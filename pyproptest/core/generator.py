@@ -6,7 +6,7 @@ for common Python types.
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, Generic, List, Optional, TypeVar
+from typing import Any, Callable, Dict, Generic, List, Optional, Tuple, TypeVar
 
 from typing_extensions import Protocol
 
@@ -404,7 +404,7 @@ class DictGenerator(Generator[Dict[T, U]]):
         return Shrinkable(value, shrinks)
 
     def _generate_shrinks(
-        self, items: List[tuple[Shrinkable[T], Shrinkable[U]]]
+        self, items: List[Tuple[Shrinkable[T], Shrinkable[U]]]
     ) -> List[Shrinkable[Dict[T, U]]]:
         """Generate shrinking candidates for a dictionary."""
         shrinks: List[Shrinkable[Dict[T, U]]] = []

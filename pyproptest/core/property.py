@@ -6,7 +6,7 @@ for running property-based tests.
 """
 
 import random
-from typing import Any, Callable, List, Optional, TypeVar, Union
+from typing import Any, Callable, List, Optional, Tuple, TypeVar, Union
 
 from .generator import Generator, Random
 
@@ -117,7 +117,7 @@ class Property:
         return True
 
     def _shrink_failing_inputs(
-        self, inputs: List[Any], generators: tuple[Generator[Any], ...]
+        self, inputs: List[Any], generators: Tuple[Generator[Any], ...]
     ) -> List[Any]:
         """Attempt to shrink failing inputs to find minimal counterexamples."""
         if len(inputs) != len(generators):
