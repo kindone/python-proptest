@@ -1,6 +1,6 @@
 """Core components of PyPropTest."""
 
-from .generator import Generator, Gen
+from .generator import Gen, Generator
 from .property import Property, run_for_all
 from .shrinker import Shrinkable
 
