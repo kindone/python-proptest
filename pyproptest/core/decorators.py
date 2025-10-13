@@ -128,7 +128,8 @@ def for_all(
 
                 # Run property-based testing
                 try:
-                    # Create a property function that returns True/False based on assertions
+                    # Create a property function that returns True/False based on
+                    # assertions
                     def assertion_property(*args):
                         try:
                             func(*args)
