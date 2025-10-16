@@ -1,6 +1,6 @@
 # Makefile for PyPropTest development tasks
 
-.PHONY: help install test lint format type-check security clean quick-check pre-commit all-checks
+.PHONY: help install test lint format type-check security clean quick-check pre-commit all-checks test-python38 test-all-python
 
 # Default target
 help:
@@ -19,6 +19,10 @@ help:
 	@echo "  make format         - Format code with black and isort"
 	@echo "  make type-check     - Run mypy type checking"
 	@echo "  make security       - Run security analysis"
+	@echo ""
+	@echo "Python Version Testing:"
+	@echo "  make test-python38  - Test Python 3.8 compatibility"
+	@echo "  make test-all-python - Test all available Python versions"
 	@echo ""
 	@echo "Utilities:"
 	@echo "  make clean          - Clean up generated files"
@@ -74,6 +78,16 @@ pre-commit:
 all-checks: install lint format type-check test security
 	@echo "✅ All CI checks completed!"
 
+# Test Python 3.8 compatibility
+test-python38:
+	@echo "🐍 Testing Python 3.8 compatibility..."
+	./scripts/test-python38.sh
+
+# Test all available Python versions
+test-all-python:
+	@echo "🐍 Testing all available Python versions..."
+	./scripts/test-all-python-versions.sh
+
 # Clean up generated files
 clean:
 	@echo "🧹 Cleaning up generated files..."
@@ -84,5 +98,6 @@ clean:
 	rm -rf .pytest_cache
 	rm -rf .mypy_cache
 	rm -rf __pycache__
+	rm -rf .venv-*-test
 	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
 	find . -type f -name "*.pyc" -delete 2>/dev/null || true

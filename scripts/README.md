@@ -43,6 +43,35 @@ Fast pre-commit check that runs only the most critical checks:
 - ✅ MyPy type checking
 - ✅ Quick unittest test run
 
+### 🐍 Python Version Testing
+
+#### `test-python38.sh`
+Test Python 3.8 compatibility (or closest available version):
+```bash
+./scripts/test-python38.sh
+```
+
+**What it tests:**
+- ✅ Python 3.8 availability detection
+- ✅ Virtual environment creation
+- ✅ Package installation
+- ✅ Basic imports (including DictGenerator fix)
+- ✅ Unittest and pytest tests
+- ✅ Type checking
+
+#### `test-all-python-versions.sh`
+Test compatibility with all available Python versions:
+```bash
+./scripts/test-all-python-versions.sh
+```
+
+**What it tests:**
+- ✅ Python 3.8, 3.9, 3.10, 3.11, 3.12, 3.13 (if available)
+- ✅ Virtual environment creation for each version
+- ✅ Package installation and imports
+- ✅ Basic functionality tests
+- ✅ Unittest tests
+
 ## Using Make Commands
 
 For convenience, you can also use the Makefile in the project root:
@@ -56,6 +85,10 @@ make pre-commit
 
 # All CI checks
 make all-checks
+
+# Python version testing
+make test-python38
+make test-all-python
 
 # Individual checks
 make lint
@@ -86,6 +119,9 @@ make pre-commit
 ```bash
 # All CI checks (same as GitHub Actions)
 make all-checks
+
+# Test all Python versions
+make test-all-python
 ```
 
 ## Troubleshooting
