@@ -6,13 +6,12 @@ with various parameters and edge cases.
 """
 
 import random
-
-import pytest
+import unittest
 
 from pyproptest import Gen, PropertyTestError, run_for_all
 
 
-class TestComprehensiveGenerators:
+class TestComprehensiveGenerators(unittest.TestCase):
     """Comprehensive tests for all generator types."""
 
     def test_boolean_generator_generates_boolean_values(self):
@@ -342,12 +341,12 @@ class TestComprehensiveGenerators:
         def test_failing_property(x):
             return x < 50  # This will fail for x >= 50
 
-        with pytest.raises(PropertyTestError) as exc_info:
+        with self.assertRaises(PropertyTestError) as exc_info:
             run_for_all(
                 test_failing_property, Gen.int(min_value=0, max_value=100), num_runs=100
             )
 
         # Should have failing input information
-        assert exc_info.value.failing_inputs is not None
-        assert len(exc_info.value.failing_inputs) == 1
-        assert exc_info.value.failing_inputs[0] >= 50
+        assert exc_info.exception.failing_inputs is not None
+        assert len(exc_info.exception.failing_inputs) == 1
+        assert exc_info.exception.failing_inputs[0] >= 50

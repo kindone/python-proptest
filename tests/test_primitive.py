@@ -6,8 +6,7 @@ and exhaustive shrinking validation.
 """
 
 import random
-
-import pytest
+import unittest
 
 from pyproptest import Gen, Shrinkable
 
@@ -33,7 +32,7 @@ def exhaustive_traversal(
         exhaustive_traversal(shrink, max_depth, visitor, current_depth + 1)
 
 
-class TestPrimitive:
+class TestPrimitive(unittest.TestCase):
     """Test primitive generator functionality."""
 
     def test_integer_generator_unique_values_within_range(self):

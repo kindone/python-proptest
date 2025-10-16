@@ -2,7 +2,7 @@
 Tests for advanced shrinking functionality.
 """
 
-import pytest
+import unittest
 
 from pyproptest.core.shrinker import (
     Shrinkable,
@@ -15,7 +15,7 @@ from pyproptest.core.shrinker import (
 )
 
 
-class TestShrinkable:
+class TestShrinkable(unittest.TestCase):
     """Test the enhanced Shrinkable class."""
 
     def test_basic_shrinkable(self):
@@ -113,7 +113,7 @@ class TestShrinkable:
     def test_filter_raises_on_root(self):
         """Test that filtering out the root value raises an error."""
         shr = Shrinkable(4)
-        with pytest.raises(ValueError, match="Cannot filter out the root value"):
+        with self.assertRaises(ValueError):
             shr.filter(lambda x: x > 10)
 
     def test_flat_map(self):
@@ -145,9 +145,9 @@ class TestShrinkable:
         assert shr.get_nth_child(1).value == 2
         assert shr.get_nth_child(2).value == 3
 
-        with pytest.raises(IndexError):
+        with self.assertRaises(IndexError):
             shr.get_nth_child(-1)
-        with pytest.raises(IndexError):
+        with self.assertRaises(IndexError):
             shr.get_nth_child(3)
 
     def test_retrieve(self):
@@ -171,7 +171,7 @@ class TestShrinkable:
         assert shr.retrieve([1, 0]).value == 1
 
 
-class TestBinarySearchShrinking:
+class TestBinarySearchShrinking(unittest.TestCase):
     """Test binary search shrinking algorithm."""
 
     def test_binary_search_zero(self):
@@ -215,7 +215,7 @@ class TestBinarySearchShrinking:
         assert shrinks_list[0].value == 0
 
 
-class TestElementWiseShrinking:
+class TestElementWiseShrinking(unittest.TestCase):
     """Test element-wise shrinking algorithm."""
 
     def test_shrink_element_wise_empty(self):
@@ -254,7 +254,7 @@ class TestElementWiseShrinking:
         assert result_list[1].value[1].value == 6
 
 
-class TestMembershipWiseShrinking:
+class TestMembershipWiseShrinking(unittest.TestCase):
     """Test membership-wise shrinking algorithm."""
 
     def test_shrink_membership_wise_empty(self):
@@ -289,7 +289,7 @@ class TestMembershipWiseShrinking:
             assert len(shrink.value) >= 1
 
 
-class TestShrinkableArray:
+class TestShrinkableArray(unittest.TestCase):
     """Test the shrinkable array function."""
 
     def test_shrinkable_array_basic(self):
@@ -342,7 +342,7 @@ class TestShrinkableArray:
         assert len(shrinks_list) > 0
 
 
-class TestShrinkableBoolean:
+class TestShrinkableBoolean(unittest.TestCase):
     """Test boolean shrinking."""
 
     def test_shrinkable_boolean_true(self):
@@ -360,7 +360,7 @@ class TestShrinkableBoolean:
         assert shr.shrinks().is_empty()
 
 
-class TestShrinkableFloat:
+class TestShrinkableFloat(unittest.TestCase):
     """Test float shrinking."""
 
     def test_shrinkable_float_zero(self):

@@ -6,8 +6,7 @@ for finding minimal failing cases.
 """
 
 import random
-
-import pytest
+import unittest
 
 from pyproptest import Gen, PropertyTestError, Shrinkable, run_for_all
 from pyproptest.core.shrinker import (
@@ -19,7 +18,7 @@ from pyproptest.core.shrinker import (
 )
 
 
-class TestShrinker:
+class TestShrinker(unittest.TestCase):
     """Test shrinking functionality."""
 
     def test_integer_shrinker_shrinks_towards_zero(self):
@@ -210,15 +209,15 @@ class TestShrinker:
         def test_failing_property(x):
             return x < 50  # This will fail for x >= 50
 
-        with pytest.raises(PropertyTestError) as exc_info:
+        with self.assertRaises(PropertyTestError) as exc_info:
             run_for_all(
                 test_failing_property, Gen.int(min_value=0, max_value=100), num_runs=100
             )
 
         # Should have failing input information
-        assert exc_info.value.failing_inputs is not None
-        assert len(exc_info.value.failing_inputs) == 1
-        assert exc_info.value.failing_inputs[0] >= 50
+        assert exc_info.exception.failing_inputs is not None
+        assert len(exc_info.exception.failing_inputs) == 1
+        assert exc_info.exception.failing_inputs[0] >= 50
 
     def test_shrinking_with_string_generator(self):
         """Test shrinking with string generator."""
@@ -226,7 +225,7 @@ class TestShrinker:
         def test_failing_property(s):
             return len(s) < 5  # This will fail for strings of length >= 5
 
-        with pytest.raises(PropertyTestError) as exc_info:
+        with self.assertRaises(PropertyTestError) as exc_info:
             run_for_all(
                 test_failing_property,
                 Gen.str(min_length=0, max_length=10),
@@ -234,9 +233,9 @@ class TestShrinker:
             )
 
         # Should have failing input information
-        assert exc_info.value.failing_inputs is not None
-        assert len(exc_info.value.failing_inputs) == 1
-        assert len(exc_info.value.failing_inputs[0]) >= 5
+        assert exc_info.exception.failing_inputs is not None
+        assert len(exc_info.exception.failing_inputs) == 1
+        assert len(exc_info.exception.failing_inputs[0]) >= 5
 
     def test_shrinking_with_list_generator(self):
         """Test shrinking with list generator."""
@@ -244,7 +243,7 @@ class TestShrinker:
         def test_failing_property(lst):
             return len(lst) < 3  # This will fail for lists of length >= 3
 
-        with pytest.raises(PropertyTestError) as exc_info:
+        with self.assertRaises(PropertyTestError) as exc_info:
             run_for_all(
                 test_failing_property,
                 Gen.list(
@@ -254,9 +253,9 @@ class TestShrinker:
             )
 
         # Should have failing input information
-        assert exc_info.value.failing_inputs is not None
-        assert len(exc_info.value.failing_inputs) == 1
-        assert len(exc_info.value.failing_inputs[0]) >= 3
+        assert exc_info.exception.failing_inputs is not None
+        assert len(exc_info.exception.failing_inputs) == 1
+        assert len(exc_info.exception.failing_inputs[0]) >= 3
 
     def test_shrinking_with_dict_generator(self):
         """Test shrinking with dict generator."""
@@ -264,7 +263,7 @@ class TestShrinker:
         def test_failing_property(d):
             return len(d) < 2  # This will fail for dicts of size >= 2
 
-        with pytest.raises(PropertyTestError) as exc_info:
+        with self.assertRaises(PropertyTestError) as exc_info:
             run_for_all(
                 test_failing_property,
                 Gen.dict(
@@ -277,9 +276,9 @@ class TestShrinker:
             )
 
         # Should have failing input information
-        assert exc_info.value.failing_inputs is not None
-        assert len(exc_info.value.failing_inputs) == 1
-        assert len(exc_info.value.failing_inputs[0]) >= 2
+        assert exc_info.exception.failing_inputs is not None
+        assert len(exc_info.exception.failing_inputs) == 1
+        assert len(exc_info.exception.failing_inputs[0]) >= 2
 
     def test_shrinking_with_complex_nested_structure(self):
         """Test shrinking with complex nested structure."""
@@ -305,12 +304,12 @@ class TestShrinker:
             max_length=3,
         )
 
-        with pytest.raises(PropertyTestError) as exc_info:
+        with self.assertRaises(PropertyTestError) as exc_info:
             run_for_all(test_failing_property, nested_gen, num_runs=100)
 
         # Should have failing input information
-        assert exc_info.value.failing_inputs is not None
-        assert len(exc_info.value.failing_inputs) == 1
+        assert exc_info.exception.failing_inputs is not None
+        assert len(exc_info.exception.failing_inputs) == 1
 
     def test_shrinking_performance_with_large_values(self):
         """Test shrinking performance with large values."""

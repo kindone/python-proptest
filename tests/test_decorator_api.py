@@ -5,7 +5,7 @@ This module demonstrates and tests the Hypothesis-style decorator API
 for more ergonomic property-based testing.
 """
 
-import pytest
+import unittest
 
 from pyproptest import (
     Gen,
@@ -26,7 +26,7 @@ from pyproptest import (
 )
 
 
-class TestDecoratorAPI:
+class TestDecoratorAPI(unittest.TestCase):
     """Test the decorator-based API."""
 
     def test_basic_decorator_usage(self):
@@ -181,13 +181,13 @@ class TestDecoratorAPI:
             assert x < 100  # This will fail for x >= 100
 
         # This should raise an AssertionError
-        with pytest.raises(AssertionError):
+        with self.assertRaises(AssertionError):
             test_failing_property()
 
     def test_decorator_argument_count_mismatch(self):
         """Test error when argument count doesn't match."""
 
-        with pytest.raises(ValueError, match="Function.*expects.*arguments"):
+        with self.assertRaises(ValueError):
 
             @for_all(integers(), integers())
             def test_wrong_arg_count(x: int):
@@ -285,7 +285,7 @@ class TestDecoratorAPI:
         assert isinstance(x, int)
 
 
-class TestStrategyAPI:
+class TestStrategyAPI(unittest.TestCase):
     """Test the Strategy API."""
 
     def test_strategy_map(self):

@@ -2,7 +2,7 @@
 Tests for new generator types (Set, UnicodeString, Lazy, Construct, ChainTuple).
 """
 
-import pytest
+import unittest
 
 from pyproptest.core.generator import (
     ChainTupleGenerator,
@@ -15,7 +15,7 @@ from pyproptest.core.generator import (
 from pyproptest.core.shrinker import Shrinkable
 
 
-class TestSetGenerator:
+class TestSetGenerator(unittest.TestCase):
     """Test Set generator."""
 
     def test_set_generator_basic(self):
@@ -65,7 +65,7 @@ class TestSetGenerator:
         )  # Can't have more unique elements than range size
 
 
-class TestUnicodeStringGenerator:
+class TestUnicodeStringGenerator(unittest.TestCase):
     """Test Unicode string generator."""
 
     def test_unicode_string_generator_basic(self):
@@ -109,7 +109,7 @@ class TestUnicodeStringGenerator:
         # assert unicode_found  # Commented out to avoid flaky tests
 
 
-class TestLazyGenerator:
+class TestLazyGenerator(unittest.TestCase):
     """Test Lazy generator."""
 
     def test_lazy_generator_basic(self):
@@ -155,7 +155,7 @@ class TestLazyGenerator:
         assert call_count == 2
 
 
-class TestConstructGenerator:
+class TestConstructGenerator(unittest.TestCase):
     """Test Construct generator."""
 
     def test_construct_generator_basic(self):
@@ -213,7 +213,7 @@ class TestConstructGenerator:
         assert shrinkable.value.value == 42
 
 
-class TestChainTupleGenerator:
+class TestChainTupleGenerator(unittest.TestCase):
     """Test ChainTuple generator."""
 
     def test_chain_tuple_generator_basic(self):
@@ -272,7 +272,7 @@ class TestChainTupleGenerator:
             assert 0 <= third
 
 
-class TestNewGenMethods:
+class TestNewGenMethods(unittest.TestCase):
     """Test new Gen class methods."""
 
     def test_gen_interval(self):

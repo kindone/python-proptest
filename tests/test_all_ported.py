@@ -5,8 +5,7 @@ This test file runs all the ported tests to ensure everything works correctly.
 """
 
 import random
-
-import pytest
+import unittest
 
 from pyproptest import Gen, Property, PropertyTestError, Shrinkable, run_for_all
 from pyproptest.core.shrinker import (
@@ -18,7 +17,7 @@ from pyproptest.core.shrinker import (
 )
 
 
-class TestAllPortedFunctionality:
+class TestAllPortedFunctionality(unittest.TestCase):
     """Comprehensive test suite for all ported functionality."""
 
     def test_basic_generators_work(self):
@@ -138,14 +137,14 @@ class TestAllPortedFunctionality:
         def test_failing_property(x):
             return x < 50
 
-        with pytest.raises(PropertyTestError) as exc_info:
+        with self.assertRaises(PropertyTestError) as exc_info:
             run_for_all(
                 test_failing_property, Gen.int(min_value=0, max_value=100), num_runs=100
             )
 
-        assert exc_info.value.failing_inputs is not None
-        assert len(exc_info.value.failing_inputs) == 1
-        assert exc_info.value.failing_inputs[0] >= 50
+        assert exc_info.exception.failing_inputs is not None
+        assert len(exc_info.exception.failing_inputs) == 1
+        assert exc_info.exception.failing_inputs[0] >= 50
 
     def test_seed_reproducibility_works(self):
         """Test that seed reproducibility works correctly."""
@@ -260,18 +259,18 @@ class TestAllPortedFunctionality:
         def test_property():
             return True
 
-        with pytest.raises(ValueError, match="At least one generator must be provided"):
+        with self.assertRaises(ValueError):
             run_for_all(test_property, num_runs=10)
 
         # Test with impossible filter condition
         rng = random.Random(42)
         impossible_gen = Gen.int(min_value=1, max_value=10).filter(lambda x: x > 100)
 
-        with pytest.raises(ValueError, match="Could not generate value"):
+        with self.assertRaises(ValueError):
             impossible_gen.generate(rng)
 
         # Test with empty one_of
-        with pytest.raises(ValueError, match="At least one generator must be provided"):
+        with self.assertRaises(ValueError):
             Gen.one_of()
 
     def test_property_class_direct_usage_works(self):

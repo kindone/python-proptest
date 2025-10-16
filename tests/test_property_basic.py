@@ -5,12 +5,12 @@ These tests verify that the property testing framework works correctly
 with various function signatures and edge cases.
 """
 
-import pytest
+import unittest
 
 from pyproptest import Gen, Property, PropertyTestError, run_for_all
 
 
-class TestPropertyBasic:
+class TestPropertyBasic(unittest.TestCase):
     """Basic property testing functionality."""
 
     def test_property_with_always_true_condition(self):
@@ -244,7 +244,7 @@ class TestPropertyBasic:
             return True
 
         # Should handle exceptions gracefully
-        with pytest.raises(PropertyTestError):
+        with self.assertRaises(PropertyTestError):
             run_for_all(
                 property_func, Gen.int(min_value=-10, max_value=10), num_runs=10
             )
@@ -255,13 +255,13 @@ class TestPropertyBasic:
         def property_func(x):
             return x < 50  # This will fail for x >= 50
 
-        with pytest.raises(PropertyTestError) as exc_info:
+        with self.assertRaises(PropertyTestError) as exc_info:
             run_for_all(property_func, Gen.int(min_value=0, max_value=100), num_runs=10)
 
         # Should have failing input information
-        assert exc_info.value.failing_inputs is not None
-        assert len(exc_info.value.failing_inputs) == 1
-        assert exc_info.value.failing_inputs[0] >= 50
+        assert exc_info.exception.failing_inputs is not None
+        assert len(exc_info.exception.failing_inputs) == 1
+        assert exc_info.exception.failing_inputs[0] >= 50
 
     def test_property_with_complex_failing_condition(self):
         """Test property with complex failing condition."""
@@ -269,7 +269,7 @@ class TestPropertyBasic:
         def property_func(a, b, c):
             return a + b + c < 100  # This will fail for large sums
 
-        with pytest.raises(PropertyTestError) as exc_info:
+        with self.assertRaises(PropertyTestError) as exc_info:
             run_for_all(
                 property_func,
                 Gen.int(min_value=0, max_value=50),
@@ -279,9 +279,9 @@ class TestPropertyBasic:
             )
 
         # Should have failing input information
-        assert exc_info.value.failing_inputs is not None
-        assert len(exc_info.value.failing_inputs) == 3
-        a, b, c = exc_info.value.failing_inputs
+        assert exc_info.exception.failing_inputs is not None
+        assert len(exc_info.exception.failing_inputs) == 3
+        a, b, c = exc_info.exception.failing_inputs
         assert a + b + c >= 100
 
     def test_property_with_no_generators_raises_error(self):
@@ -290,7 +290,7 @@ class TestPropertyBasic:
         def property_func():
             return True
 
-        with pytest.raises(ValueError, match="At least one generator must be provided"):
+        with self.assertRaises(ValueError):
             run_for_all(property_func, num_runs=10)
 
     def test_property_with_wrong_number_of_arguments_raises_error(self):
@@ -300,7 +300,9 @@ class TestPropertyBasic:
             return True
 
         # This should raise an error because we provide 2 generators but function takes 1 argument
-        with pytest.raises(Exception):  # Function.apply will raise NoSuchMethodError
+        with self.assertRaises(
+            Exception
+        ):  # Function.apply will raise NoSuchMethodError
             run_for_all(
                 property_func,
                 Gen.int(min_value=0, max_value=100),

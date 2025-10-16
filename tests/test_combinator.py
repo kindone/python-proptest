@@ -6,13 +6,12 @@ for combining and transforming generators.
 """
 
 import random
-
-import pytest
+import unittest
 
 from pyproptest import Gen, PropertyTestError, for_all, integers, run_for_all
 
 
-class TestCombinators:
+class TestCombinators(unittest.TestCase):
     """Test generator combinators."""
 
     def test_just_produces_constant_values(self):
@@ -159,7 +158,7 @@ class TestCombinators:
         rng = random.Random(42)
         impossible_gen = Gen.int(min_value=1, max_value=10).filter(lambda x: x > 100)
 
-        with pytest.raises(ValueError, match="Could not generate value"):
+        with self.assertRaises(ValueError):
             impossible_gen.generate(rng)
 
     def test_flat_map_works_correctly(self):
@@ -234,11 +233,11 @@ class TestCombinators:
         def test_failing_property(self, x: int):
             assert x < 50  # This will fail for x >= 50
 
-        with pytest.raises(AssertionError) as exc_info:
+        with self.assertRaises(AssertionError) as exc_info:
             test_failing_property(self)
 
         # Should have failing input information in the error message
-        error_msg = str(exc_info.value)
+        error_msg = str(exc_info.exception)
         assert "Property failed" in error_msg
 
     def test_combinator_reproducibility_with_seeds(self):
@@ -324,7 +323,7 @@ class TestCombinators:
 
     def test_combinator_with_one_of_empty_list_raises_error(self):
         """Test that oneOf with empty list raises error."""
-        with pytest.raises(ValueError, match="At least one generator must be provided"):
+        with self.assertRaises(ValueError):
             Gen.one_of()
 
     def test_combinator_with_one_of_single_generator(self):

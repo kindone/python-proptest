@@ -5,8 +5,7 @@ These tests verify that stateful testing functionality works correctly.
 """
 
 import random
-
-import pytest
+import unittest
 
 from pyproptest import (
     Action,
@@ -20,7 +19,7 @@ from pyproptest import (
 )
 
 
-class TestStateful:
+class TestStateful(unittest.TestCase):
     """Test stateful testing functionality."""
 
     def test_simple_stateful_property(self):
@@ -230,7 +229,7 @@ class TestStateful:
         )
 
         # This should raise a PropertyTestError
-        with pytest.raises(Exception):  # PropertyTestError or ZeroDivisionError
+        with self.assertRaises(Exception):  # PropertyTestError or ZeroDivisionError
             prop.go()
 
     def test_stateful_property_with_different_seeds(self):

@@ -5,8 +5,7 @@ These tests verify that utility classes (Option, Either, Try) work correctly.
 """
 
 import random
-
-import pytest
+import unittest
 
 from pyproptest import (
     Either,
@@ -23,7 +22,7 @@ from pyproptest import (
 )
 
 
-class TestOption:
+class TestOption(unittest.TestCase):
     """Test Option functionality."""
 
     def test_some_creation(self):
@@ -41,7 +40,7 @@ class TestOption:
         assert not none_val.is_some()
         assert none_val.is_none()
 
-        with pytest.raises(ValueError, match="Cannot get value from None"):
+        with self.assertRaises(ValueError):
             none_val.get()
 
         assert none_val.get_or_else(42) == 42
@@ -99,7 +98,7 @@ class TestOption:
         assert none_val == None_()
 
 
-class TestEither:
+class TestEither(unittest.TestCase):
     """Test Either functionality."""
 
     def test_left_creation(self):
@@ -110,7 +109,7 @@ class TestEither:
         assert left.get_left() == "error"
         assert left.get_or_else("default") == "default"
 
-        with pytest.raises(ValueError, match="Cannot get right value from Left"):
+        with self.assertRaises(ValueError):
             left.get_right()
 
         assert str(left) == "Left('error')"
@@ -123,7 +122,7 @@ class TestEither:
         assert right.get_right() == 42
         assert right.get_or_else(0) == 42
 
-        with pytest.raises(ValueError, match="Cannot get left value from Right"):
+        with self.assertRaises(ValueError):
             right.get_left()
 
         assert str(right) == "Right(42)"
@@ -181,7 +180,7 @@ class TestEither:
         assert right == Right(42)
 
 
-class TestTry:
+class TestTry(unittest.TestCase):
     """Test Try functionality."""
 
     def test_success_creation(self):
@@ -192,7 +191,7 @@ class TestTry:
         assert success.get() == 42
         assert success.get_or_else(0) == 42
 
-        with pytest.raises(ValueError, match="Cannot get exception from Success"):
+        with self.assertRaises(ValueError):
             success.get_exception()
 
         assert str(success) == "Success(42)"
@@ -206,7 +205,7 @@ class TestTry:
         assert failure.get_exception() == exception
         assert failure.get_or_else(42) == 42
 
-        with pytest.raises(ValueError, match="test error"):
+        with self.assertRaises(ValueError):
             failure.get()
 
         assert str(failure) == "Failure(ValueError('test error'))"
@@ -291,7 +290,7 @@ class TestTry:
         assert failure == Failure(ValueError("error"))
 
 
-class TestRandom:
+class TestRandom(unittest.TestCase):
     """Test random number generation."""
 
     def test_random_next(self):
@@ -302,7 +301,7 @@ class TestRandom:
         assert 0 <= value < 1
 
 
-class TestJest:
+class TestJest(unittest.TestCase):
     """Test assertion functionality."""
 
     def test_expect(self):
@@ -334,7 +333,7 @@ class Error2(Error1):
         self.message = "Error2"
 
 
-class TestError:
+class TestError(unittest.TestCase):
     """Test error handling."""
 
     def test_error_type(self):

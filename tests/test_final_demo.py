@@ -6,6 +6,7 @@ and serves as a comprehensive test suite.
 """
 
 import random
+import unittest
 
 from pyproptest import Gen, Property, PropertyTestError, Shrinkable, for_all
 from pyproptest.core.shrinker import (

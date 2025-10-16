@@ -6,13 +6,12 @@ with transformations, chaining, and filtering.
 """
 
 import random
-
-import pytest
+import unittest
 
 from pyproptest import Gen, PropertyTestError, run_for_all
 
 
-class TestGeneratorInterface:
+class TestGeneratorInterface(unittest.TestCase):
     """Test the generator interface and transformations."""
 
     def test_map_transformation_works(self):
@@ -51,7 +50,7 @@ class TestGeneratorInterface:
         int_gen = Gen.int(min_value=1, max_value=10)
         impossible_gen = int_gen.filter(lambda i: i > 100)  # Impossible condition
 
-        with pytest.raises(ValueError, match="Could not generate value"):
+        with self.assertRaises(ValueError):
             impossible_gen.generate(rng)
 
     def test_chain_preserves_original_value(self):

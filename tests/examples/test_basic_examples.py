@@ -5,12 +5,12 @@ These examples show common property-based testing patterns
 and serve as both documentation and tests.
 """
 
-import pytest
+import unittest
 
 from pyproptest import Gen, PropertyTestError, run_for_all
 
 
-class TestBasicProperties:
+class TestBasicProperties(unittest.TestCase):
     """Basic property testing examples."""
 
     def test_addition_is_commutative(self):
@@ -95,7 +95,7 @@ class TestBasicProperties:
         assert result is True
 
 
-class TestFailingProperties:
+class TestFailingProperties(unittest.TestCase):
     """Examples of properties that fail and demonstrate shrinking."""
 
     def test_failing_property_demonstrates_shrinking(self):
@@ -104,15 +104,15 @@ class TestFailingProperties:
         def property_func(x):
             return x < 100  # This will fail for x >= 100
 
-        with pytest.raises(PropertyTestError) as exc_info:
+        with self.assertRaises(PropertyTestError) as exc_info:
             run_for_all(
                 property_func, Gen.int(min_value=0, max_value=200), num_runs=100
             )
 
         # The error should contain information about the failing input
-        assert exc_info.value.failing_inputs is not None
-        assert len(exc_info.value.failing_inputs) == 1
-        assert exc_info.value.failing_inputs[0] >= 100
+        assert exc_info.exception.failing_inputs is not None
+        assert len(exc_info.exception.failing_inputs) == 1
+        assert exc_info.exception.failing_inputs[0] >= 100
 
     def test_string_property_failure(self):
         """Test string property that fails for certain inputs."""
@@ -120,18 +120,18 @@ class TestFailingProperties:
         def property_func(s):
             return len(s) < 5  # This will fail for strings of length >= 5
 
-        with pytest.raises(PropertyTestError) as exc_info:
+        with self.assertRaises(PropertyTestError) as exc_info:
             run_for_all(
                 property_func, Gen.str(min_length=0, max_length=10), num_runs=100
             )
 
         # The error should contain information about the failing input
-        assert exc_info.value.failing_inputs is not None
-        assert len(exc_info.value.failing_inputs) == 1
-        assert len(exc_info.value.failing_inputs[0]) >= 5
+        assert exc_info.exception.failing_inputs is not None
+        assert len(exc_info.exception.failing_inputs) == 1
+        assert len(exc_info.exception.failing_inputs[0]) >= 5
 
 
-class TestGeneratorCombinators:
+class TestGeneratorCombinators(unittest.TestCase):
     """Examples of using generator combinators."""
 
     def test_map_transformation(self):
@@ -193,7 +193,7 @@ class TestGeneratorCombinators:
         assert result is True
 
 
-class TestReproducibleTests:
+class TestReproducibleTests(unittest.TestCase):
     """Examples of using seeds for reproducible tests."""
 
     def test_reproducible_with_string_seed(self):
@@ -233,7 +233,7 @@ class TestReproducibleTests:
         assert result is True
 
 
-class TestComplexProperties:
+class TestComplexProperties(unittest.TestCase):
     """Examples of more complex property testing scenarios."""
 
     def test_nested_data_structures(self):

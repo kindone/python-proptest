@@ -80,6 +80,38 @@ class TestStringProperties:
 # Each test method automatically runs with 100+ random inputs!
 ```
 
+### Unittest Integration
+
+**PyPropTest also works with Python's built-in unittest framework!** The `@for_all` decorator automatically detects unittest.TestCase classes and adapts accordingly:
+
+```python
+import unittest
+from pyproptest import for_all, integers, text
+
+class TestMathProperties(unittest.TestCase):
+    @for_all(integers(), integers())
+    def test_addition_commutativity(self, x: int, y: int):
+        """Test that addition is commutative using unittest assertions."""
+        self.assertEqual(x + y, y + x)
+    
+    @for_all(integers(), integers(), integers())
+    def test_multiplication_associativity(self, x: int, y: int, z: int):
+        """Test that multiplication is associative."""
+        self.assertEqual((x * y) * z, x * (y * z))
+
+class TestStringProperties(unittest.TestCase):
+    @for_all(text(), text())
+    def test_string_concatenation(self, s1: str, s2: str):
+        """Test string concatenation properties."""
+        result = s1 + s2
+        self.assertEqual(len(result), len(s1) + len(s2))
+        self.assertTrue(result.startswith(s1))
+        self.assertTrue(result.endswith(s2))
+
+# Run with: python -m unittest
+# Or with: pytest (both frameworks work!)
+```
+
 ### Standalone Function-Based Tests
 
 ```python
@@ -109,6 +141,16 @@ test_complex_math_property()
 - **Complex assertions**: Multiple conditions and complex generator transformations
 - **Team collaboration**: Standard pytest workflow everyone understands
 
+### Use `@for_all` with unittest
+
+**Perfect for teams using Python's built-in unittest framework!** Great for:
+
+- **Standard library integration**: No external dependencies beyond PyPropTest
+- **Unittest assertions**: Use `self.assertEqual()`, `self.assertTrue()`, etc.
+- **Mixed assertion styles**: Combine unittest assertions with regular `assert` statements
+- **Legacy codebases**: Easy migration from existing unittest test suites
+- **CI/CD compatibility**: Works with any unittest-compatible test runner
+
 ### Use `run_for_all` for Simple Lambda-Based Tests
 
 Perfect for simple property checks that can be expressed as lambdas:
@@ -121,7 +163,8 @@ Perfect for simple property checks that can be expressed as lambdas:
 
 ## Features
 
-- **🚀 Pytest Integration**: Drop-in integration with pytest - just add `@for_all()` decorator and run `pytest`
+- **🚀 Test Framework Integration**: Drop-in integration with both pytest and unittest - just add `@for_all()` decorator
+- **🔧 Automatic Framework Detection**: Automatically detects unittest.TestCase vs pytest vs standalone functions
 - **🎲 Automatic Randomization**: Each test method automatically runs with 100+ randomly generated inputs
 - **🔍 Automatic Shrinking**: When tests fail, PyPropTest finds minimal counterexamples
 - **📊 Comprehensive Generators**: Built-in generators for primitives, collections, and complex data structures

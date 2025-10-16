@@ -2,7 +2,7 @@
 Tests for basic generators.
 """
 
-import pytest
+import unittest
 
 from pyproptest import (
     Gen,
@@ -18,7 +18,7 @@ from pyproptest import (
 )
 
 
-class TestIntGenerator:
+class TestIntGenerator(unittest.TestCase):
     """Test integer generator."""
 
     def test_int_generator_basic(self):
@@ -45,7 +45,7 @@ class TestIntGenerator:
         assert result is True
 
 
-class TestStringGenerator:
+class TestStringGenerator(unittest.TestCase):
     """Test string generator."""
 
     def test_string_generator_basic(self):
@@ -76,7 +76,7 @@ class TestStringGenerator:
         test_charset(self)
 
 
-class TestBoolGenerator:
+class TestBoolGenerator(unittest.TestCase):
     """Test boolean generator."""
 
     def test_bool_generator_basic(self):
@@ -85,7 +85,7 @@ class TestBoolGenerator:
         assert result is True
 
 
-class TestFloatGenerator:
+class TestFloatGenerator(unittest.TestCase):
     """Test float generator."""
 
     def test_float_generator_basic(self):
@@ -107,7 +107,7 @@ class TestFloatGenerator:
         assert result is True
 
 
-class TestListGenerator:
+class TestListGenerator(unittest.TestCase):
     """Test list generator."""
 
     def test_list_generator_basic(self):
@@ -138,7 +138,7 @@ class TestListGenerator:
         assert result is True
 
 
-class TestDictGenerator:
+class TestDictGenerator(unittest.TestCase):
     """Test dictionary generator."""
 
     def test_dict_generator_basic(self):
@@ -167,7 +167,7 @@ class TestDictGenerator:
         assert result is True
 
 
-class TestCombinators:
+class TestCombinators(unittest.TestCase):
     """Test generator combinators."""
 
     @for_all(one_of(integers(min_value=0, max_value=10), text(min_size=1, max_size=3)))

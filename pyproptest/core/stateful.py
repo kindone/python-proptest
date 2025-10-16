@@ -156,7 +156,12 @@ def statefulProperty(
 ) -> StatefulProperty[S, A]:
     """Create a stateful property for testing."""
     return StatefulProperty(
-        initial_state_gen, action_gen, max_actions, num_runs, seed, initial_model_gen  # type: ignore
+        initial_state_gen,
+        action_gen,  # type: ignore
+        max_actions,
+        num_runs,
+        seed,
+        initial_model_gen,  # type: ignore
     )
 
 
@@ -168,4 +173,6 @@ def simpleStatefulProperty(
     seed: Optional[Union[str, int]] = None,
 ) -> StatefulProperty[S, A]:
     """Create a simple stateful property for testing without a model."""
-    return StatefulProperty(initial_state_gen, action_gen, max_actions, num_runs, seed)  # type: ignore
+    return StatefulProperty(
+        initial_state_gen, action_gen, max_actions, num_runs, seed  # type: ignore
+    )

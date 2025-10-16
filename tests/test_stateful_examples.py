@@ -4,9 +4,8 @@ Stateful testing examples demonstrating PyPropTest's stateful testing capabiliti
 This file shows how to test systems with internal state using action sequences.
 """
 
+import unittest
 from typing import Any, Dict, List
-
-import pytest
 
 from pyproptest import (
     Action,
@@ -19,7 +18,7 @@ from pyproptest import (
 )
 
 
-class TestStatefulExamples:
+class TestStatefulExamples(unittest.TestCase):
     """Examples demonstrating stateful testing capabilities."""
 
     def test_simple_counter(self):
