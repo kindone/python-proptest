@@ -94,7 +94,9 @@ class Property:
 
                 if not result:
                     # Property failed, try to shrink
-                    minimal_inputs = self._shrink_failing_inputs(inputs, list(generators))
+                    minimal_inputs = self._shrink_failing_inputs(
+                        inputs, list(generators)
+                    )
                     raise PropertyTestError(
                         f"Property failed on run {run + 1}",
                         failing_inputs=inputs,

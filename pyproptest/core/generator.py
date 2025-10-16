@@ -64,7 +64,7 @@ class MappedGenerator(Generator[U]):
     def generate(self, rng: Random) -> Shrinkable[U]:
         shrinkable = self.generator.generate(rng)
         transformed_value = self.func(shrinkable.value)
-        
+
         def shrink_func() -> Stream[Shrinkable[U]]:
             transformed_shrinks = [
                 Shrinkable(self.func(s.value), lambda: s.shrinks())  # type: ignore
