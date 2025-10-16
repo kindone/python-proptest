@@ -20,9 +20,6 @@ U = TypeVar("U")
 class Random(Protocol):
     """Protocol for random number generators."""
 
-    @staticmethod
-
-
     def random(self) -> float:
         """Generate a random float in [0.0, 1.0)."""
         ...
@@ -138,16 +135,12 @@ class Gen:
         return BoolGenerator()
 
     @staticmethod
-    def float(
-        min_value: float = -1000.0, max_value: float = 1000.0
-    ):
+    def float(min_value: float = -1000.0, max_value: float = 1000.0):
         """Generate random floats in the specified range."""
         return FloatGenerator(min_value, max_value)
 
     @staticmethod
-    def list(
-        element_generator, min_length: int = 0, max_length: int = 10
-    ):
+    def list(element_generator, min_length: int = 0, max_length: int = 10):
         """Generate random lists of elements from the given generator."""
         return ListGenerator(element_generator, min_length, max_length)
 
@@ -184,9 +177,7 @@ class Gen:
         return generator
 
     @staticmethod
-    def set(
-        element_generator, min_size: int = 0, max_size: int = 10
-    ):
+    def set(element_generator, min_size: int = 0, max_size: int = 10):
         """Generate random sets of elements from the given generator."""
         return SetGenerator(element_generator, min_size, max_size)
 
@@ -216,9 +207,7 @@ class Gen:
         return ConstructGenerator(Type, list(generators))
 
     @staticmethod
-    def chain_tuple(
-        tuple_gen, gen_factory
-    ):
+    def chain_tuple(tuple_gen, gen_factory):
         """Chain tuple generation with dependent value generation."""
         return ChainTupleGenerator(tuple_gen, gen_factory)
 

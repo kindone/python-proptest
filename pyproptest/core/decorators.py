@@ -87,7 +87,7 @@ def for_all(
             if test_class:
                 # Check if it inherits from unittest.TestCase
                 try:
-                    import unittest
+                    import unittest  # noqa: F401
 
                     is_unittest_method = issubclass(test_class, unittest.TestCase)
                 except ImportError:
@@ -170,7 +170,7 @@ def for_all(
                         # For unittest, we need to raise the test case's failure
                         # exception
                         try:
-                            import unittest
+                            import unittest  # noqa: F401
 
                             # Get the test case instance and raise its failure exception
                             test_case = args[0]  # 'self' is the test case instance
