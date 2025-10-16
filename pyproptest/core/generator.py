@@ -20,6 +20,9 @@ U = TypeVar("U")
 class Random(Protocol):
     """Protocol for random number generators."""
 
+    @staticmethod
+
+
     def random(self) -> float:
         """Generate a random float in [0.0, 1.0)."""
         ...
@@ -116,7 +119,7 @@ class Gen:
     """Namespace for built-in generators."""
 
     @staticmethod
-    def int(min_value: int = -1000, max_value: int = 1000) -> Generator[int]:
+    def int(min_value: int = -1000, max_value: int = 1000):
         """Generate random integers in the specified range."""
         return IntGenerator(min_value, max_value)
 
@@ -125,102 +128,102 @@ class Gen:
         min_length: int = 0,
         max_length: int = 20,
         charset: str = "abcdefghijklmnopqrstuvwxyz",
-    ) -> Generator[str]:
+    ):
         """Generate random strings with the specified constraints."""
         return StringGenerator(min_length, max_length, charset)
 
     @staticmethod
-    def bool() -> Generator[bool]:
+    def bool():
         """Generate random booleans."""
         return BoolGenerator()
 
     @staticmethod
     def float(
         min_value: float = -1000.0, max_value: float = 1000.0
-    ) -> Generator[float]:
+    ):
         """Generate random floats in the specified range."""
         return FloatGenerator(min_value, max_value)
 
     @staticmethod
     def list(
-        element_generator: Generator[T], min_length: int = 0, max_length: int = 10
-    ) -> Generator[List[T]]:
+        element_generator, min_length: int = 0, max_length: int = 10
+    ):
         """Generate random lists of elements from the given generator."""
         return ListGenerator(element_generator, min_length, max_length)
 
     @staticmethod
     def dict(
-        key_generator: Generator[T],
-        value_generator: Generator[U],
+        key_generator,
+        value_generator,
         min_size: int = 0,
         max_size: int = 10,
-    ) -> Generator[Dict[T, U]]:
+    ):
         """Generate random dictionaries."""
         return DictGenerator(key_generator, value_generator, min_size, max_size)
 
     @staticmethod
-    def one_of(*generators: Generator[T]) -> Generator[T]:
+    def one_of(*generators):
         """Randomly choose from multiple generators."""
         return OneOfGenerator(list(generators))
 
     @staticmethod
-    def element_of(*values: T) -> Generator[T]:
+    def element_of(*values):
         """Randomly choose from multiple values."""
         if not values:
             raise ValueError("At least one value must be provided")
         return ElementOfGenerator(list(values))
 
     @staticmethod
-    def just(value: T) -> Generator[T]:
+    def just(value):
         """Always generate the same value."""
         return JustGenerator(value)
 
     @staticmethod
-    def weighted_value(generator: Generator[T], weight: float) -> Generator[T]:
+    def weighted_value(generator, weight: float):
         """Create a weighted generator (for compatibility with stateful tests)."""
         return generator
 
     @staticmethod
     def set(
-        element_generator: Generator[T], min_size: int = 0, max_size: int = 10
-    ) -> Generator[Set[T]]:
+        element_generator, min_size: int = 0, max_size: int = 10
+    ):
         """Generate random sets of elements from the given generator."""
         return SetGenerator(element_generator, min_size, max_size)
 
     @staticmethod
-    def unicode_string(min_length: int = 0, max_length: int = 20) -> Generator[str]:
+    def unicode_string(min_length: int = 0, max_length: int = 20):
         """Generate random Unicode strings with the specified constraints."""
         return UnicodeStringGenerator(min_length, max_length)
 
     @staticmethod
-    def interval(min_value: int, max_value: int) -> Generator[int]:
+    def interval(min_value: int, max_value: int):
         """Generate random integers in the specified range (inclusive)."""
         return IntGenerator(min_value, max_value)
 
     @staticmethod
-    def integers(min_value: int, max_value: int) -> Generator[int]:
+    def integers(min_value: int, max_value: int):
         """Alias for interval for compatibility."""
         return IntGenerator(min_value, max_value)
 
     @staticmethod
-    def lazy(func: Callable[[], T]) -> Generator[T]:
+    def lazy(func):
         """Create a generator that delays evaluation until generation."""
         return LazyGenerator(func)
 
     @staticmethod
-    def construct(Type: type, *generators: Generator[Any]) -> Generator[Any]:
+    def construct(Type: type, *generators):
         """Create a generator for instances of a class."""
         return ConstructGenerator(Type, list(generators))
 
     @staticmethod
     def chain_tuple(
-        tuple_gen: Generator[tuple], gen_factory: Callable[[tuple], Generator[Any]]
-    ) -> Generator[tuple]:
+        tuple_gen, gen_factory
+    ):
         """Chain tuple generation with dependent value generation."""
         return ChainTupleGenerator(tuple_gen, gen_factory)
 
     @staticmethod
-    def tuple(*generators: Generator[Any]) -> Generator[tuple]:
+    def tuple(*generators):
         """Create a generator that generates tuples from multiple generators."""
         if not generators:
             raise ValueError("At least one generator must be provided")
