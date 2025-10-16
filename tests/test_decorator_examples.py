@@ -180,7 +180,8 @@ class TestDecoratorAPIExamples:
             assume(y != 0)  # Skip test cases where y is 0
             result = x / y
             assert isinstance(result, float)
-            assert result * y == x  # Division is inverse of multiplication
+            # Use approximate equality for floating-point arithmetic
+            assert abs(result * y - x) < 1e-10  # Division is approximately inverse of multiplication
 
         # Run the test
         test_division_property()
