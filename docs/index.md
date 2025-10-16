@@ -99,55 +99,19 @@ def test_addition_commutativity(x: int, y: int):
 test_addition_commutativity()
 ```
 
-### 3. Pytest Integration (Automatic Randomization)
+### 3. Pytest Integration
 
-The `@for_all` decorator provides seamless pytest integration with **automatic test randomization**. Simply add the decorator to your test methods, and PyPropTest will automatically generate hundreds of random test cases for each test run:
+The `@for_all` decorator integrates seamlessly with pytest using direct decoration:
 
 ```python
 import pytest
-from pyproptest import for_all, integers, text
+from pyproptest import for_all, integers
 
 class TestMathProperties:
     @for_all(integers(), integers())
     def test_addition_commutativity(self, x: int, y: int):
-        """Test that addition is commutative - automatically runs 100+ random cases!"""
+        """Test that addition is commutative - direct decoration!"""
         assert x + y == y + x
-    
-    @for_all(integers(), integers())
-    def test_multiplication_associativity(self, x: int, y: int, z: int):
-        """Test that multiplication is associative."""
-        assert (x * y) * z == x * (y * z)
-
-class TestStringProperties:
-    @for_all(text(), text())
-    def test_string_concatenation(self, s1: str, s2: str):
-        """Test string concatenation properties."""
-        result = s1 + s2
-        assert len(result) == len(s1) + len(s2)
-        assert result.startswith(s1)
-        assert result.endswith(s2)
-```
-
-**Key Benefits of Pytest Integration:**
-- **Zero Configuration**: Just add `@for_all()` decorator and run `pytest` as usual
-- **Automatic Randomization**: Each test method runs with 100+ randomly generated inputs
-- **Pytest Discovery**: Tests are automatically discovered by pytest
-- **Standard Output**: Failures appear as normal pytest failures with minimal counterexamples
-- **IDE Support**: Full type hints and parameter completion in your IDE
-
-**Running with pytest:**
-```bash
-# Run all property-based tests
-pytest
-
-# Run specific test class
-pytest tests/test_math_properties.py::TestMathProperties
-
-# Run with verbose output to see generated test cases
-pytest -v
-
-# Run with coverage
-pytest --cov=pyproptest
 ```
 
 
@@ -213,76 +177,4 @@ def test_string_operations(s1: str, s2: str):
 - **Use `run_for_all`** for seed-based reproducibility testing
 - **Use `@for_all`** for tests with complex generator transformations
 
-All approaches provide the same functionality - choose based on your testing framework and preferences.
-
-## Pytest Integration: The Easiest Way to Get Started
-
-If you're using pytest (which most Python projects do), the `@for_all` decorator is the **recommended approach** for property-based testing. It provides the smoothest integration with your existing test suite:
-
-### Why Use the Pytest Decorator API?
-
-1. **Drop-in Integration**: Works with your existing pytest setup without any configuration
-2. **Automatic Test Discovery**: pytest automatically finds and runs your property-based tests
-3. **Familiar Workflow**: Use the same `pytest` commands you're already using
-4. **IDE Integration**: Full support for debugging, breakpoints, and parameter inspection
-5. **Standard Output**: Test failures appear as normal pytest failures with clear error messages
-
-### Complete Example: Testing a Custom Function
-
-```python
-import pytest
-from pyproptest import for_all, integers, text, lists
-
-def my_sort_function(items):
-    """A custom sorting function we want to test."""
-    return sorted(items)
-
-class TestMySortFunction:
-    @for_all(lists(integers()))
-    def test_sort_preserves_length(self, items):
-        """Sorting should preserve the number of elements."""
-        sorted_items = my_sort_function(items)
-        assert len(sorted_items) == len(items)
-    
-    @for_all(lists(integers()))
-    def test_sort_is_sorted(self, items):
-        """Sorted result should be in ascending order."""
-        sorted_items = my_sort_function(items)
-        for i in range(len(sorted_items) - 1):
-            assert sorted_items[i] <= sorted_items[i + 1]
-    
-    @for_all(lists(integers()))
-    def test_sort_preserves_elements(self, items):
-        """Sorting should preserve all original elements."""
-        sorted_items = my_sort_function(items)
-        assert set(sorted_items) == set(items)
-
-# Just run: pytest tests/test_my_sort_function.py
-# Each test method will automatically run with 100+ random inputs!
-```
-
-### Advanced Pytest Features
-
-You can combine PyPropTest with other pytest features:
-
-```python
-import pytest
-from pyproptest import for_all, integers
-
-class TestAdvancedFeatures:
-    @for_all(integers(), integers())
-    @pytest.mark.slow  # Mark as slow test
-    def test_expensive_operation(self, x, y):
-        """This test might take longer due to complexity."""
-        result = expensive_operation(x, y)
-        assert result is not None
-    
-    @for_all(integers())
-    @pytest.mark.parametrize("multiplier", [2, 3, 5])  # Combine with parametrize
-    def test_with_parametrize(self, x, multiplier):
-        """Combine property-based testing with parametrized tests."""
-        result = x * multiplier
-        assert result % multiplier == 0
-```
-
-For more details on pytest integration, see [Pytest Integration](pytest-integration.md) and [Pytest Best Practices](pytest-best-practices.md).
+All approaches provide the same functionality - choose based on your testing framework and preferences. For more details on pytest integration, see [Pytest Integration](pytest-integration.md) and [Pytest Best Practices](pytest-best-practices.md).

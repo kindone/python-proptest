@@ -29,7 +29,7 @@ def exhaustive_traversal(
 
     visitor(shrinkable)
 
-    for shrink in shrinkable.shrinks:
+    for shrink in shrinkable.shrinks().to_list():
         exhaustive_traversal(shrink, max_depth, visitor, current_depth + 1)
 
 
@@ -122,7 +122,7 @@ class TestPrimitive:
             assert shrinkable.value == 0
 
             # Should have no shrinks
-            assert len(shrinkable.shrinks) == 0
+            assert shrinkable.shrinks().is_empty()
 
     def test_integer_generator_large_range(self):
         """Test integer generator with large range."""
@@ -187,7 +187,7 @@ class TestPrimitive:
             assert shrinkable.value == ""
 
             # Should have no shrinks
-            assert len(shrinkable.shrinks) == 0
+            assert shrinkable.shrinks().is_empty()
 
     def test_boolean_generator_distribution(self):
         """Test boolean generator distribution."""

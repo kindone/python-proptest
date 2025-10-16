@@ -6,7 +6,7 @@ using property-based testing.
 """
 
 import random
-from typing import Callable, Generic, List, Optional, TypeVar, Union
+from typing import Any, Callable, Generic, List, Optional, TypeVar, Union
 
 from .generator import Gen, Generator
 from .property import PropertyTestError
@@ -107,12 +107,8 @@ class StatefulProperty(Generic[S, A]):
                         action = action_shrinkable.value
                         if isinstance(action, Action) and model is not None:
                             action.run(state, model)
-                        elif isinstance(action, SimpleAction):
-                            # This is a SimpleAction, which only takes state
-                            action.run(state)
                         else:
-                            # Fallback - try to call with just state
-                            action.run(state)  # type: ignore
+                            action.run(state)
 
                 # Run cleanup callbacks
                 for callback in self._cleanup_callbacks:
@@ -123,7 +119,7 @@ class StatefulProperty(Generic[S, A]):
                 for callback in self._cleanup_callbacks:
                     try:
                         callback()
-                    except Exception:
+                    except:
                         pass
                 raise PropertyTestError(
                     f"Stateful property failed on run {run + 1}: {e}"
@@ -152,7 +148,7 @@ def actionGenOf(
 
 def statefulProperty(
     initial_state_gen: Generator[S],
-    action_gen: Generator[Union[SimpleAction[S], Action[S, A]]],
+    action_gen: Generator[Action[S, A]],
     max_actions: int = 100,
     num_runs: int = 100,
     seed: Optional[Union[str, int]] = None,
@@ -166,7 +162,7 @@ def statefulProperty(
 
 def simpleStatefulProperty(
     initial_state_gen: Generator[S],
-    action_gen: Generator[Union[SimpleAction[S], Action[S, A]]],
+    action_gen: Generator[SimpleAction[S]],
     max_actions: int = 100,
     num_runs: int = 100,
     seed: Optional[Union[str, int]] = None,

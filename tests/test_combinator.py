@@ -23,7 +23,7 @@ class TestCombinators:
         for _ in range(5):
             result = const_gen.generate(rng)
             assert result.value == 42
-            assert len(result.shrinks) == 0  # Just generator has no shrinks
+            assert result.shrinks().is_empty()  # Just generator has no shrinks
 
     def test_just_with_various_types(self):
         """Test just with various types."""

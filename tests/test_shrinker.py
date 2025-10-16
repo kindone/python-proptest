@@ -179,15 +179,19 @@ class TestShrinker:
         # Test with integer
         shrinkable = Shrinkable(42)
         assert shrinkable.value == 42
-        assert len(shrinkable.shrinks) == 0  # No shrinks by default
+        assert shrinkable.shrinks().is_empty()  # No shrinks by default
 
         # Test with shrinks
-        shrinks = [Shrinkable(21), Shrinkable(0)]
-        shrinkable_with_shrinks = Shrinkable(42, shrinks)
+        from pyproptest.core.stream import Stream
+
+        shrinkable_with_shrinks = Shrinkable(
+            42, lambda: Stream.many([Shrinkable(21), Shrinkable(0)])
+        )
         assert shrinkable_with_shrinks.value == 42
-        assert len(shrinkable_with_shrinks.shrinks) == 2
-        assert shrinkable_with_shrinks.shrinks[0].value == 21
-        assert shrinkable_with_shrinks.shrinks[1].value == 0
+        shrinks_list = shrinkable_with_shrinks.shrinks().to_list()
+        assert len(shrinks_list) == 2
+        assert shrinks_list[0].value == 21
+        assert shrinks_list[1].value == 0
 
     def test_shrinkable_equality_and_hash(self):
         """Test Shrinkable equality and hash."""

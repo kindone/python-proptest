@@ -256,7 +256,7 @@ class TestComprehensiveGenerators:
             result = gen.generate(rng)
             assert result.value == value
             assert isinstance(result.value, expected_type)
-            assert len(result.shrinks) == 0  # Just generator has no shrinks
+            assert result.shrinks().is_empty()  # Just generator has no shrinks
 
     def test_generator_with_edge_case_ranges(self):
         """Test generators with edge case ranges."""

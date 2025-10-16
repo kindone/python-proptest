@@ -152,7 +152,8 @@ class TestGeneratorInterface:
         assert result.value % 2 == 0  # Should be even since we multiply by 2
 
         # Check that shrinks exist
-        assert len(result.shrinks) > 0
+        shrinks_list = result.shrinks().to_list()
+        assert len(shrinks_list) > 0
 
     def test_one_of_generator_selection(self):
         """Test that one_of generator selects from multiple generators."""
@@ -184,7 +185,7 @@ class TestGeneratorInterface:
         for _ in range(10):
             result = gen.generate(rng)
             assert result.value == 42
-            assert len(result.shrinks) == 0  # Just generator has no shrinks
+            assert result.shrinks().is_empty()  # Just generator has no shrinks
 
     def test_generator_with_complex_nested_structure(self):
         """Test generator with complex nested structure."""

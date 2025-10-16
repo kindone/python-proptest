@@ -154,7 +154,7 @@ class Failure(Try[T]):
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, Failure):
             return False
-        return isinstance(self._exception, type(other._exception)) and str(
+        return type(self._exception) == type(other._exception) and str(
             self._exception
         ) == str(other._exception)
 

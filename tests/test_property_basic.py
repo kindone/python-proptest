@@ -275,7 +275,7 @@ class TestPropertyBasic:
                 Gen.int(min_value=0, max_value=50),
                 Gen.int(min_value=0, max_value=50),
                 Gen.int(min_value=0, max_value=50),
-                num_runs=100,  # More runs to ensure we find a failing case
+                num_runs=200,
             )
 
         # Should have failing input information

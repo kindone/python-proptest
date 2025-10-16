@@ -6,11 +6,9 @@ for running property-based tests.
 """
 
 import random
-from typing import Any, Callable, List, Optional, Tuple, TypeVar, Union
+from typing import Any, Callable, List, Optional, TypeVar, Union
 
 from .generator import Generator, Random
-
-# from .shrinker import IntegerShrinker, Shrinkable, StringShrinker, shrink_to_minimal
 
 T = TypeVar("T")
 
@@ -117,7 +115,7 @@ class Property:
         return True
 
     def _shrink_failing_inputs(
-        self, inputs: List[Any], generators: Tuple[Generator[Any], ...]
+        self, inputs: List[Any], generators: List[Generator[Any]]
     ) -> List[Any]:
         """Attempt to shrink failing inputs to find minimal counterexamples."""
         if len(inputs) != len(generators):
@@ -131,7 +129,7 @@ class Property:
                 return False
 
         # Shrink each input individually using the shrinkable candidates
-        shrunk_inputs: List[Any] = []
+        shrunk_inputs = []
         for i, (input_val, generator) in enumerate(zip(inputs, generators)):
             # Generate a shrinkable for this input to get shrinking candidates
             shrinkable = generator.generate(self._rng)
@@ -144,7 +142,7 @@ class Property:
 
             while improved:
                 improved = False
-                for candidate_shrinkable in shrinkable.shrinks:
+                for candidate_shrinkable in shrinkable.shrinks().to_list():
                     candidate_val = candidate_shrinkable.value
                     # Test if this candidate also fails
                     test_inputs = shrunk_inputs[:i] + [candidate_val] + inputs[i + 1 :]

@@ -30,14 +30,16 @@ class TestAllPortedFunctionality:
         result = int_gen.generate(rng)
         assert isinstance(result.value, int)
         assert 0 <= result.value <= 100
-        assert len(result.shrinks) > 0
+        shrinks_list = result.shrinks().to_list()
+        assert len(shrinks_list) > 0
 
         # Test string generator
         str_gen = Gen.str(min_length=1, max_length=10)
         result = str_gen.generate(rng)
         assert isinstance(result.value, str)
         assert 1 <= len(result.value) <= 10
-        assert len(result.shrinks) > 0
+        shrinks_list = result.shrinks().to_list()
+        assert len(shrinks_list) > 0
 
         # Test boolean generator
         bool_gen = Gen.bool()
@@ -45,14 +47,16 @@ class TestAllPortedFunctionality:
         assert isinstance(result.value, bool)
         # Boolean generator may have no shrinks if value is False
         if result.value is True:
-            assert len(result.shrinks) > 0
+            shrinks_list = result.shrinks().to_list()
+        assert len(shrinks_list) > 0
 
         # Test float generator
         float_gen = Gen.float(min_value=0.0, max_value=1.0)
         result = float_gen.generate(rng)
         assert isinstance(result.value, float)
         assert 0.0 <= result.value <= 1.0
-        assert len(result.shrinks) > 0
+        shrinks_list = result.shrinks().to_list()
+        assert len(shrinks_list) > 0
 
     def test_collection_generators_work(self):
         """Test that collection generators work correctly."""
@@ -66,7 +70,8 @@ class TestAllPortedFunctionality:
         assert isinstance(result.value, list)
         assert 0 <= len(result.value) <= 5
         assert all(isinstance(x, int) for x in result.value)
-        assert len(result.shrinks) > 0
+        shrinks_list = result.shrinks().to_list()
+        assert len(shrinks_list) > 0
 
         # Test dict generator
         dict_gen = Gen.dict(
@@ -77,7 +82,8 @@ class TestAllPortedFunctionality:
         for key, value in result.value.items():
             assert isinstance(key, str)
             assert isinstance(value, int)
-        assert len(result.shrinks) > 0
+        shrinks_list = result.shrinks().to_list()
+        assert len(shrinks_list) > 0
 
     def test_combinators_work(self):
         """Test that all combinators work correctly."""
@@ -87,7 +93,7 @@ class TestAllPortedFunctionality:
         just_gen = Gen.just(42)
         result = just_gen.generate(rng)
         assert result.value == 42
-        assert len(result.shrinks) == 0
+        assert result.shrinks().is_empty()
 
         # Test one_of combinator
         one_of_gen = Gen.one_of(Gen.just(1), Gen.just(2))

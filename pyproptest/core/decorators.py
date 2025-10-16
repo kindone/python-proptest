@@ -19,8 +19,7 @@ def for_all(
     Decorator for property-based testing with generators.
 
     This decorator automatically detects whether it's being used in a pytest context
-    (class methods with 'self' parameter) or standalone functions and adapts
-    accordingly.
+    (class methods with 'self' parameter) or standalone functions and adapts accordingly.
 
     Usage:
         # Standalone function
@@ -70,17 +69,14 @@ def for_all(
         def wrapper(*args, **kwargs):
             # For pytest class methods, we need to handle the 'self' parameter
             if is_pytest_method:
-                # In pytest context, args[0] is 'self', and we need to generate values
-                # for the rest
+                # In pytest context, args[0] is 'self', and we need to generate values for the rest
                 if len(args) > 1:
                     # Function was called with arguments (shouldn't happen in pytest)
                     return func(*args, **kwargs)
 
-                # Check if this is being called by pytest directly (no arguments except
-                # self)
+                # Check if this is being called by pytest directly (no arguments except self)
                 if len(args) == 1:  # Only 'self' parameter
-                    # This is pytest calling the method directly - run property-based
-                    # testing
+                    # This is pytest calling the method directly - run property-based testing
                     pass  # Continue to property-based testing below
                 else:
                     # This shouldn't happen in normal pytest usage
@@ -91,8 +87,7 @@ def for_all(
                     # Create a property function that works with pytest
                     def pytest_property(*generated_args):
                         try:
-                            # Call the original function with 'self' and generated
-                            # arguments
+                            # Call the original function with 'self' and generated arguments
                             func(args[0], *generated_args)
                             return True  # No assertion failed
                         except AssertionError:
@@ -128,8 +123,7 @@ def for_all(
 
                 # Run property-based testing
                 try:
-                    # Create a property function that returns True/False based on
-                    # assertions
+                    # Create a property function that returns True/False based on assertions
                     def assertion_property(*args):
                         try:
                             func(*args)
@@ -169,10 +163,10 @@ def for_all(
         wrapper.__annotations__ = func.__annotations__
 
         # Add metadata for introspection
-        wrapper._pyproptest_generators = generators  # type: ignore
-        wrapper._pyproptest_num_runs = num_runs  # type: ignore
-        wrapper._pyproptest_seed = seed  # type: ignore
-        wrapper._pyproptest_is_pytest_method = is_pytest_method  # type: ignore
+        wrapper._pyproptest_generators = generators
+        wrapper._pyproptest_num_runs = num_runs
+        wrapper._pyproptest_seed = seed
+        wrapper._pyproptest_is_pytest_method = is_pytest_method
 
         return wrapper
 
@@ -203,8 +197,8 @@ def example(*values: Any):
     def decorator(func: Callable) -> Callable:
         # Store examples for later use
         if not hasattr(func, "_pyproptest_examples"):
-            func._pyproptest_examples = []  # type: ignore
-        func._pyproptest_examples.append(values)  # type: ignore
+            func._pyproptest_examples = []
+        func._pyproptest_examples.append(values)
         return func
 
     return decorator
@@ -230,8 +224,8 @@ def settings(**kwargs):
     def decorator(func: Callable) -> Callable:
         # Store settings for later use
         if not hasattr(func, "_pyproptest_settings"):
-            func._pyproptest_settings = {}  # type: ignore
-        func._pyproptest_settings.update(kwargs)  # type: ignore
+            func._pyproptest_settings = {}
+        func._pyproptest_settings.update(kwargs)
         return func
 
     return decorator
@@ -374,13 +368,7 @@ def text(min_size: int = 0, max_size: int = None, alphabet: str = None) -> Strat
     if max_size is not None:
         kwargs["max_length"] = max_size
     # For now, ignore alphabet parameter
-    return Strategy(
-        Gen.str(
-            min_length=kwargs.get("min_length", 0),
-            max_length=kwargs.get("max_length", 20),
-            charset=str(kwargs.get("charset", "abcdefghijklmnopqrstuvwxyz")),
-        )
-    )
+    return Strategy(Gen.str(**kwargs))
 
 
 def lists(elements: Strategy, min_size: int = 0, max_size: int = None) -> Strategy:

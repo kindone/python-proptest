@@ -82,7 +82,7 @@ def run_all_tests():
     just_gen = Gen.just(42)
     result = just_gen.generate(rng)
     assert result.value == 42
-    assert len(result.shrinks) == 0
+    assert result.shrinks().is_empty()
     print(f"   ✅ Just combinator: {result.value}")
 
     # One of combinator
