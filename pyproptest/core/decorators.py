@@ -313,20 +313,11 @@ def assume(condition: bool):
         condition: Condition that must be True to continue the test
 
     Raises:
-        SkipTest: If condition is False
+        Exception: If condition is False (with message 'Assumption failed')
     """
     if not condition:
-        # Import here to avoid circular imports
-        try:
-            import pytest
-
-            pytest.skip("Assumption failed")
-        except ImportError:
-            # Fallback for non-pytest environments
-            class SkipTest(Exception):
-                pass
-
-            raise SkipTest("Assumption failed")
+        # Raise a regular exception that the property testing framework can catch
+        raise Exception("Assumption failed")
 
 
 def note(message: str):
