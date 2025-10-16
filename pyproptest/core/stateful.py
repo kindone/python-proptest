@@ -6,7 +6,7 @@ using property-based testing.
 """
 
 import random
-from typing import Any, Callable, Generic, List, Optional, TypeVar, Union
+from typing import Callable, Generic, List, Optional, TypeVar, Union
 
 from .generator import Gen, Generator
 from .property import PropertyTestError
@@ -119,7 +119,7 @@ class StatefulProperty(Generic[S, A]):
                 for callback in self._cleanup_callbacks:
                     try:
                         callback()
-                    except:
+                    except Exception:
                         pass
                 raise PropertyTestError(
                     f"Stateful property failed on run {run + 1}: {e}"

@@ -382,3 +382,8 @@ htmlcov/
 dmypy.json
 .pyre/
 .pytype/
+
+# Security reports
+bandit-report.json
+safety-report.json
+*.security-report

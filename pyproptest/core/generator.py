@@ -91,7 +91,8 @@ class FilteredGenerator(Generator[T]):
             if self.predicate(shrinkable.value):
                 return shrinkable
         raise ValueError(
-            f"Could not generate value satisfying predicate after {self.max_attempts} attempts"
+            f"Could not generate value satisfying predicate after "
+            f"{self.max_attempts} attempts"
         )
 
 

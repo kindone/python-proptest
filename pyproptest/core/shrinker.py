@@ -77,7 +77,8 @@ class Shrinkable(Generic[T]):
     def and_then(
         self, shrink_func: Callable[["Shrinkable[T]"], Stream["Shrinkable[T]"]]
     ) -> "Shrinkable[T]":
-        """Replace shrinking candidates with new ones that depend on the current value."""
+        """Replace shrinking candidates with new ones that depend on the current
+        value."""
         return Shrinkable(self.value, lambda: shrink_func(self))
 
     def map(self, func: Callable[[T], U]) -> "Shrinkable[U]":
@@ -277,7 +278,8 @@ def binary_search_shrinkable(value: int) -> Shrinkable[int]:
     """
 
     def gen_pos(min_val: int, max_val: int) -> Stream[Shrinkable[int]]:
-        """Generate shrinking candidates for a positive integer range using binary search."""
+        """Generate shrinking candidates for a positive integer range using
+        binary search."""
         mid = (
             (min_val // 2)
             + (max_val // 2)
@@ -286,14 +288,16 @@ def binary_search_shrinkable(value: int) -> Shrinkable[int]:
         if min_val + 1 >= max_val:
             return Stream.empty()  # Base case: No more shrinking possible
         elif min_val + 2 >= max_val:
-            return Stream.one(Shrinkable(mid))  # Base case: Only the midpoint is left
+            return Stream.one(Shrinkable(mid))  # Base case: Only midpoint left
         else:
-            # Recursively generate shrinks: prioritize the midpoint, then the lower half, then the upper half
+            # Recursively generate shrinks: prioritize midpoint, then lower half,
+            # then upper half
             mid_shrinkable = Shrinkable(mid, lambda: gen_pos(min_val, mid))
             return Stream(mid_shrinkable, lambda: gen_pos(mid, max_val))
 
     def gen_neg(min_val: int, max_val: int) -> Stream[Shrinkable[int]]:
-        """Generate shrinking candidates for a negative integer range using binary search."""
+        """Generate shrinking candidates for a negative integer range using
+        binary search."""
         mid = (
             (min_val // 2)
             + (max_val // 2)
@@ -302,22 +306,25 @@ def binary_search_shrinkable(value: int) -> Shrinkable[int]:
         if min_val + 1 >= max_val:
             return Stream.empty()  # Base case: No more shrinking possible
         elif min_val + 2 >= max_val:
-            return Stream.one(Shrinkable(mid))  # Base case: Only the midpoint is left
+            return Stream.one(Shrinkable(mid))  # Base case: Only midpoint left
         else:
-            # Recursively generate shrinks: prioritize the midpoint, then the lower half, then the upper half
+            # Recursively generate shrinks: prioritize midpoint, then lower half,
+            # then upper half
             mid_shrinkable = Shrinkable(mid, lambda: gen_neg(min_val, mid))
             return Stream(mid_shrinkable, lambda: gen_neg(mid, max_val))
 
     if value == 0:
         return Shrinkable(value)  # 0 cannot shrink further
     elif value > 0:
-        # For positive numbers, shrink towards 0: prioritize 0, then use gen_pos for the range (0, value)
+        # For positive numbers, shrink towards 0: prioritize 0, then use gen_pos
+        # for the range (0, value)
         def shrinks() -> Stream[Shrinkable[int]]:
             return Stream.one(Shrinkable(0)).concat(gen_pos(0, value))
 
         return Shrinkable(value, shrinks)
     else:
-        # For negative numbers, shrink towards 0: prioritize 0, then use gen_neg for the range (value, 0)
+        # For negative numbers, shrink towards 0: prioritize 0, then use gen_neg
+        # for the range (value, 0)
         def shrinks() -> Stream[Shrinkable[int]]:
             return Stream.one(Shrinkable(0)).concat(gen_neg(value, 0))
 
@@ -333,12 +340,16 @@ def shrink_element_wise(
     and shrinks elements within the targeted chunk.
 
     Args:
-        shrinkable_elems_shr: The Shrinkable containing the array of Shrinkable elements
-        power: Determines the number of chunks (2^power) the array is divided into for shrinking
-        offset: Specifies which chunk (0 <= offset < 2^power) of elements to shrink in this step
+        shrinkable_elems_shr: The Shrinkable containing the array of Shrinkable
+            elements
+        power: Determines the number of chunks (2^power) the array is divided
+            into for shrinking
+        offset: Specifies which chunk (0 <= offset < 2^power) of elements to
+            shrink in this step
 
     Returns:
-        A list of Shrinkable arrays, where elements in the specified chunk have been shrunk
+        A list of Shrinkable arrays, where elements in the specified chunk have
+        been shrunk
     """
     if not shrinkable_elems_shr.value:
         return []
@@ -452,12 +463,16 @@ def shrinkable_array(
 
     Args:
         shrinkable_elems: The initial array of Shrinkable elements
-        min_size: The minimum allowed length of the array after shrinking element membership
-        membership_wise: If true, allows shrinking by removing elements (membership). Defaults to true
-        element_wise: If true, applies element-wise shrinking *after* membership shrinking. Defaults to false
+        min_size: The minimum allowed length of the array after shrinking element
+            membership
+        membership_wise: If true, allows shrinking by removing elements
+            (membership). Defaults to true
+        element_wise: If true, applies element-wise shrinking *after* membership
+            shrinking. Defaults to false
 
     Returns:
-        A Shrinkable<Array<T>> that represents the original array and its potential shrunken versions
+        A Shrinkable<Array<T>> that represents the original array and its
+        potential shrunken versions
     """
     # Base Shrinkable containing the initial structure Shrinkable<T>[]
     current_shrinkable = Shrinkable(shrinkable_elems)
@@ -474,7 +489,8 @@ def shrinkable_array(
             lambda parent: shrink_element_wise(parent, 0, 0)
         )
 
-    # Map the final Shrinkable<Shrinkable<T>[]> to Shrinkable<Array<T>> by extracting the values
+    # Map the final Shrinkable<Shrinkable<T>[]> to Shrinkable<Array<T>> by
+    # extracting the values
     return current_shrinkable.map(lambda the_arr: [shr.value for shr in the_arr])
 
 
