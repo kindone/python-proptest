@@ -6,9 +6,7 @@ for common Python types.
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, Generic, List, Set, Tuple, TypeVar
-
-from typing_extensions import Protocol
+from typing import Any, Callable, Dict, Generic, List, Protocol, Set, Tuple, TypeVar
 
 from .shrinker import Shrinkable
 from .stream import Stream
