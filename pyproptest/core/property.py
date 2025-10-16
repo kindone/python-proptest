@@ -94,7 +94,7 @@ class Property:
 
                 if not result:
                     # Property failed, try to shrink
-                    minimal_inputs = self._shrink_failing_inputs(inputs, generators)
+                    minimal_inputs = self._shrink_failing_inputs(inputs, list(generators))
                     raise PropertyTestError(
                         f"Property failed on run {run + 1}",
                         failing_inputs=inputs,
@@ -105,7 +105,7 @@ class Property:
                 if isinstance(e, PropertyTestError):
                     raise
                 # Other exceptions are treated as property failures
-                minimal_inputs = self._shrink_failing_inputs(inputs, generators)
+                minimal_inputs = self._shrink_failing_inputs(inputs, list(generators))
                 raise PropertyTestError(
                     f"Property failed with exception on run {run + 1}: {e}",
                     failing_inputs=inputs,
@@ -129,7 +129,7 @@ class Property:
                 return False
 
         # Shrink each input individually using the shrinkable candidates
-        shrunk_inputs = []
+        shrunk_inputs: List[Any] = []
         for i, (input_val, generator) in enumerate(zip(inputs, generators)):
             # Generate a shrinkable for this input to get shrinking candidates
             shrinkable = generator.generate(self._rng)

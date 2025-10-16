@@ -169,10 +169,10 @@ def for_all(
         wrapper.__annotations__ = func.__annotations__
 
         # Add metadata for introspection
-        wrapper._pyproptest_generators = generators
-        wrapper._pyproptest_num_runs = num_runs
-        wrapper._pyproptest_seed = seed
-        wrapper._pyproptest_is_pytest_method = is_pytest_method
+        wrapper._pyproptest_generators = generators  # type: ignore
+        wrapper._pyproptest_num_runs = num_runs  # type: ignore
+        wrapper._pyproptest_seed = seed  # type: ignore
+        wrapper._pyproptest_is_pytest_method = is_pytest_method  # type: ignore
 
         return wrapper
 
@@ -203,8 +203,8 @@ def example(*values: Any):
     def decorator(func: Callable) -> Callable:
         # Store examples for later use
         if not hasattr(func, "_pyproptest_examples"):
-            func._pyproptest_examples = []
-        func._pyproptest_examples.append(values)
+            func._pyproptest_examples = []  # type: ignore
+        func._pyproptest_examples.append(values)  # type: ignore
         return func
 
     return decorator
@@ -230,8 +230,8 @@ def settings(**kwargs):
     def decorator(func: Callable) -> Callable:
         # Store settings for later use
         if not hasattr(func, "_pyproptest_settings"):
-            func._pyproptest_settings = {}
-        func._pyproptest_settings.update(kwargs)
+            func._pyproptest_settings = {}  # type: ignore
+        func._pyproptest_settings.update(kwargs)  # type: ignore
         return func
 
     return decorator
@@ -374,7 +374,7 @@ def text(min_size: int = 0, max_size: int = None, alphabet: str = None) -> Strat
     if max_size is not None:
         kwargs["max_length"] = max_size
     # For now, ignore alphabet parameter
-    return Strategy(Gen.str(**kwargs))
+    return Strategy(Gen.str(**kwargs))  # type: ignore
 
 
 def lists(elements: Strategy, min_size: int = 0, max_size: int = None) -> Strategy:

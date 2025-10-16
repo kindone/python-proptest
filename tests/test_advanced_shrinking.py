@@ -222,7 +222,7 @@ class TestElementWiseShrinking:
         """Test element-wise shrinking with empty array."""
         shr = Shrinkable([])
         result = shrink_element_wise(shr, 0, 0)
-        assert result == []
+        assert result.is_empty()
 
     def test_shrink_element_wise_single_element(self):
         """Test element-wise shrinking with single element."""

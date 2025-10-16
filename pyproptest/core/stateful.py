@@ -108,7 +108,7 @@ class StatefulProperty(Generic[S, A]):
                         if isinstance(action, Action) and model is not None:
                             action.run(state, model)
                         else:
-                            action.run(state)
+                            action.run(state)  # type: ignore
 
                 # Run cleanup callbacks
                 for callback in self._cleanup_callbacks:
@@ -156,7 +156,7 @@ def statefulProperty(
 ) -> StatefulProperty[S, A]:
     """Create a stateful property for testing."""
     return StatefulProperty(
-        initial_state_gen, action_gen, max_actions, num_runs, seed, initial_model_gen
+        initial_state_gen, action_gen, max_actions, num_runs, seed, initial_model_gen  # type: ignore
     )
 
 
@@ -168,4 +168,4 @@ def simpleStatefulProperty(
     seed: Optional[Union[str, int]] = None,
 ) -> StatefulProperty[S, A]:
     """Create a simple stateful property for testing without a model."""
-    return StatefulProperty(initial_state_gen, action_gen, max_actions, num_runs, seed)
+    return StatefulProperty(initial_state_gen, action_gen, max_actions, num_runs, seed)  # type: ignore

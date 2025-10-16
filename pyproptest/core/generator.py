@@ -11,6 +11,7 @@ from typing import Any, Callable, Dict, Generic, List, Set, TypeVar
 from typing_extensions import Protocol
 
 from .shrinker import Shrinkable
+from .stream import Stream
 
 T = TypeVar("T")
 U = TypeVar("U")
@@ -63,13 +64,15 @@ class MappedGenerator(Generator[U]):
     def generate(self, rng: Random) -> Shrinkable[U]:
         shrinkable = self.generator.generate(rng)
         transformed_value = self.func(shrinkable.value)
-        transformed_shrinks = [
-            Shrinkable(self.func(s.value), lambda: s.shrinks())
-            for s in shrinkable.shrinks().to_list()
-        ]
-        from pyproptest.core.stream import Stream
+        
+        def shrink_func() -> Stream[Shrinkable[U]]:
+            transformed_shrinks = [
+                Shrinkable(self.func(s.value), lambda: s.shrinks())  # type: ignore
+                for s in shrinkable.shrinks().to_list()
+            ]
+            return Stream.many(transformed_shrinks)
 
-        return Shrinkable(transformed_value, lambda: Stream.many(transformed_shrinks))
+        return Shrinkable(transformed_value, shrink_func)
 
 
 class FilteredGenerator(Generator[T]):
@@ -207,7 +210,7 @@ class Gen:
     @staticmethod
     def construct(Type: type, *generators: Generator[Any]) -> Generator[Any]:
         """Create a generator for instances of a class."""
-        return ConstructGenerator(Type, generators)
+        return ConstructGenerator(Type, list(generators))
 
     @staticmethod
     def chain_tuple(
@@ -396,7 +399,7 @@ class ListGenerator(Generator[List[T]]):
         self, elements: List[Shrinkable[T]]
     ) -> List[Shrinkable[List[T]]]:
         """Generate shrinking candidates for a list."""
-        shrinks = []
+        shrinks: List[Shrinkable[List[T]]] = []
 
         # Empty list
         if len(elements) > 0:
@@ -454,7 +457,7 @@ class DictGenerator(Generator[Dict[T, U]]):
         self, items: List[tuple[Shrinkable[T], Shrinkable[U]]]
     ) -> List[Shrinkable[Dict[T, U]]]:
         """Generate shrinking candidates for a dictionary."""
-        shrinks = []
+        shrinks: List[Shrinkable[Dict[T, U]]] = []
 
         # Empty dictionary
         if len(items) > 0:
@@ -533,7 +536,7 @@ class SetGenerator(Generator[Set[T]]):
 
     def generate(self, rng: Random) -> Shrinkable[Set[T]]:
         size = rng.randint(self.min_size, self.max_size)
-        elements = []
+        elements: List[Shrinkable[T]] = []
         seen = set()
 
         # Generate unique elements
@@ -555,7 +558,7 @@ class SetGenerator(Generator[Set[T]]):
         self, elements: List[Shrinkable[T]]
     ) -> List[Shrinkable[Set[T]]]:
         """Generate shrinking candidates for a set."""
-        shrinks = []
+        shrinks: List[Shrinkable[Set[T]]] = []
 
         # Empty set
         if len(elements) > 0:

@@ -87,7 +87,7 @@ class Stream(Generic[T]):
         def filter_tail() -> "Stream[T]":
             return self.tail().filter(predicate)
 
-        if predicate(self._head):
+        if self._head is not None and predicate(self._head):
             return Stream(self._head, filter_tail)
         else:
             return filter_tail()
@@ -100,7 +100,10 @@ class Stream(Generic[T]):
         def map_tail() -> "Stream[Any]":
             return self.tail().map(func)
 
-        return Stream(func(self._head), map_tail)
+        if self._head is not None:
+            return Stream(func(self._head), map_tail)
+        else:
+            return Stream.empty()
 
     def take(self, n: int) -> "Stream[T]":
         """Take the first n elements from the stream."""
@@ -117,7 +120,9 @@ class Stream(Generic[T]):
         result = []
         current = self
         while not current.is_empty():
-            result.append(current.head())
+            head_val = current.head()
+            if head_val is not None:
+                result.append(head_val)
             current = current.tail()
         return result
 
@@ -125,7 +130,9 @@ class Stream(Generic[T]):
         """Make the stream iterable."""
         current = self
         while not current.is_empty():
-            yield current.head()
+            head_val = current.head()
+            if head_val is not None:
+                yield head_val
             current = current.tail()
 
     def __repr__(self) -> str:

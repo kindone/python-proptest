@@ -131,7 +131,10 @@ class Shrinkable(Generic[T]):
         if current.is_empty():
             raise IndexError(f"Index {index} out of range for shrinks")
 
-        return current.head()
+        head_val = current.head()
+        if head_val is None:
+            raise IndexError(f"Index {index} out of range for shrinks")
+        return head_val
 
     def retrieve(self, path: List[int]) -> "Shrinkable[T]":
         """Retrieve a shrinkable by following a path of indices."""
@@ -211,7 +214,7 @@ class ListShrinker(Shrinker[List[T]]):
 
     def shrink(self, value: List[T]) -> List[List[T]]:
         """Generate shrinking candidates for a list."""
-        candidates = []
+        candidates: List[List[T]] = []
 
         # Empty list
         if len(value) > 0:
@@ -241,7 +244,7 @@ class DictShrinker(Shrinker[dict]):
 
     def shrink(self, value: dict) -> List[dict]:
         """Generate shrinking candidates for a dictionary."""
-        candidates = []
+        candidates: List[dict] = []
 
         # Empty dictionary
         if len(value) > 0:
@@ -352,14 +355,14 @@ def shrink_element_wise(
         been shrunk
     """
     if not shrinkable_elems_shr.value:
-        return []
+        return Stream.empty()
 
     shrinkable_elems = shrinkable_elems_shr.value
     length = len(shrinkable_elems)
     num_splits = 2**power
 
     if length / num_splits < 1 or offset >= num_splits:
-        return []
+        return Stream.empty()
 
     def shrink_bulk(
         ancestor: Shrinkable[List[Shrinkable[T]]], power: int, offset: int
@@ -428,7 +431,7 @@ def shrink_membership_wise(
         elems: List[Shrinkable[T]],
     ) -> List[Shrinkable[List[Shrinkable[T]]]]:
         """Generate shrinking candidates by removing elements."""
-        shrinks = []
+        shrinks: List[Shrinkable[List[Shrinkable[T]]]] = []
 
         # Empty array (if min_size allows)
         if min_size == 0 and len(elems) > 0:
