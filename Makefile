@@ -1,6 +1,6 @@
 # Makefile for PyPropTest development tasks
 
-.PHONY: help install test lint format type-check security clean quick-check pre-commit all-checks test-python38 test-all-python clean-whitespace
+.PHONY: help install test lint format type-check security clean quick-check pre-commit all-checks test-python38 test-all-python clean-whitespace build-package test-package upload-testpypi upload-pypi bump-version
 
 # Default target
 help:
@@ -23,6 +23,13 @@ help:
 	@echo "Python Version Testing:"
 	@echo "  make test-python38  - Test Python 3.8 compatibility"
 	@echo "  make test-all-python - Test all available Python versions"
+	@echo ""
+	@echo "PyPI Publishing:"
+	@echo "  make bump-version   - Bump version (patch/minor/major)"
+	@echo "  make build-package  - Build package for PyPI distribution"
+	@echo "  make test-package   - Test built package locally"
+	@echo "  make upload-testpypi - Upload to TestPyPI"
+	@echo "  make upload-pypi    - Upload to production PyPI"
 	@echo ""
 	@echo "Utilities:"
 	@echo "  make clean          - Clean up generated files"
@@ -93,6 +100,27 @@ test-all-python:
 clean-whitespace:
 	@echo "🧹 Cleaning trailing whitespaces..."
 	./scripts/clean-whitespace.sh
+
+# PyPI Publishing Commands
+bump-version:
+	@echo "📈 Bumping version..."
+	./scripts/bump-version.sh
+
+build-package:
+	@echo "📦 Building package for PyPI..."
+	./scripts/build-package.sh
+
+test-package:
+	@echo "🧪 Testing built package..."
+	./scripts/test-package.sh
+
+upload-testpypi:
+	@echo "🚀 Uploading to TestPyPI..."
+	./scripts/upload-testpypi.sh
+
+upload-pypi:
+	@echo "🚀 Uploading to PyPI..."
+	./scripts/upload-pypi.sh
 
 # Clean up generated files
 clean:

@@ -87,6 +87,55 @@ Clean trailing whitespaces from all documentation and code files:
 - ✅ YAML files (.yml, .yaml)
 - ✅ TOML files (.toml)
 
+### 📦 PyPI Publishing
+
+#### `build-package.sh`
+Build the package for PyPI distribution:
+```bash
+./scripts/build-package.sh
+```
+
+**What it does:**
+- ✅ Runs pre-build checks (linting, formatting, tests)
+- ✅ Cleans previous builds
+- ✅ Builds source distribution (.tar.gz)
+- ✅ Builds wheel distribution (.whl)
+- ✅ Validates package structure
+
+#### `test-package.sh`
+Test the built package locally:
+```bash
+./scripts/test-package.sh
+```
+
+**What it tests:**
+- ✅ Package installation from built wheel
+- ✅ Basic imports and functionality
+- ✅ Generator creation and usage
+- ✅ Property testing capabilities
+- ✅ Unittest integration
+
+#### `upload-testpypi.sh`
+Upload package to TestPyPI for testing:
+```bash
+./scripts/upload-testpypi.sh
+```
+
+**Requirements:**
+- ✅ TestPyPI account and API token
+- ✅ Built package in `dist/` directory
+
+#### `upload-pypi.sh`
+Upload package to production PyPI:
+```bash
+./scripts/upload-pypi.sh
+```
+
+**Requirements:**
+- ✅ PyPI account and API token
+- ✅ Tested package from TestPyPI
+- ✅ Final confirmation before upload
+
 ## Using Make Commands
 
 For convenience, you can also use the Makefile in the project root:
@@ -111,6 +160,12 @@ make format
 make type-check
 make test
 make security
+
+# PyPI Publishing
+make build-package
+make test-package
+make upload-testpypi
+make upload-pypi
 
 # Utilities
 make clean-whitespace
