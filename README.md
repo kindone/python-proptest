@@ -3,7 +3,7 @@
 A property-based testing framework for Python, inspired by Haskell's QuickCheck and Python's Hypothesis.
 
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/downloads/)
-[![License](https://img.shields.io/badge/license-BSD--3--Clause-green.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Tests](https://github.com/kindone/pyproptest/workflows/CI/badge.svg)](https://github.com/kindone/pyproptest/actions)
 [![Coverage](https://codecov.io/gh/kindone/pyproptest/branch/main/graph/badge.svg)](https://codecov.io/gh/kindone/pyproptest)
 [![PyPI version](https://badge.fury.io/py/pyproptest.svg)](https://badge.fury.io/py/pyproptest)
@@ -324,7 +324,7 @@ isort pyproptest/ tests/
 
 ## License
 
-This project is licensed under the BSD-3-Clause License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Contributing
 

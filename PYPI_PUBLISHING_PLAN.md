@@ -15,7 +15,7 @@ This document outlines the complete plan for publishing PyPropTest to PyPI (Pyth
 - [x] **CI/CD**: GitHub Actions pipeline working
 - [x] **Code Quality**: Linting, formatting, type checking all pass
 - [x] **Security**: Security analysis completed
-- [x] **License**: BSD-3-Clause license in place
+- [x] **License**: MIT license in place
 
 ### 🔧 Still Needed
 
@@ -125,7 +125,7 @@ This document outlines the complete plan for publishing PyPropTest to PyPI (Pyth
 pyproptest/
 ├── pyproject.toml          # ✅ Well configured
 ├── README.md               # ✅ Comprehensive
-├── LICENSE                 # ✅ BSD-3-Clause
+├── LICENSE                 # ✅ MIT
 ├── pyproptest/            # ✅ Main package
 │   ├── __init__.py        # ✅ Proper exports
 │   └── core/              # ✅ Well organized

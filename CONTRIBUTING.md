@@ -197,4 +197,4 @@ Please be respectful and constructive in all interactions. We aim to create a we
 
 ## License
 
-By contributing to PyPropTest, you agree that your contributions will be licensed under the BSD-3-Clause License.
+By contributing to PyPropTest, you agree that your contributions will be licensed under the MIT License.
