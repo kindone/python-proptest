@@ -8,12 +8,12 @@ version = "0.1.0"
 description = "A comprehensive Python property-based testing library with pytest and unittest integration"
 readme = "README.md"
 requires-python = ">=3.8"
-license = "MIT"
+license = "LICENSE"
 authors = [
-    {name = "PyPropTest Contributors", email = "pyproptest@example.com"},
+    {name = "kindone", email = "jradoo@gmail.com"},
 ]
 maintainers = [
-    {name = "PyPropTest Contributors", email = "pyproptest@example.com"},
+    {name = "kindone", email = "jradoo@gmail.com"},
 ]
 keywords = [
     "testing",

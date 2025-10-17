@@ -40,7 +40,7 @@ from .core.try_ import Failure, Success, Try, attempt
 
 __version__ = "0.1.0"
 __author__ = "kindone"
-__email__ = "kindone@example.com"
+__email__ = "jradoo@gmail.com"
 
 __all__ = [
     "for_all",
