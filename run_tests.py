@@ -17,7 +17,7 @@ def run_pytest_tests():
         result = subprocess.run([
             sys.executable, '-m', 'pytest', 'tests/', '-v', '--tb=short'
         ], capture_output=True, text=True, cwd=Path(__file__).parent)
-        
+
         if result.returncode == 0:
             print("✅ All pytest tests passed!")
             return True
@@ -35,7 +35,7 @@ def run_custom_tests():
     try:
         # Add current directory to Python path
         sys.path.insert(0, str(Path(__file__).parent))
-        
+
         # Import and run our comprehensive test
         from tests.test_final_demo import run_all_tests
         run_all_tests()
@@ -48,14 +48,14 @@ def main():
     """Main test runner function."""
     print("🧪 PyPropTest Test Runner")
     print("=" * 50)
-    
+
     # Try pytest first, fall back to custom runner
     if not run_pytest_tests():
         print("\n🔄 Falling back to custom test runner...")
         if not run_custom_tests():
             print("❌ All test methods failed!")
             sys.exit(1)
-    
+
     print("\n🎉 All tests completed successfully!")
     print("\nTo run tests manually:")
     print("1. With pytest: python -m pytest tests/ -v")

@@ -1,6 +1,6 @@
 # Makefile for PyPropTest development tasks
 
-.PHONY: help install test lint format type-check security clean quick-check pre-commit all-checks test-python38 test-all-python
+.PHONY: help install test lint format type-check security clean quick-check pre-commit all-checks test-python38 test-all-python clean-whitespace
 
 # Default target
 help:
@@ -26,6 +26,7 @@ help:
 	@echo ""
 	@echo "Utilities:"
 	@echo "  make clean          - Clean up generated files"
+	@echo "  make clean-whitespace - Clean trailing whitespaces from all files"
 	@echo "  make help           - Show this help message"
 
 # Install dependencies
@@ -87,6 +88,11 @@ test-python38:
 test-all-python:
 	@echo "🐍 Testing all available Python versions..."
 	./scripts/test-all-python-versions.sh
+
+# Clean trailing whitespaces
+clean-whitespace:
+	@echo "🧹 Cleaning trailing whitespaces..."
+	./scripts/clean-whitespace.sh
 
 # Clean up generated files
 clean:

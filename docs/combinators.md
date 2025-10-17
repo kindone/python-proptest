@@ -186,7 +186,7 @@ user_profile_gen = Gen.construct(
 def tree_gen(depth: int = 0):
     if depth > 3:
         return Gen.just(None)  # Leaf node
-    
+
     return Gen.one_of(
         Gen.just(None),  # Leaf
         Gen.construct(
@@ -206,7 +206,7 @@ from pyproptest import Gen
 # Generate different types based on a condition
 def conditional_gen():
     type_gen = Gen.element_of('string', 'number', 'boolean')
-    
+
     return type_gen.flat_map(lambda t:
         Gen.str() if t == 'string' else
         Gen.int() if t == 'number' else

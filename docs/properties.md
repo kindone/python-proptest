@@ -120,19 +120,19 @@ def test_simple_properties():
         lambda x: isinstance(x, int),
         Gen.int(min_value=0, max_value=100)
     )
-    
+
     # Range validations
     result = run_for_all(
         lambda x: 0 <= x <= 100,
         Gen.int(min_value=0, max_value=100)
     )
-    
+
     # Simple assertions
     result = run_for_all(
         lambda lst: all(isinstance(x, int) for x in lst),
         Gen.list(Gen.int())
     )
-    
+
     assert result is True
 ```
 

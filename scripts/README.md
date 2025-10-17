@@ -72,6 +72,21 @@ Test compatibility with all available Python versions:
 - ✅ Basic functionality tests
 - ✅ Unittest tests
 
+### 🧹 Whitespace Cleaning
+
+#### `clean-whitespace.sh`
+Clean trailing whitespaces from all documentation and code files:
+```bash
+./scripts/clean-whitespace.sh
+```
+
+**What it cleans:**
+- ✅ Markdown files (.md)
+- ✅ Python files (.py)
+- ✅ Shell scripts (.sh)
+- ✅ YAML files (.yml, .yaml)
+- ✅ TOML files (.toml)
+
 ## Using Make Commands
 
 For convenience, you can also use the Makefile in the project root:
@@ -96,6 +111,9 @@ make format
 make type-check
 make test
 make security
+
+# Utilities
+make clean-whitespace
 
 # Show all available commands
 make help

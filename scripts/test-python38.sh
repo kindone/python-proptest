@@ -40,7 +40,7 @@ else
     echo "  3. Use conda: conda install python=3.8"
     echo ""
     print_warning "Since Python 3.8 is not available, we'll test with the closest available version..."
-    
+
     # Find the lowest available Python version
     for version in 3.9 3.10 3.11 3.12; do
         if command -v "python$version" >/dev/null 2>&1; then
@@ -49,7 +49,7 @@ else
             break
         fi
     done
-    
+
     if [ -z "$PYTHON38_CMD" ]; then
         print_error "No suitable Python version found"
         exit 1

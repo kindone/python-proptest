@@ -39,12 +39,12 @@ def test_simple_properties():
         lambda x, y: x + y == y + x,  # Addition is commutative
         Gen.int(), Gen.int()
     )
-    
+
     result = run_for_all(
         lambda x: isinstance(x, int),  # Type check
         Gen.int(min_value=0, max_value=100)
     )
-    
+
     assert result is True
 ```
 
@@ -61,7 +61,7 @@ class TestMathProperties:
     def test_addition_commutativity(self, x: int, y: int):
         """Test that addition is commutative - automatically runs 100+ random cases!"""
         assert x + y == y + x
-    
+
     @for_all(integers(), integers())
     def test_multiplication_associativity(self, x: int, y: int, z: int):
         """Test that multiplication is associative."""
@@ -93,7 +93,7 @@ class TestMathProperties(unittest.TestCase):
     def test_addition_commutativity(self, x: int, y: int):
         """Test that addition is commutative using unittest assertions."""
         self.assertEqual(x + y, y + x)
-    
+
     @for_all(integers(), integers(), integers())
     def test_multiplication_associativity(self, x: int, y: int, z: int):
         """Test that multiplication is associative."""
@@ -184,7 +184,7 @@ def test_list_reverse():
     def property_func(lst: list):
         # Reversing twice should return the original list
         return list(reversed(list(reversed(lst)))) == lst
-    
+
     run_for_all(property_func, Gen.list(Gen.str(), min_length=0, max_length=10))
 ```
 
@@ -212,7 +212,7 @@ def test_json_roundtrip():
         serialized = json.dumps(data)
         parsed = json.loads(serialized)
         return parsed == data
-    
+
     # Generate dictionaries with string keys and various values
     data_gen = Gen.dict(
         Gen.str(min_length=1, max_length=10),
@@ -225,7 +225,7 @@ def test_json_roundtrip():
         min_size=0,
         max_size=5
     )
-    
+
     run_for_all(property_func, data_gen)
 ```
 
@@ -237,29 +237,29 @@ from pyproptest import simple_stateful_property, Gen, SimpleAction
 def test_stack_operations():
     # Define a stack as a list
     Stack = list
-    
+
     # Start with an empty stack
     initial_gen = Gen.just([])
-    
+
     # Action: Push an element
     def push_action():
         return Gen.int().map(lambda val:
             SimpleAction(lambda stack: stack.append(val))
         )
-    
+
     # Action: Pop an element
     def pop_action():
         return Gen.just(
             SimpleAction(lambda stack: stack.pop() if stack else None)
         )
-    
+
     # Action factory
     def action_factory(stack: Stack):
         if not stack:
             return push_action()  # Can only push when empty
         else:
             return Gen.one_of(push_action(), pop_action())
-    
+
     # Create and run the property
     prop = simple_stateful_property(initial_gen, action_factory)
     prop.go()

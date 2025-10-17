@@ -264,7 +264,7 @@ def test_bank_account():
 
     # Create the property
     prop = stateful_property(initial_gen, model_factory, action_factory)
-    
+
     # Add post-check to verify model consistency
     def post_check(account: BankAccount, model: AccountModel):
         assert account["balance"] == model["balance"]
@@ -303,7 +303,7 @@ def test_failing_stateful_property():
         return Gen.one_of(increment_action(), decrement_action())
 
     prop = simple_stateful_property(initial_gen, action_factory)
-    
+
     # This will fail and show shrinking in action
     prop.set_post_check_without_model(lambda counter: counter >= 0)
     prop.go()

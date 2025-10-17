@@ -12,12 +12,12 @@ from pyproptest import for_all, Gen, integers, text
 
 class TestMathProperties:
     """Test class for mathematical properties."""
-    
+
     @for_all(integers(), integers())
     def test_addition_commutativity(self, x: int, y: int):
         """Test that addition is commutative - direct decoration!"""
         assert x + y == y + x
-    
+
     @for_all(integers(), integers(), integers())
     def test_multiplication_associativity(self, x: int, y: int, z: int):
         """Test that multiplication is associative - direct decoration!"""
@@ -37,7 +37,7 @@ class TestMathProperties:
         @for_all(integers(), integers())
         def test_commutativity(self, x: int, y: int):
             assert x + y == y + x
-        
+
         test_commutativity(self)
 ```
 
@@ -49,7 +49,7 @@ def test_standalone_property():
     @for_all(integers(), integers())
     def test_commutativity(x: int, y: int):
         assert x + y == y + x
-    
+
     test_commutativity()
 ```
 
@@ -60,18 +60,18 @@ def test_standalone_property():
 ```python
 class TestFailingProperties:
     """Test class demonstrating failing properties and shrinking."""
-    
+
     def test_failing_property_demonstrates_shrinking(self):
         """Test that failing properties show minimal counterexamples."""
         @for_all(integers())
         def test_failing_property(self, x: int):
             # This will fail for x >= 50
             assert x < 50
-        
+
         # This should raise an AssertionError with shrinking information
         with pytest.raises(AssertionError) as exc_info:
             test_failing_property(self)
-        
+
         # The error message should contain shrinking information
         assert "Property failed" in str(exc_info.value)
 ```
@@ -81,7 +81,7 @@ class TestFailingProperties:
 ```python
 class TestWithAssumptions:
     """Test class demonstrating assume() functionality."""
-    
+
     def test_with_assume(self):
         """Test assume() functionality in pytest context."""
         @for_all(integers(), integers())
@@ -91,7 +91,7 @@ class TestWithAssumptions:
             # Use a simpler assertion to avoid floating point precision issues
             assert isinstance(x, int)
             assert isinstance(y, int)
-        
+
         test_with_assume(self)
 ```
 
@@ -100,7 +100,7 @@ class TestWithAssumptions:
 ```python
 class TestComplexStructures:
     """Test class for complex data structures."""
-    
+
     def test_list_properties(self):
         """Test list properties."""
         @for_all(Gen.list(Gen.int(), min_length=0, max_length=10))
@@ -109,9 +109,9 @@ class TestComplexStructures:
             lst.append(42)
             assert len(lst) == original_length + 1
             assert lst[-1] == 42
-        
+
         test_list_properties(self)
-    
+
     def test_string_properties(self):
         """Test string properties."""
         @for_all(text(), text())
@@ -120,7 +120,7 @@ class TestComplexStructures:
             assert len(combined) == len(s1) + len(s2)
             assert combined.startswith(s1)
             assert combined.endswith(s2)
-        
+
         test_string_properties(self)
 ```
 
@@ -176,15 +176,15 @@ from pyproptest import for_all, Gen, integers, text
 
 class TestCompleteExample:
     """Complete example of pytest integration."""
-    
+
     def test_basic_math_properties(self):
         """Test basic mathematical properties."""
         @for_all(integers(), integers())
         def test_commutativity(self, x: int, y: int):
             assert x + y == y + x
-        
+
         test_commutativity(self)
-    
+
     def test_string_operations(self):
         """Test string operation properties."""
         @for_all(text(), text())
@@ -193,15 +193,15 @@ class TestCompleteExample:
             assert len(result) == len(s1) + len(s2)
             assert result.startswith(s1)
             assert result.endswith(s2)
-        
+
         test_concatenation(self)
-    
+
     def test_failing_property(self):
         """Test that failing properties are properly reported."""
         @for_all(integers())
         def test_failing_property(self, x: int):
             assert x < 100
-        
+
         with pytest.raises(AssertionError):
             test_failing_property(self)
 ```

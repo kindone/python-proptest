@@ -12,14 +12,14 @@ from pyproptest import for_all, integers, text
 
 class TestMathProperties(unittest.TestCase):
     """Test class for mathematical properties using unittest."""
-    
+
     @for_all(integers(), integers())
     def test_addition_commutativity(self, x: int, y: int):
         """Test that addition is commutative."""
         result1 = x + y
         result2 = y + x
         self.assertEqual(result1, result2)
-    
+
     @for_all(integers(), integers(), integers())
     def test_multiplication_associativity(self, x: int, y: int, z: int):
         """Test that multiplication is associative."""
@@ -62,12 +62,12 @@ class TestMixedAssertions(unittest.TestCase):
         # Unittest assertions
         self.assertIsInstance(x, int)
         self.assertIsInstance(y, int)
-        
+
         # Regular assertions (work in both frameworks)
         assert x + y == y + x
         assert x * 0 == 0
         assert x * 1 == x
-        
+
         # More unittest assertions
         self.assertGreaterEqual(x + y, x)
         self.assertGreaterEqual(x + y, y)

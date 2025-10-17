@@ -105,12 +105,12 @@ class TestMixedAssertions(unittest.TestCase):
         # Unittest assertions
         self.assertIsInstance(x, int)
         self.assertIsInstance(y, int)
-        
+
         # Regular assertions (work in both frameworks)
         assert x + y == y + x
         assert x * 0 == 0
         assert x * 1 == x
-        
+
         # More unittest assertions - basic properties that are always true
         self.assertEqual(x + y, y + x)  # Commutativity
         self.assertEqual(x * 0, 0)      # Zero property
@@ -129,7 +129,7 @@ class TestAdvancedUnittest(unittest.TestCase):
         """Test properties of absolute value."""
         abs_x = abs(x)
         abs_y = abs(y)
-        
+
         self.assertGreaterEqual(abs_x, 0)
         self.assertGreaterEqual(abs_y, 0)
         self.assertEqual(abs_x, abs(-x))
@@ -140,7 +140,7 @@ class TestAdvancedUnittest(unittest.TestCase):
         """Test string repetition properties."""
         repeated = s * n
         self.assertEqual(len(repeated), len(s) * n)
-        
+
         if n > 0:
             self.assertTrue(repeated.startswith(s))
             self.assertTrue(repeated.endswith(s))
@@ -150,7 +150,7 @@ class TestAdvancedUnittest(unittest.TestCase):
         """Test modulo operation properties."""
         remainder = x % y
         quotient = x // y
-        
+
         self.assertGreaterEqual(remainder, 0)
         self.assertLess(remainder, y)
         self.assertEqual(quotient * y + remainder, x)
@@ -177,10 +177,10 @@ def run_pytest_examples():
 if __name__ == "__main__":
     print("PyPropTest unittest and pytest integration examples")
     print("=" * 60)
-    
+
     # Run unittest examples
     run_unittest_examples()
-    
+
     print("\n" + "=" * 60)
     print("To run with pytest, use:")
     print("python -m pytest examples/unittest_pytest_comparison.py -v")

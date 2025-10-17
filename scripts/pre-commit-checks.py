@@ -42,19 +42,19 @@ def print_warning(message):
 def run_command(command, description, capture_output=True, allow_failure=False):
     """Run a command and return success status"""
     print_status(f"Running {description}...")
-    
+
     try:
         if capture_output:
             result = subprocess.run(
-                command, 
-                shell=True, 
-                capture_output=True, 
+                command,
+                shell=True,
+                capture_output=True,
                 text=True,
                 cwd=Path(__file__).parent.parent
             )
         else:
             result = subprocess.run(command, shell=True, cwd=Path(__file__).parent.parent)
-        
+
         if result.returncode == 0:
             print_success(f"{description} passed")
             return True
@@ -75,23 +75,23 @@ def run_command(command, description, capture_output=True, allow_failure=False):
 def check_required_tools():
     """Check if all required tools are available"""
     print_status("Checking required tools...")
-    
+
     required_tools = [
         "python3", "pip", "flake8", "black", "isort", "mypy", "pytest"
     ]
-    
+
     missing_tools = []
     for tool in required_tools:
         try:
             subprocess.run([tool, "--version"], capture_output=True, check=True)
         except (subprocess.CalledProcessError, FileNotFoundError):
             missing_tools.append(tool)
-    
+
     if missing_tools:
         print_error(f"Missing required tools: {', '.join(missing_tools)}")
         print_warning("Please install missing tools and try again")
         return False
-    
+
     print_success("All required tools are available")
     return True
 
@@ -101,43 +101,43 @@ def main():
     print("🚀 PyPropTest Pre-commit Checks")
     print("================================")
     print()
-    
+
     # Check if we're in the right directory
     if not Path("pyproject.toml").exists():
         print_error("Please run this script from the project root directory")
         sys.exit(1)
-    
+
     # Check required tools
     if not check_required_tools():
         sys.exit(1)
-    
+
     print()
-    
+
     # Track failed checks
     failed_checks = []
-    
+
     # Step 1: Install/update dependencies
     if not run_command(
-        'pip install -e ".[dev]"', 
+        'pip install -e ".[dev]"',
         "Installing/updating dependencies",
         capture_output=True
     ):
         failed_checks.append("Dependencies")
-    
+
     # Step 2: Critical flake8 checks
     if not run_command(
         "flake8 pyproptest --count --select=E9,F63,F7,F82 --show-source --statistics",
         "Critical flake8 checks"
     ):
         failed_checks.append("Critical flake8")
-    
+
     # Step 3: Extended flake8 checks
     if not run_command(
         "flake8 pyproptest --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics",
         "Extended flake8 checks"
     ):
         failed_checks.append("Extended flake8")
-    
+
     # Step 4: Black formatting check
     if not run_command(
         "black --check pyproptest/ tests/",
@@ -145,7 +145,7 @@ def main():
     ):
         print_warning("Code formatting issues found. Run 'black pyproptest/ tests/' to fix")
         failed_checks.append("Black formatting")
-    
+
     # Step 5: Import sorting check
     if not run_command(
         "isort --check-only pyproptest/ tests/",
@@ -153,14 +153,14 @@ def main():
     ):
         print_warning("Import sorting issues found. Run 'isort pyproptest/ tests/' to fix")
         failed_checks.append("Import sorting")
-    
+
     # Step 6: MyPy type checking
     if not run_command(
         "mypy pyproptest/",
         "MyPy type checking"
     ):
         failed_checks.append("MyPy type checking")
-    
+
     # Step 7: Unittest tests
     if not run_command(
         "python -m unittest discover tests -v",
@@ -168,7 +168,7 @@ def main():
         capture_output=True
     ):
         failed_checks.append("Unittest tests")
-    
+
     # Step 8: Pytest tests with coverage
     if not run_command(
         "pytest --cov=pyproptest --cov-report=term-missing -q",
@@ -176,17 +176,17 @@ def main():
         capture_output=True
     ):
         failed_checks.append("Pytest tests")
-    
+
     # Step 9: Security analysis (optional)
     run_command(
         "bandit -r pyproptest/ -f json -o bandit-report.json",
         "Security analysis",
         allow_failure=True
     )
-    
+
     print()
     print("================================")
-    
+
     # Final results
     if not failed_checks:
         print_success("All checks passed! Ready to commit/push 🎉")

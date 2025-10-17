@@ -12,23 +12,23 @@ from pyproptest import for_all, Gen, integers, text
 
 class TestMathProperties:
     """Recommended approach: nested property tests."""
-    
+
     def test_addition_commutativity(self):
         """Test that addition is commutative."""
         @for_all(integers(), integers())
         def test_commutativity(self, x: int, y: int):
             assert x + y == y + x
-        
+
         test_commutativity(self)
-    
+
     def test_multiplication_associativity(self):
         """Test that multiplication is associative."""
         @for_all(integers(), integers(), integers())
         def test_associativity(self, x: int, y: int, z: int):
             assert (x * y) * z == x * (y * z)
-        
+
         test_associativity(self)
-    
+
     def test_string_properties(self):
         """Test string concatenation properties."""
         @for_all(text(), text())
@@ -37,7 +37,7 @@ class TestMathProperties:
             assert len(combined) == len(s1) + len(s2)
             assert combined.startswith(s1)
             assert combined.endswith(s2)
-        
+
         test_concatenation(self)
 ```
 
@@ -86,15 +86,15 @@ def test_addition_commutativity(x: int, y: int):
 class TestAdvancedPatterns:
     def test_multiple_math_properties(self):
         """Test multiple mathematical properties."""
-        
+
         @for_all(integers(), integers())
         def test_commutativity(self, x: int, y: int):
             assert x + y == y + x
-        
+
         @for_all(integers(), integers(), integers())
         def test_associativity(self, x: int, y: int, z: int):
             assert (x + y) + z == x + (y + z)
-        
+
         # Run both property tests
         test_commutativity(self)
         test_associativity(self)
@@ -106,13 +106,13 @@ class TestAdvancedPatterns:
 class TestConditionalProperties:
     def test_division_properties(self):
         """Test division properties with assumptions."""
-        
+
         @for_all(integers(), integers())
         def test_division_property(self, x: int, y: int):
             from pyproptest import assume
             assume(y != 0)  # Skip test cases where y is 0
             assert (x // y) * y + (x % y) == x
-        
+
         test_division_property(self)
 ```
 
@@ -122,16 +122,16 @@ class TestConditionalProperties:
 class TestFailingProperties:
     def test_failing_property_demonstrates_shrinking(self):
         """Test that failing properties show minimal counterexamples."""
-        
+
         @for_all(integers())
         def test_failing_property(self, x: int):
             # This will fail for x >= 50
             assert x < 50
-        
+
         # This should raise an AssertionError with shrinking information
         with pytest.raises(AssertionError) as exc_info:
             test_failing_property(self)
-        
+
         # The error message should contain failure information
         error_msg = str(exc_info.value)
         assert "Property failed" in error_msg

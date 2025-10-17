@@ -25,35 +25,35 @@ echo ""
 test_python_version() {
     local python_cmd="$1"
     local version="$2"
-    
+
     print_status "Testing Python $version with command: $python_cmd"
-    
+
     # Check if Python command exists
     if ! command -v "$python_cmd" >/dev/null 2>&1; then
         print_warning "Python $version not found, skipping..."
         return 0
     fi
-    
+
     # Show version
     $python_cmd --version
-    
+
     # Create temporary virtual environment
     local venv_dir=".venv-$version-test"
     if [ -d "$venv_dir" ]; then
         rm -rf "$venv_dir"
     fi
-    
+
     print_status "Creating virtual environment for Python $version..."
     $python_cmd -m venv "$venv_dir" 2>/dev/null || {
         print_error "Failed to create virtual environment for Python $version"
         return 1
     }
-    
+
     source "$venv_dir/bin/activate"
-    
+
     # Upgrade pip
     pip install --upgrade pip >/dev/null 2>&1
-    
+
     # Install package
     print_status "Installing PyPropTest for Python $version..."
     pip install -e ".[dev]" >/dev/null 2>&1 || {
@@ -62,7 +62,7 @@ test_python_version() {
         rm -rf "$venv_dir"
         return 1
     }
-    
+
     # Test imports
     print_status "Testing imports for Python $version..."
     if $python_cmd -c "
@@ -77,7 +77,7 @@ print('✅ All imports successful')
         rm -rf "$venv_dir"
         return 1
     fi
-    
+
     # Test basic functionality
     print_status "Testing basic functionality for Python $version..."
     if $python_cmd -c "
@@ -95,7 +95,7 @@ print('✅ Generator creation successful')
         rm -rf "$venv_dir"
         return 1
     fi
-    
+
     # Test a few unittest tests
     print_status "Running unittest tests for Python $version..."
     if timeout 30 $python_cmd -m unittest discover tests -q 2>/dev/null; then
@@ -103,11 +103,11 @@ print('✅ Generator creation successful')
     else
         print_warning "Unittest tests had issues for Python $version (may be timeout or minor issues)"
     fi
-    
+
     # Cleanup
     deactivate
     rm -rf "$venv_dir"
-    
+
     print_success "Python $version test completed successfully!"
     echo ""
 }
