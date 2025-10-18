@@ -133,12 +133,16 @@ class Gen:
         return BoolGenerator()
 
     @staticmethod
-    def float(min_value: float = -1000.0, max_value: float = 1000.0) -> "FloatGenerator":
+    def float(
+        min_value: float = -1000.0, max_value: float = 1000.0
+    ) -> "FloatGenerator":
         """Generate random floats in the specified range."""
         return FloatGenerator(min_value, max_value)
 
     @staticmethod
-    def list(element_generator: "Generator", min_length: int = 0, max_length: int = 10) -> "ListGenerator":
+    def list(
+        element_generator: "Generator", min_length: int = 0, max_length: int = 10
+    ) -> "ListGenerator":
         """Generate random lists of elements from the given generator."""
         return ListGenerator(element_generator, min_length, max_length)
 
@@ -175,12 +179,16 @@ class Gen:
         return generator
 
     @staticmethod
-    def set(element_generator: "Generator", min_size: int = 0, max_size: int = 10) -> "SetGenerator":
+    def set(
+        element_generator: "Generator", min_size: int = 0, max_size: int = 10
+    ) -> "SetGenerator":
         """Generate random sets of elements from the given generator."""
         return SetGenerator(element_generator, min_size, max_size)
 
     @staticmethod
-    def unicode_string(min_length: int = 0, max_length: int = 20) -> "UnicodeStringGenerator":
+    def unicode_string(
+        min_length: int = 0, max_length: int = 20
+    ) -> "UnicodeStringGenerator":
         """Generate random Unicode strings with the specified constraints."""
         return UnicodeStringGenerator(min_length, max_length)
 
