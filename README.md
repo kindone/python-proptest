@@ -326,6 +326,30 @@ isort pyproptest/ tests/
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+## CI/CD and Publishing
+
+### Automated Testing
+- **CI Pipeline**: Runs on every push and PR with Python 3.8-3.12
+- **Test Frameworks**: Both `unittest` and `pytest` are supported
+- **Code Quality**: Automated linting, formatting, type checking, and security analysis
+
+### Publishing to PyPI
+
+#### TestPyPI Uploads
+To upload to TestPyPI (for testing), you can:
+
+1. **Manual trigger**: Use GitHub Actions workflow dispatch
+2. **Local upload**: Use `./scripts/upload-testpypi.sh`
+
+#### Production PyPI Uploads
+Production uploads happen automatically when you:
+1. Create a version tag: `git tag v1.0.0`
+2. Push the tag: `git push origin v1.0.0`
+
+### Version Management
+- Use `./scripts/bump-version.sh` to bump versions
+- Production PyPI uses semantic versioning from git tags
+
 ## Contributing
 
 Contributions are welcome! Please see our [Contributing Guide](CONTRIBUTING.md) for details on how to get started.

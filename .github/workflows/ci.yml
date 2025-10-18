@@ -98,7 +98,7 @@ jobs:
         twine check dist/*
 
     - name: Upload to TestPyPI
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      if: github.event_name == 'workflow_dispatch'
       env:
         TWINE_USERNAME: __token__
         TWINE_PASSWORD: ${{ secrets.TESTPYPI_API_TOKEN }}
