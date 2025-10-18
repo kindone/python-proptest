@@ -7,8 +7,8 @@ This test file runs all the ported tests to ensure everything works correctly.
 import random
 import unittest
 
-from pyproptest import Gen, Property, PropertyTestError, Shrinkable, run_for_all
-from pyproptest.core.shrinker import (
+from proptest import Gen, Property, PropertyTestError, Shrinkable, run_for_all
+from proptest.core.shrinker import (
     DictShrinker,
     IntegerShrinker,
     ListShrinker,

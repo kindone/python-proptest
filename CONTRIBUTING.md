@@ -1,6 +1,6 @@
-# Contributing to PyPropTest
+# Contributing to python-proptest
 
-Thank you for your interest in contributing to PyPropTest! This document provides guidelines and information for contributors.
+Thank you for your interest in contributing to python-proptest! This document provides guidelines and information for contributors.
 
 ## Getting Started
 
@@ -15,8 +15,8 @@ Thank you for your interest in contributing to PyPropTest! This document provide
 1. Fork the repository on GitHub
 2. Clone your fork locally:
    ```bash
-   git clone https://github.com/your-username/pyproptest.git
-   cd pyproptest
+   git clone https://github.com/your-username/proptest.git
+   cd proptest
    ```
 
 3. Create a virtual environment:
@@ -39,7 +39,7 @@ Thank you for your interest in contributing to PyPropTest! This document provide
 pytest
 
 # Run tests with coverage
-pytest --cov=pyproptest --cov-report=html
+pytest --cov=proptest --cov-report=html
 
 # Run specific test file
 pytest tests/test_generators.py
@@ -54,19 +54,19 @@ Before submitting a PR, ensure your code passes all quality checks:
 
 ```bash
 # Format code with black
-black pyproptest/ tests/
+black proptest/ tests/
 
 # Sort imports with isort
-isort pyproptest/ tests/
+isort proptest/ tests/
 
 # Lint with flake8
-flake8 pyproptest/ tests/
+flake8 proptest/ tests/
 
 # Type check with mypy
-mypy pyproptest/
+mypy proptest/
 
 # Security check with bandit
-bandit -r pyproptest/
+bandit -r proptest/
 
 # Check for known security vulnerabilities
 safety check
@@ -131,7 +131,7 @@ Follow conventional commit format:
 ### Example
 
 ```python
-from pyproptest import for_all, integers, text
+from proptest import for_all, integers, text
 
 class TestStringOperations:
     @for_all(text(), text())
@@ -197,4 +197,4 @@ Please be respectful and constructive in all interactions. We aim to create a we
 
 ## License
 
-By contributing to PyPropTest, you agree that your contributions will be licensed under the MIT License.
+By contributing to python-proptest, you agree that your contributions will be licensed under the MIT License.

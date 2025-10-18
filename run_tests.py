@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test runner for PyPropTest.
+Test runner for python-proptest.
 
 This script runs all tests in the project and provides a comprehensive
 test report.
@@ -46,7 +46,7 @@ def run_custom_tests():
 
 def main():
     """Main test runner function."""
-    print("🧪 PyPropTest Test Runner")
+    print("🧪 python-proptest Test Runner")
     print("=" * 50)
 
     # Try pytest first, fall back to custom runner

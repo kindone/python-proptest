@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Test script for Python 3.8 compatibility
-# This script helps test PyPropTest with Python 3.8
+# This script helps test python-proptest with Python 3.8
 
 set -e
 
@@ -79,7 +79,7 @@ print_status "Upgrading pip..."
 pip install --upgrade pip >/dev/null 2>&1
 
 # Install the package in development mode
-print_status "Installing PyPropTest in development mode..."
+print_status "Installing python-proptest in development mode..."
 pip install -e ".[dev]" >/dev/null 2>&1
 
 print_success "Package installed successfully"
@@ -88,7 +88,7 @@ echo ""
 # Test 1: Basic import
 print_status "Test 1: Basic import test..."
 if $PYTHON38_CMD -c "
-from pyproptest import Gen, PropertyTestError, run_for_all
+from proptest import Gen, PropertyTestError, run_for_all
 print('✅ Basic imports successful')
 "; then
     print_success "Basic import test passed"
@@ -100,7 +100,7 @@ fi
 # Test 2: DictGenerator import (the specific issue we fixed)
 print_status "Test 2: DictGenerator import test..."
 if $PYTHON38_CMD -c "
-from pyproptest.core.generator import DictGenerator
+from proptest.core.generator import DictGenerator
 print('✅ DictGenerator import successful')
 "; then
     print_success "DictGenerator import test passed"
@@ -129,7 +129,7 @@ fi
 
 # Test 5: Type checking with mypy
 print_status "Test 5: Type checking with mypy..."
-if $PYTHON38_CMD -m mypy pyproptest/ --ignore-missing-imports 2>/dev/null; then
+if $PYTHON38_CMD -m mypy proptest/ --ignore-missing-imports 2>/dev/null; then
     print_success "Type checking passed"
 else
     print_warning "Type checking had issues (this is expected for Python 3.8)"

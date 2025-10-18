@@ -4,7 +4,7 @@ Tests for new generator types (Set, UnicodeString, Lazy, Construct, ChainTuple).
 
 import unittest
 
-from pyproptest.core.generator import (
+from proptest.core.generator import (
     ChainTupleGenerator,
     ConstructGenerator,
     Gen,
@@ -12,7 +12,7 @@ from pyproptest.core.generator import (
     SetGenerator,
     UnicodeStringGenerator,
 )
-from pyproptest.core.shrinker import Shrinkable
+from proptest.core.shrinker import Shrinkable
 
 
 class TestSetGenerator(unittest.TestCase):

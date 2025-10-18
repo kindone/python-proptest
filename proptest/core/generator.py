@@ -123,32 +123,32 @@ class Gen:
         min_length: int = 0,
         max_length: int = 20,
         charset: str = "abcdefghijklmnopqrstuvwxyz",
-    ):
+    ) -> "StringGenerator":
         """Generate random strings with the specified constraints."""
         return StringGenerator(min_length, max_length, charset)
 
     @staticmethod
-    def bool():
+    def bool() -> "BoolGenerator":
         """Generate random booleans."""
         return BoolGenerator()
 
     @staticmethod
-    def float(min_value: float = -1000.0, max_value: float = 1000.0):
+    def float(min_value: float = -1000.0, max_value: float = 1000.0) -> "FloatGenerator":
         """Generate random floats in the specified range."""
         return FloatGenerator(min_value, max_value)
 
     @staticmethod
-    def list(element_generator, min_length: int = 0, max_length: int = 10):
+    def list(element_generator: "Generator", min_length: int = 0, max_length: int = 10) -> "ListGenerator":
         """Generate random lists of elements from the given generator."""
         return ListGenerator(element_generator, min_length, max_length)
 
     @staticmethod
     def dict(
-        key_generator,
-        value_generator,
+        key_generator: "Generator",
+        value_generator: "Generator",
         min_size: int = 0,
         max_size: int = 10,
-    ):
+    ) -> "DictGenerator":
         """Generate random dictionaries."""
         return DictGenerator(key_generator, value_generator, min_size, max_size)
 
@@ -170,27 +170,27 @@ class Gen:
         return JustGenerator(value)
 
     @staticmethod
-    def weighted_value(generator, weight: float):
+    def weighted_value(generator: "Generator", weight: float) -> "Generator":
         """Create a weighted generator (for compatibility with stateful tests)."""
         return generator
 
     @staticmethod
-    def set(element_generator, min_size: int = 0, max_size: int = 10):
+    def set(element_generator: "Generator", min_size: int = 0, max_size: int = 10) -> "SetGenerator":
         """Generate random sets of elements from the given generator."""
         return SetGenerator(element_generator, min_size, max_size)
 
     @staticmethod
-    def unicode_string(min_length: int = 0, max_length: int = 20):
+    def unicode_string(min_length: int = 0, max_length: int = 20) -> "UnicodeStringGenerator":
         """Generate random Unicode strings with the specified constraints."""
         return UnicodeStringGenerator(min_length, max_length)
 
     @staticmethod
-    def interval(min_value: int, max_value: int):
+    def interval(min_value: int, max_value: int) -> "IntGenerator":
         """Generate random integers in the specified range (inclusive)."""
         return IntGenerator(min_value, max_value)
 
     @staticmethod
-    def integers(min_value: int, max_value: int):
+    def integers(min_value: int, max_value: int) -> "IntGenerator":
         """Alias for interval for compatibility."""
         return IntGenerator(min_value, max_value)
 
@@ -231,7 +231,7 @@ class Gen:
                     new_values[i] = shr.value
                     tuple_shrinks.append(Shrinkable(tuple(new_values)))
 
-            from pyproptest.core.stream import Stream
+            from proptest.core.stream import Stream
 
             return Shrinkable(tuple(values), lambda: Stream.many(tuple_shrinks))
 
@@ -252,7 +252,7 @@ class IntGenerator(Generator[int]):
     def generate(self, rng: Random) -> Shrinkable[int]:
         value = rng.randint(self.min_value, self.max_value)
         shrinks = self._generate_shrinks(value)
-        from pyproptest.core.stream import Stream
+        from proptest.core.stream import Stream
 
         return Shrinkable(value, lambda: Stream.many(shrinks))
 
@@ -291,7 +291,7 @@ class StringGenerator(Generator[str]):
         chars = [rng.choice(list(self.charset)) for _ in range(length)]
         value = "".join(chars)
         shrinks = self._generate_shrinks(value)
-        from pyproptest.core.stream import Stream
+        from proptest.core.stream import Stream
 
         return Shrinkable(value, lambda: Stream.many(shrinks))
 
@@ -323,7 +323,7 @@ class BoolGenerator(Generator[bool]):
     def generate(self, rng: Random) -> Shrinkable[bool]:
         value = rng.choice([True, False])
         shrinks = self._generate_shrinks(value)
-        from pyproptest.core.stream import Stream
+        from proptest.core.stream import Stream
 
         return Shrinkable(value, lambda: Stream.many(shrinks))
 
@@ -344,7 +344,7 @@ class FloatGenerator(Generator[float]):
     def generate(self, rng: Random) -> Shrinkable[float]:
         value = rng.random() * (self.max_value - self.min_value) + self.min_value
         shrinks = self._generate_shrinks(value)
-        from pyproptest.core.stream import Stream
+        from proptest.core.stream import Stream
 
         return Shrinkable(value, lambda: Stream.many(shrinks))
 
@@ -381,7 +381,7 @@ class ListGenerator(Generator[List[T]]):
         elements = [self.element_generator.generate(rng) for _ in range(length)]
         value = [elem.value for elem in elements]
         shrinks = self._generate_shrinks(elements)
-        from pyproptest.core.stream import Stream
+        from proptest.core.stream import Stream
 
         return Shrinkable(value, lambda: Stream.many(shrinks))
 
@@ -439,7 +439,7 @@ class DictGenerator(Generator[Dict[T, U]]):
 
         value = {key.value: value.value for key, value in items}
         shrinks = self._generate_shrinks(items)
-        from pyproptest.core.stream import Stream
+        from proptest.core.stream import Stream
 
         return Shrinkable(value, lambda: Stream.many(shrinks))
 
@@ -499,7 +499,7 @@ class ElementOfGenerator(Generator[T]):
         value = rng.choice(self.values)
         # Generate shrinks by trying other values
         shrinks = [Shrinkable(v) for v in self.values if v != value]
-        from pyproptest.core.stream import Stream
+        from proptest.core.stream import Stream
 
         return Shrinkable(value, lambda: Stream.many(shrinks))
 
@@ -511,7 +511,7 @@ class JustGenerator(Generator[T]):
         self.value = value
 
     def generate(self, rng: Random) -> Shrinkable[T]:
-        from pyproptest.core.stream import Stream
+        from proptest.core.stream import Stream
 
         return Shrinkable(self.value, lambda: Stream.empty())
 
@@ -540,7 +540,7 @@ class SetGenerator(Generator[Set[T]]):
 
         value = {elem.value for elem in elements}
         shrinks = self._generate_shrinks(elements)
-        from pyproptest.core.stream import Stream
+        from proptest.core.stream import Stream
 
         return Shrinkable(value, lambda: Stream.many(shrinks))
 
@@ -593,7 +593,7 @@ class UnicodeStringGenerator(Generator[str]):
 
         value = "".join(chars)
         shrinks = self._generate_shrinks(value)
-        from pyproptest.core.stream import Stream
+        from proptest.core.stream import Stream
 
         return Shrinkable(value, lambda: Stream.many(shrinks))
 
@@ -627,7 +627,7 @@ class LazyGenerator(Generator[T]):
 
     def generate(self, rng: Random) -> Shrinkable[T]:
         value = self.func()
-        from pyproptest.core.stream import Stream
+        from proptest.core.stream import Stream
 
         return Shrinkable(value, lambda: Stream.empty())
 
@@ -660,7 +660,7 @@ class ConstructGenerator(Generator[Any]):
                 new_args[i] = shrunk_arg.value
                 shrinks.append(Shrinkable(self.Type(*new_args)))
 
-        from pyproptest.core.stream import Stream
+        from proptest.core.stream import Stream
 
         return Shrinkable(instance, lambda: Stream.many(shrinks))
 
@@ -704,6 +704,6 @@ class ChainTupleGenerator(Generator[tuple]):
                 Shrinkable(tuple_shrinkable.value + (shrunk_dependent.value,))
             )
 
-        from pyproptest.core.stream import Stream
+        from proptest.core.stream import Stream
 
         return Shrinkable(combined_value, lambda: Stream.many(shrinks))

@@ -1,6 +1,6 @@
 # Pytest Integration
 
-PyPropTest provides seamless integration with pytest through the `@for_all` decorator. The decorator automatically detects whether it's being used in a pytest context (class methods with `self` parameter) or standalone functions and adapts accordingly.
+python-proptest provides seamless integration with pytest through the `@for_all` decorator. The decorator automatically detects whether it's being used in a pytest context (class methods with `self` parameter) or standalone functions and adapts accordingly.
 
 ## Basic Usage
 
@@ -8,7 +8,7 @@ PyPropTest provides seamless integration with pytest through the `@for_all` deco
 
 ```python
 import pytest
-from pyproptest import for_all, Gen, integers, text
+from proptest import for_all, Gen, integers, text
 
 class TestMathProperties:
     """Test class for mathematical properties."""
@@ -86,7 +86,7 @@ class TestWithAssumptions:
         """Test assume() functionality in pytest context."""
         @for_all(integers(), integers())
         def test_with_assume(self, x: int, y: int):
-            from pyproptest import assume
+            from proptest import assume
             assume(y != 0)  # Skip test cases where y is 0
             # Use a simpler assertion to avoid floating point precision issues
             assert isinstance(x, int)
@@ -172,7 +172,7 @@ pytest -m "not slow" -v
 
 ```python
 import pytest
-from pyproptest import for_all, Gen, integers, text
+from proptest import for_all, Gen, integers, text
 
 class TestCompleteExample:
     """Complete example of pytest integration."""
@@ -206,4 +206,4 @@ class TestCompleteExample:
             test_failing_property(self)
 ```
 
-This integration makes PyPropTest a powerful tool for property-based testing within the pytest ecosystem, providing the benefits of both frameworks seamlessly combined.
+This integration makes python-proptest a powerful tool for property-based testing within the pytest ecosystem, providing the benefits of both frameworks seamlessly combined.

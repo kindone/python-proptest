@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Test PyPropTest package after building
+# Test python-proptest package after building
 
 set -e
 
@@ -16,7 +16,7 @@ print_success() { echo -e "${GREEN}✅ $1${NC}"; }
 print_error() { echo -e "${RED}❌ $1${NC}"; }
 print_warning() { echo -e "${YELLOW}⚠️  $1${NC}"; }
 
-echo "🧪 Testing PyPropTest Package"
+echo "🧪 Testing python-proptest Package"
 echo "============================="
 echo ""
 
@@ -54,7 +54,7 @@ print_success "Package installed successfully"
 # Test 1: Basic import
 print_status "Test 1: Basic import test..."
 if python -c "
-from pyproptest import Gen, PropertyTestError, run_for_all
+from proptest import Gen, PropertyTestError, run_for_all
 print('✅ Basic imports successful')
 "; then
     print_success "Basic import test passed"
@@ -66,7 +66,7 @@ fi
 # Test 2: Generator creation
 print_status "Test 2: Generator creation test..."
 if python -c "
-from pyproptest import Gen
+from proptest import Gen
 # Test that generators can be created
 int_gen = Gen.int()
 str_gen = Gen.str()
@@ -82,7 +82,7 @@ fi
 # Test 3: Property testing
 print_status "Test 3: Property testing test..."
 if python -c "
-from pyproptest import Gen, for_all
+from proptest import Gen, for_all
 
 @for_all(Gen.int(), Gen.int())
 def test_addition_commutative(x, y):
@@ -100,9 +100,9 @@ fi
 # Test 4: Package info
 print_status "Test 4: Package information..."
 if python -c "
-import pyproptest
-print(f'✅ Package version: {pyproptest.__version__ if hasattr(pyproptest, \"__version__\") else \"Unknown\"}')
-print(f'✅ Package location: {pyproptest.__file__}')
+import proptest
+print(f'✅ Package version: {proptest.__version__ if hasattr(proptest, \"__version__\") else \"Unknown\"}')
+print(f'✅ Package location: {proptest.__file__}')
 "; then
     print_success "Package information test passed"
 else
@@ -113,7 +113,7 @@ fi
 print_status "Test 5: Unittest integration test..."
 if python -c "
 import unittest
-from pyproptest import Gen, for_all
+from proptest import Gen, for_all
 
 class TestIntegration(unittest.TestCase):
     @for_all(Gen.int())
@@ -142,5 +142,5 @@ echo "Package is ready for PyPI upload!"
 echo ""
 echo "Next steps:"
 echo "  1. Upload to TestPyPI: ./scripts/upload-testpypi.sh"
-echo "  2. Test from TestPyPI: pip install --index-url https://test.pypi.org/simple/ pyproptest"
+echo "  2. Test from TestPyPI: pip install --index-url https://test.pypi.org/simple/ proptest"
 echo "  3. Upload to PyPI: ./scripts/upload-pypi.sh"

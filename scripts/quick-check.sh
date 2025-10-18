@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Quick pre-commit check script for PyPropTest
+# Quick pre-commit check script for python-proptest
 # Faster version that runs only the most critical checks
 
 set -e
@@ -16,12 +16,12 @@ print_status() { echo -e "${BLUE}🔍 $1${NC}"; }
 print_success() { echo -e "${GREEN}✅ $1${NC}"; }
 print_error() { echo -e "${RED}❌ $1${NC}"; }
 
-echo "⚡ PyPropTest Quick Check"
+echo "⚡ python-proptest Quick Check"
 echo "========================"
 
 # Critical flake8 checks
 print_status "Critical flake8 checks..."
-if flake8 pyproptest --count --select=E9,F63,F7,F82 --show-source --statistics; then
+if flake8 proptest --count --select=E9,F63,F7,F82 --show-source --statistics; then
     print_success "Critical flake8 passed"
 else
     print_error "Critical flake8 failed"
@@ -30,16 +30,16 @@ fi
 
 # Black formatting
 print_status "Black formatting check..."
-if black --check pyproptest/ tests/; then
+if black --check proptest/ tests/; then
     print_success "Formatting passed"
 else
-    print_error "Formatting issues found - run 'black pyproptest/ tests/' to fix"
+    print_error "Formatting issues found - run 'black proptest/ tests/' to fix"
     exit 1
 fi
 
 # MyPy type checking
 print_status "MyPy type checking..."
-if mypy pyproptest/; then
+if mypy proptest/; then
     print_success "Type checking passed"
 else
     print_error "Type checking failed"

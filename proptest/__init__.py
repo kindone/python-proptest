@@ -1,5 +1,5 @@
 """
-PyPropTest - Python Property-Based Testing Library
+python-proptest - Python Property-Based Testing Library
 
 A clean, Pythonic property-based testing library with seamless pytest integration.
 """

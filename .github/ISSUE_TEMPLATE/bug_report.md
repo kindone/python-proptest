@@ -23,7 +23,7 @@ A clear and concise description of what you expected to happen.
 **Code example**
 ```python
 # Please provide a minimal code example that reproduces the issue
-from pyproptest import for_all, integers
+from proptest import for_all, integers
 
 @for_all(integers())
 def test_example(x: int):
@@ -34,7 +34,7 @@ def test_example(x: int):
 **Environment (please complete the following information):**
  - OS: [e.g. macOS, Linux, Windows]
  - Python version: [e.g. 3.8, 3.9, 3.10, 3.11, 3.12]
- - PyPropTest version: [e.g. 0.1.0]
+ - python-proptest version: [e.g. 0.1.0]
 
 **Additional context**
 Add any other context about the problem here.

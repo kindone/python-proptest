@@ -1,5 +1,5 @@
 """
-Basic examples demonstrating PyPropTest usage.
+Basic examples demonstrating python-proptest usage.
 
 These examples show common property-based testing patterns
 and serve as both documentation and tests.
@@ -7,7 +7,7 @@ and serve as both documentation and tests.
 
 import unittest
 
-from pyproptest import Gen, PropertyTestError, run_for_all
+from proptest import Gen, PropertyTestError, run_for_all
 
 
 class TestBasicProperties(unittest.TestCase):

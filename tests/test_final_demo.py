@@ -8,8 +8,8 @@ and serves as a comprehensive test suite.
 import random
 import unittest
 
-from pyproptest import Gen, Property, PropertyTestError, Shrinkable, for_all
-from pyproptest.core.shrinker import (
+from proptest import Gen, Property, PropertyTestError, Shrinkable, for_all
+from proptest.core.shrinker import (
     DictShrinker,
     IntegerShrinker,
     ListShrinker,
@@ -20,7 +20,7 @@ from pyproptest.core.shrinker import (
 
 def run_all_tests():
     """Run all ported tests and demonstrate functionality."""
-    print("🐍 PyPropTest - Comprehensive Test Suite")
+    print("🐍 python-proptest - Comprehensive Test Suite")
     print("=" * 60)
 
     # Test 1: Basic Generators
@@ -358,7 +358,7 @@ def run_all_tests():
     print("• Property class direct usage")
     print("• Mixed type support")
     print("• String and large seed support")
-    print("\n🚀 PyPropTest is ready for production use!")
+    print("\n🚀 python-proptest is ready for production use!")
 
 
 if __name__ == "__main__":

@@ -8,7 +8,7 @@ and produces reproducible results with seeds.
 import random
 import unittest
 
-from pyproptest import Gen, PropertyTestError, run_for_all
+from proptest import Gen, PropertyTestError, run_for_all
 
 
 class TestRandom(unittest.TestCase):

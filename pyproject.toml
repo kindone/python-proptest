@@ -3,9 +3,9 @@ requires = ["setuptools>=45.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "pyproptest"
+name = "proptest"
 version = "0.1.0"
-description = "A comprehensive Python property-based testing library with pytest and unittest integration"
+description = "python-proptest: A comprehensive Python property-based testing library with pytest and unittest integration"
 readme = "README.md"
 requires-python = ">=3.8"
 license = { file = "LICENSE" }
@@ -66,16 +66,16 @@ docs = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/kindone/pyproptest"
-Repository = "https://github.com/kindone/pyproptest"
-Documentation = "https://kindone.github.io/pyproptest"
-"Bug Tracker" = "https://github.com/kindone/pyproptest/issues"
-"Source Code" = "https://github.com/kindone/pyproptest"
+Homepage = "https://github.com/kindone/proptest"
+Repository = "https://github.com/kindone/proptest"
+Documentation = "https://kindone.github.io/proptest"
+"Bug Tracker" = "https://github.com/kindone/proptest/issues"
+"Source Code" = "https://github.com/kindone/proptest"
 
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["pyproptest*"]
+include = ["proptest*"]
 
 [tool.black]
 line-length = 88
@@ -116,7 +116,7 @@ warn_unreachable = false
 strict_equality = false
 
 [[tool.mypy.overrides]]
-module = "pyproptest.core.generator"
+module = "proptest.core.generator"
 disable_error_code = ["valid-type"]
 
 [tool.pytest.ini_options]
@@ -127,7 +127,7 @@ python_functions = ["test_*"]
 addopts = [
     "--strict-markers",
     "--strict-config",
-    "--cov=pyproptest",
+    "--cov=proptest",
     "--cov-report=term-missing",
     "--cov-report=html",
 ]

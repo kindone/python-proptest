@@ -1,8 +1,8 @@
-# PyPropTest PyPI Publishing Plan
+# python-proptest PyPI Publishing Plan
 
 ## 🎯 Overview
 
-This document outlines the complete plan for publishing PyPropTest to PyPI (Python Package Index).
+This document outlines the complete plan for publishing python-proptest to PyPI (Python Package Index).
 
 ## 📋 Pre-Publication Checklist
 
@@ -122,11 +122,11 @@ This document outlines the complete plan for publishing PyPropTest to PyPI (Pyth
 
 ### Current Structure ✅
 ```
-pyproptest/
+proptest/
 ├── pyproject.toml          # ✅ Well configured
 ├── README.md               # ✅ Comprehensive
 ├── LICENSE                 # ✅ MIT
-├── pyproptest/            # ✅ Main package
+├── proptest/            # ✅ Main package
 │   ├── __init__.py        # ✅ Proper exports
 │   └── core/              # ✅ Well organized
 ├── tests/                 # ✅ Comprehensive tests
@@ -137,9 +137,9 @@ pyproptest/
 ### Build Artifacts (Will be created)
 ```
 dist/
-├── pyproptest-0.1.0.tar.gz           # Source distribution
-├── pyproptest-0.1.0-py3-none-any.whl # Universal wheel
-└── pyproptest-0.1.0.dist-info/       # Package metadata
+├── proptest-0.1.0.tar.gz           # Source distribution
+├── proptest-0.1.0-py3-none-any.whl # Universal wheel
+└── proptest-0.1.0.dist-info/       # Package metadata
 ```
 
 ## 🔧 Required Tools
@@ -210,14 +210,14 @@ pip install build twine
 
 ### Post-Publication
 - [ ] Package is available on PyPI
-- [ ] Installation works: `pip install pyproptest`
+- [ ] Installation works: `pip install proptest`
 - [ ] All functionality works as expected
 - [ ] Documentation reflects PyPI installation
 
 ## 🚨 Risk Mitigation
 
 ### Common Issues
-1. **Name Conflicts**: Check if `pyproptest` is available
+1. **Name Conflicts**: Check if `proptest` is available
 2. **Build Errors**: Test builds locally first
 3. **Upload Failures**: Use TestPyPI for testing
 4. **Installation Issues**: Test on multiple Python versions

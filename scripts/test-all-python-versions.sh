@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Test script for all Python versions
-# This script tests PyPropTest with multiple Python versions
+# This script tests python-proptest with multiple Python versions
 
 set -e
 
@@ -55,9 +55,9 @@ test_python_version() {
     pip install --upgrade pip >/dev/null 2>&1
 
     # Install package
-    print_status "Installing PyPropTest for Python $version..."
+    print_status "Installing python-proptest for Python $version..."
     pip install -e ".[dev]" >/dev/null 2>&1 || {
-        print_error "Failed to install PyPropTest for Python $version"
+        print_error "Failed to install python-proptest for Python $version"
         deactivate
         rm -rf "$venv_dir"
         return 1
@@ -66,8 +66,8 @@ test_python_version() {
     # Test imports
     print_status "Testing imports for Python $version..."
     if $python_cmd -c "
-from pyproptest import Gen, PropertyTestError, run_for_all
-from pyproptest.core.generator import DictGenerator
+from proptest import Gen, PropertyTestError, run_for_all
+from proptest.core.generator import DictGenerator
 print('✅ All imports successful')
 " 2>/dev/null; then
         print_success "Imports work for Python $version"
@@ -81,7 +81,7 @@ print('✅ All imports successful')
     # Test basic functionality
     print_status "Testing basic functionality for Python $version..."
     if $python_cmd -c "
-from pyproptest import Gen
+from proptest import Gen
 # Test that generators can be created
 int_gen = Gen.int()
 str_gen = Gen.str()
@@ -140,4 +140,4 @@ echo ""
 print_warning "Note: Some versions may not be available on your system."
 print_warning "This is normal - the script will skip unavailable versions."
 echo ""
-print_success "Your PyPropTest library is compatible with all tested Python versions! 🎉"
+print_success "Your python-proptest library is compatible with all tested Python versions! 🎉"

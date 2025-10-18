@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Upload PyPropTest package to production PyPI
+# Upload python-proptest package to production PyPI
 
 set -e
 
@@ -16,7 +16,7 @@ print_success() { echo -e "${GREEN}✅ $1${NC}"; }
 print_error() { echo -e "${RED}❌ $1${NC}"; }
 print_warning() { echo -e "${YELLOW}⚠️  $1${NC}"; }
 
-echo "🚀 Uploading PyPropTest to PyPI"
+echo "🚀 Uploading python-proptest to PyPI"
 echo "==============================="
 echo ""
 
@@ -82,16 +82,16 @@ fi
 
 print_success "Package uploaded to PyPI successfully! 🎉"
 echo ""
-echo "PyPI URL: https://pypi.org/project/pyproptest/"
+echo "PyPI URL: https://pypi.org/project/proptest/"
 echo ""
 echo "Installation command:"
-echo "  pip install pyproptest"
+echo "  pip install proptest"
 echo ""
-echo "🎉 Congratulations! PyPropTest is now available on PyPI!"
+echo "🎉 Congratulations! python-proptest is now available on PyPI!"
 echo ""
 echo "Next steps:"
-echo "  1. Verify the package page: https://pypi.org/project/pyproptest/"
-echo "  2. Test installation: pip install pyproptest"
+echo "  1. Verify the package page: https://pypi.org/project/proptest/"
+echo "  2. Test installation: pip install proptest"
 echo "  3. Update documentation with installation instructions"
 echo "  4. Create a GitHub release"
 echo "  5. Announce the release!"

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Version bumping script for PyPropTest
+# Version bumping script for python-proptest
 
 set -e
 
@@ -61,7 +61,7 @@ bump_version() {
 }
 
 # Main script
-echo "📈 PyPropTest Version Bumper"
+echo "📈 python-proptest Version Bumper"
 echo "============================"
 echo ""
 

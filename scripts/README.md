@@ -1,4 +1,4 @@
-# PyPropTest Development Scripts
+# python-proptest Development Scripts
 
 This directory contains scripts to help with development and pre-commit checks.
 
@@ -213,7 +213,7 @@ make test-all-python
 
 3. **Import sorting issues**: Auto-fix with:
    ```bash
-   isort pyproptest/ tests/
+   isort proptest/ tests/
    ```
 
 4. **Type checking errors**: Check the mypy output and fix type annotations

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Build PyPropTest package for PyPI distribution
+# Build python-proptest package for PyPI distribution
 
 set -e
 
@@ -16,7 +16,7 @@ print_success() { echo -e "${GREEN}✅ $1${NC}"; }
 print_error() { echo -e "${RED}❌ $1${NC}"; }
 print_warning() { echo -e "${YELLOW}⚠️  $1${NC}"; }
 
-echo "📦 Building PyPropTest Package"
+echo "📦 Building python-proptest Package"
 echo "=============================="
 echo ""
 
@@ -62,11 +62,11 @@ if [ -d "dist" ] && [ "$(ls -A dist)" ]; then
     print_status "Package information:"
     python -m build --wheel --sdist --outdir dist/ >/dev/null 2>&1 || true
     
-    if [ -f "dist/pyproptest-*.whl" ]; then
+    if [ -f "dist/proptest-*.whl" ]; then
         echo "Wheel: $(ls dist/*.whl)"
     fi
     
-    if [ -f "dist/pyproptest-*.tar.gz" ]; then
+    if [ -f "dist/proptest-*.tar.gz" ]; then
         echo "Source: $(ls dist/*.tar.gz)"
     fi
     

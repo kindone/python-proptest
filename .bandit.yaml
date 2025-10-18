@@ -1,4 +1,4 @@
-# Bandit configuration for PyPropTest
+# Bandit configuration for python-proptest
 # We use random module for property-based testing, not security/crypto
 
 # Skip B311: Standard pseudo-random generators are not suitable for security/cryptographic purposes

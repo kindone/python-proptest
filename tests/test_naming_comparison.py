@@ -1,5 +1,5 @@
 """
-Comparison of the two property-based testing approaches in PyPropTest.
+Comparison of the two property-based testing approaches in python-proptest.
 
 This test demonstrates both the decorator-based @for_all and the
 function-based run_for_all approaches.
@@ -7,7 +7,7 @@ function-based run_for_all approaches.
 
 import unittest
 
-from pyproptest import Gen, for_all, integers, run_for_all
+from proptest import Gen, for_all, integers, run_for_all
 
 
 class TestNamingComparison(unittest.TestCase):

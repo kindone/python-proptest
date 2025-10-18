@@ -1,5 +1,5 @@
 """
-Tests for unittest integration with PyPropTest.
+Tests for unittest integration with python-proptest.
 
 This module verifies that the @for_all decorator works correctly with
 unittest.TestCase classes.
@@ -7,11 +7,11 @@ unittest.TestCase classes.
 
 import unittest
 
-from pyproptest import Gen, for_all, integers, text
+from proptest import Gen, for_all, integers, text
 
 
 class TestUnittestIntegration(unittest.TestCase):
-    """Test unittest integration with PyPropTest."""
+    """Test unittest integration with python-proptest."""
 
     @for_all(integers(), integers())
     def test_addition_commutativity(self, x: int, y: int):

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Upload PyPropTest package to TestPyPI
+# Upload python-proptest package to TestPyPI
 
 set -e
 
@@ -16,7 +16,7 @@ print_success() { echo -e "${GREEN}✅ $1${NC}"; }
 print_error() { echo -e "${RED}❌ $1${NC}"; }
 print_warning() { echo -e "${YELLOW}⚠️  $1${NC}"; }
 
-echo "🚀 Uploading PyPropTest to TestPyPI"
+echo "🚀 Uploading python-proptest to TestPyPI"
 echo "==================================="
 echo ""
 
@@ -65,13 +65,13 @@ fi
 
 print_success "Package uploaded to TestPyPI successfully! 🎉"
 echo ""
-echo "TestPyPI URL: https://test.pypi.org/project/pyproptest/"
+echo "TestPyPI URL: https://test.pypi.org/project/proptest/"
 echo ""
 echo "To test the installation from TestPyPI:"
-echo "  pip install --index-url https://test.pypi.org/simple/ pyproptest"
+echo "  pip install --index-url https://test.pypi.org/simple/ proptest"
 echo ""
 echo "Or create a test script:"
-echo "  python -c \"import pyproptest; print('Installation successful!')\""
+echo "  python -c \"import proptest; print('Installation successful!')\""
 echo ""
 print_warning "Remember: TestPyPI packages are temporary and will be deleted after 30 days."
 echo ""

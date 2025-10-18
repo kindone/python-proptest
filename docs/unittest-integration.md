@@ -1,6 +1,6 @@
 # Unittest Integration
 
-PyPropTest provides seamless integration with Python's built-in `unittest` framework through the `@for_all` decorator. The decorator automatically detects whether it's being used in a unittest context (unittest.TestCase methods), pytest context, or standalone functions and adapts accordingly.
+python-proptest provides seamless integration with Python's built-in `unittest` framework through the `@for_all` decorator. The decorator automatically detects whether it's being used in a unittest context (unittest.TestCase methods), pytest context, or standalone functions and adapts accordingly.
 
 ## Basic Usage
 
@@ -8,7 +8,7 @@ PyPropTest provides seamless integration with Python's built-in `unittest` frame
 
 ```python
 import unittest
-from pyproptest import for_all, integers, text
+from proptest import for_all, integers, text
 
 class TestMathProperties(unittest.TestCase):
     """Test class for mathematical properties using unittest."""
@@ -76,7 +76,7 @@ class TestMixedAssertions(unittest.TestCase):
 ### Using Gen Class Directly
 
 ```python
-from pyproptest import for_all, Gen
+from proptest import for_all, Gen
 
 class TestWithGen(unittest.TestCase):
     @for_all(Gen.int(), Gen.str())
@@ -99,7 +99,7 @@ class TestWithGen(unittest.TestCase):
 
 ### Unittest-Specific Error Handling
 
-When a property test fails in a unittest context, PyPropTest automatically raises the appropriate unittest failure exception:
+When a property test fails in a unittest context, python-proptest automatically raises the appropriate unittest failure exception:
 
 ```python
 class TestFailingProperties(unittest.TestCase):
@@ -114,7 +114,7 @@ The error will be reported using unittest's standard failure mechanism, making i
 
 ## Framework Detection
 
-PyPropTest automatically detects the test framework by checking the class hierarchy:
+python-proptest automatically detects the test framework by checking the class hierarchy:
 
 1. **Unittest Detection**: Checks if the class inherits from `unittest.TestCase`
 2. **Pytest Detection**: If not unittest, assumes pytest for class methods with `self` parameter

@@ -1,4 +1,4 @@
-"""Core components of PyPropTest."""
+"""Core components of python-proptest."""
 
 from .generator import Gen, Generator
 from .property import Property, run_for_all

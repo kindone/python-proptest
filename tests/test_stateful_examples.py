@@ -1,5 +1,5 @@
 """
-Stateful testing examples demonstrating PyPropTest's stateful testing capabilities.
+Stateful testing examples demonstrating python-proptest's stateful testing capabilities.
 
 This file shows how to test systems with internal state using action sequences.
 """
@@ -7,7 +7,7 @@ This file shows how to test systems with internal state using action sequences.
 import unittest
 from typing import Any, Dict, List
 
-from pyproptest import (
+from proptest import (
     Action,
     Gen,
     SimpleAction,

@@ -229,12 +229,12 @@ def for_all(
         wrapper.__annotations__ = func.__annotations__
 
         # Add metadata for introspection
-        wrapper._pyproptest_generators = generators  # type: ignore
-        wrapper._pyproptest_num_runs = num_runs  # type: ignore
-        wrapper._pyproptest_seed = seed  # type: ignore
-        wrapper._pyproptest_is_pytest_method = is_pytest_method  # type: ignore
-        wrapper._pyproptest_is_unittest_method = is_unittest_method  # type: ignore
-        wrapper._pyproptest_is_test_method = is_test_method  # type: ignore
+        wrapper._proptest_generators = generators  # type: ignore
+        wrapper._proptest_num_runs = num_runs  # type: ignore
+        wrapper._proptest_seed = seed  # type: ignore
+        wrapper._proptest_is_pytest_method = is_pytest_method  # type: ignore
+        wrapper._proptest_is_unittest_method = is_unittest_method  # type: ignore
+        wrapper._proptest_is_test_method = is_test_method  # type: ignore
 
         return wrapper
 
@@ -264,9 +264,9 @@ def example(*values: Any):
 
     def decorator(func: Callable) -> Callable:
         # Store examples for later use
-        if not hasattr(func, "_pyproptest_examples"):
-            func._pyproptest_examples = []  # type: ignore
-        func._pyproptest_examples.append(values)  # type: ignore
+        if not hasattr(func, "_proptest_examples"):
+            func._proptest_examples = []  # type: ignore
+        func._proptest_examples.append(values)  # type: ignore
         return func
 
     return decorator
@@ -291,9 +291,9 @@ def settings(**kwargs):
 
     def decorator(func: Callable) -> Callable:
         # Store settings for later use
-        if not hasattr(func, "_pyproptest_settings"):
-            func._pyproptest_settings = {}  # type: ignore
-        func._pyproptest_settings.update(kwargs)  # type: ignore
+        if not hasattr(func, "_proptest_settings"):
+            func._proptest_settings = {}  # type: ignore
+        func._proptest_settings.update(kwargs)  # type: ignore
         return func
 
     return decorator
@@ -358,7 +358,7 @@ def run_property_test(func: Callable) -> Any:
     Returns:
         Result of the property test
     """
-    if not hasattr(func, "_pyproptest_generators"):
+    if not hasattr(func, "_proptest_generators"):
         raise ValueError(f"Function {func.__name__} is not decorated with @given")
 
     return func()

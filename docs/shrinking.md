@@ -6,7 +6,7 @@ When `run_for_all` (either standalone or called on a `Property` instance) detect
 *   The error message thrown by `run_for_all` on failure typically includes the original failing input and the final, shrunk failing input.
 
 ```python
-from pyproptest import run_for_all, Gen, PropertyTestError
+from proptest import run_for_all, Gen, PropertyTestError
 
 # Example where shrinking is useful (using standalone run_for_all)
 def test_failing_property():
@@ -30,11 +30,11 @@ def test_failing_property():
 
 ## How Shrinking Works
 
-PyPropTest's shrinking process follows these principles:
+python-proptest's shrinking process follows these principles:
 
 1. **Start with the failing input**: When a property fails, the system records the exact input that caused the failure.
 
-2. **Generate shrink candidates**: For each type of input, PyPropTest generates simpler versions:
+2. **Generate shrink candidates**: For each type of input, python-proptest generates simpler versions:
    - **Integers**: Shrinks towards 0 (e.g., 100 → 50 → 25 → 12 → 6 → 3 → 1 → 0)
    - **Strings**: Shrinks by removing characters (e.g., "hello" → "hell" → "hel" → "he" → "h" → "")
    - **Lists**: Shrinks by removing elements and making elements simpler
@@ -49,7 +49,7 @@ PyPropTest's shrinking process follows these principles:
 ### Integer Shrinking
 
 ```python
-from pyproptest import run_for_all, Gen, PropertyTestError
+from proptest import run_for_all, Gen, PropertyTestError
 
 def test_integer_shrinking():
     def property_func(x: int):
@@ -66,7 +66,7 @@ def test_integer_shrinking():
 ### String Shrinking
 
 ```python
-from pyproptest import run_for_all, Gen, PropertyTestError
+from proptest import run_for_all, Gen, PropertyTestError
 
 def test_string_shrinking():
     def property_func(s: str):
@@ -83,7 +83,7 @@ def test_string_shrinking():
 ### List Shrinking
 
 ```python
-from pyproptest import run_for_all, Gen, PropertyTestError
+from proptest import run_for_all, Gen, PropertyTestError
 
 def test_list_shrinking():
     def property_func(lst: list):
@@ -100,7 +100,7 @@ def test_list_shrinking():
 ### Complex Structure Shrinking
 
 ```python
-from pyproptest import run_for_all, Gen, PropertyTestError
+from proptest import run_for_all, Gen, PropertyTestError
 
 def test_complex_shrinking():
     def property_func(data):
@@ -128,14 +128,14 @@ def test_complex_shrinking():
 
 ## Advanced Shrinking
 
-PyPropTest includes advanced shrinking strategies for more complex scenarios:
+python-proptest includes advanced shrinking strategies for more complex scenarios:
 
 ### Element-wise Shrinking
 
-For collections, PyPropTest can shrink individual elements while keeping the structure:
+For collections, python-proptest can shrink individual elements while keeping the structure:
 
 ```python
-from pyproptest import run_for_all, Gen, PropertyTestError
+from proptest import run_for_all, Gen, PropertyTestError
 
 def test_element_wise_shrinking():
     def property_func(numbers: list):
@@ -151,10 +151,10 @@ def test_element_wise_shrinking():
 
 ### Membership-wise Shrinking
 
-For sets and dictionaries, PyPropTest can remove elements to find the minimal failing subset:
+For sets and dictionaries, python-proptest can remove elements to find the minimal failing subset:
 
 ```python
-from pyproptest import run_for_all, Gen, PropertyTestError
+from proptest import run_for_all, Gen, PropertyTestError
 
 def test_membership_shrinking():
     def property_func(items: set):
@@ -175,7 +175,7 @@ You can influence the shrinking behavior by using specific generators or combina
 ### Using `Gen.just()` for Fixed Values
 
 ```python
-from pyproptest import run_for_all, Gen
+from proptest import run_for_all, Gen
 
 def test_with_fixed_values():
     def property_func(x: int):
@@ -189,7 +189,7 @@ def test_with_fixed_values():
 ### Using `Gen.element_of()` for Specific Values
 
 ```python
-from pyproptest import run_for_all, Gen, PropertyTestError
+from proptest import run_for_all, Gen, PropertyTestError
 
 def test_with_specific_values():
     def property_func(x: int):
@@ -207,7 +207,7 @@ def test_with_specific_values():
 You can control shrinking behavior through the `Property` class:
 
 ```python
-from pyproptest import Property, Gen
+from proptest import Property, Gen
 
 def my_property(x: int):
     return x < 100

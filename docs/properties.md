@@ -9,7 +9,7 @@ Properties define the expected behavior of your code over a range of inputs.
     *   If the predicate returns `True` or `None` (implicitly returns `None`), the property passes for that input.
 
     ```python
-    from pyproptest import Property, Gen
+    from proptest import Property, Gen
 
     # Property: The sum of two non-negative numbers is non-negative
     def sum_property(a: float, b: float):
@@ -39,7 +39,7 @@ Properties define the expected behavior of your code over a range of inputs.
 *   **`run_for_all(predicate: Callable[..., bool | None], *generators: Generator[Any])`**: Perfect for simple property checks that can be expressed as lambdas. This is the most concise way to define and immediately check a property. It implicitly creates and runs the property. You don't need to manually create a `Property` object.
 
     ```python
-    from pyproptest import run_for_all, Gen
+    from proptest import run_for_all, Gen
 
     # Property: Reversing a list twice yields the original list
     def test_double_reverse():
@@ -80,10 +80,10 @@ Properties define the expected behavior of your code over a range of inputs.
 
 ## Decorator-based Properties
 
-PyPropTest also supports a decorator-based approach for defining properties, similar to Hypothesis. This is perfect for complex assertions that benefit from explicit parameter signatures:
+python-proptest also supports a decorator-based approach for defining properties, similar to Hypothesis. This is perfect for complex assertions that benefit from explicit parameter signatures:
 
 ```python
-from pyproptest import for_all, integers, text
+from proptest import for_all, integers, text
 
 @for_all(integers(), integers())
 def test_addition_commutativity(x: int, y: int):
@@ -105,14 +105,14 @@ test_string_concatenation()
 
 ## Choosing the Right Approach
 
-PyPropTest provides multiple ways to define property tests. Choose based on your needs:
+python-proptest provides multiple ways to define property tests. Choose based on your needs:
 
 ### Use `run_for_all` for Simple Lambda-Based Tests
 
 Perfect for simple property checks that can be expressed as lambdas:
 
 ```python
-from pyproptest import run_for_all, Gen
+from proptest import run_for_all, Gen
 
 def test_simple_properties():
     # Type checks
@@ -141,7 +141,7 @@ def test_simple_properties():
 Perfect for complex assertions that benefit from explicit parameter signatures:
 
 ```python
-from pyproptest import for_all, integers, text
+from proptest import for_all, integers, text
 
 @for_all(integers(), integers())
 def test_complex_math_property(x: int, y: int):
@@ -172,7 +172,7 @@ def test_string_operations(s1: str, s2: str):
 ### Number of Runs
 
 ```python
-from pyproptest import Property, Gen
+from proptest import Property, Gen
 
 def my_property(x: int):
     return x >= 0
@@ -188,7 +188,7 @@ run_for_all(my_property, Gen.int(), num_runs=500)
 ### Seed for Reproducibility
 
 ```python
-from pyproptest import run_for_all, Gen
+from proptest import run_for_all, Gen
 
 def my_property(x: int):
     return x >= 0
@@ -202,14 +202,14 @@ run_for_all(my_property, Gen.int(), seed="my_test_seed")
 
 ## Error Handling
 
-When a property fails, PyPropTest will:
+When a property fails, python-proptest will:
 
 1. **Report the failure** with the original failing input
 2. **Attempt shrinking** to find a minimal counterexample
 3. **Raise an exception** with details about the failure
 
 ```python
-from pyproptest import run_for_all, Gen, PropertyTestError
+from proptest import run_for_all, Gen, PropertyTestError
 
 def failing_property(x: int):
     return x < 100  # This will fail for x >= 100

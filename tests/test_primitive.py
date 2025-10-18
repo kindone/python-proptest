@@ -8,7 +8,7 @@ and exhaustive shrinking validation.
 import random
 import unittest
 
-from pyproptest import Gen, Shrinkable
+from proptest import Gen, Shrinkable
 
 
 def exhaustive_traversal(

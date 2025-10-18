@@ -1,10 +1,10 @@
-# Makefile for PyPropTest development tasks
+# Makefile for python-proptest development tasks
 
 .PHONY: help install test lint format type-check security clean quick-check pre-commit all-checks test-python38 test-all-python clean-whitespace build-package test-package upload-testpypi upload-pypi bump-version
 
 # Default target
 help:
-	@echo "PyPropTest Development Commands"
+	@echo "python-proptest Development Commands"
 	@echo "==============================="
 	@echo ""
 	@echo "Quick Commands:"
@@ -46,30 +46,30 @@ test:
 	@echo "🧪 Running unittest tests..."
 	python -m unittest discover tests -v
 	@echo "🧪 Running pytest tests..."
-	pytest --cov=pyproptest --cov-report=term-missing -v
+	pytest --cov=proptest --cov-report=term-missing -v
 
 # Run linting
 lint:
 	@echo "🔍 Running flake8 linting..."
-	flake8 pyproptest --count --select=E9,F63,F7,F82 --show-source --statistics
-	flake8 pyproptest --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics
+	flake8 proptest --count --select=E9,F63,F7,F82 --show-source --statistics
+	flake8 proptest --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics
 
 # Format code
 format:
 	@echo "🎨 Formatting code with black..."
-	black pyproptest/ tests/
+	black proptest/ tests/
 	@echo "📋 Sorting imports with isort..."
-	isort pyproptest/ tests/
+	isort proptest/ tests/
 
 # Type checking
 type-check:
 	@echo "🔍 Running mypy type checking..."
-	mypy pyproptest/
+	mypy proptest/
 
 # Security analysis
 security:
 	@echo "🔒 Running security analysis..."
-	bandit -r pyproptest/ -s B311,B110 -f json -o bandit-report.json
+	bandit -r proptest/ -s B311,B110 -f json -o bandit-report.json
 	safety check --json > safety-report.json || true
 
 # Quick pre-commit check (fast)

@@ -1,1 +1,1 @@
-"""Example tests demonstrating PyPropTest usage."""
+"""Example tests demonstrating python-proptest usage."""

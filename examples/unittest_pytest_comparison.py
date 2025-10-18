@@ -1,5 +1,5 @@
 """
-Comparison of unittest and pytest integration with PyPropTest.
+Comparison of unittest and pytest integration with python-proptest.
 
 This example shows how the same property-based tests can be written
 using both unittest and pytest frameworks.
@@ -7,7 +7,7 @@ using both unittest and pytest frameworks.
 
 import unittest
 import pytest
-from pyproptest import for_all, Gen, integers, text
+from proptest import for_all, Gen, integers, text
 
 
 # =============================================================================
@@ -175,7 +175,7 @@ def run_pytest_examples():
 
 
 if __name__ == "__main__":
-    print("PyPropTest unittest and pytest integration examples")
+    print("python-proptest unittest and pytest integration examples")
     print("=" * 60)
 
     # Run unittest examples

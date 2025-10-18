@@ -1,10 +1,10 @@
-site_name: 'PyPropTest'
+site_name: 'python-proptest'
 site_description: 'Python Property-Based Testing Library'
 site_author: 'kindone'
-site_url: 'https://github.com/pages/kindone/pyproptest'
+site_url: 'https://github.com/pages/kindone/proptest'
 
-repo_name: 'kindone/pyproptest'
-repo_url: 'https://github.com/kindone/pyproptest'
+repo_name: 'kindone/proptest'
+repo_url: 'https://github.com/kindone/proptest'
 edit_uri: 'edit/master/docs'
 
 theme:

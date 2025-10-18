@@ -1,1 +1,1 @@
-"""Tests for PyPropTest."""
+"""Tests for python-proptest."""

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Pre-commit checks script for PyPropTest
+# Pre-commit checks script for python-proptest
 # Run this script before committing/pushing to ensure all CI checks pass
 
 set -e  # Exit on any error
@@ -52,7 +52,7 @@ run_check() {
 
 # Main execution
 main() {
-    echo "🚀 PyPropTest Pre-commit Checks"
+    echo "🚀 python-proptest Pre-commit Checks"
     echo "================================"
     echo ""
 
@@ -118,29 +118,29 @@ main() {
     echo ""
 
     # Step 2: Critical flake8 checks
-    if ! run_check "Critical flake8 checks" "flake8 pyproptest --count --select=E9,F63,F7,F82 --show-source --statistics"; then
+    if ! run_check "Critical flake8 checks" "flake8 proptest --count --select=E9,F63,F7,F82 --show-source --statistics"; then
         failed_checks+=("Critical flake8")
     fi
 
     # Step 3: Extended flake8 checks
-    if ! run_check "Extended flake8 checks" "flake8 pyproptest --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics"; then
+    if ! run_check "Extended flake8 checks" "flake8 proptest --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics"; then
         failed_checks+=("Extended flake8")
     fi
 
     # Step 4: Black formatting check
-    if ! run_check "Black formatting check" "black --check pyproptest/ tests/"; then
-        print_warning "Code formatting issues found. Run 'black pyproptest/ tests/' to fix"
+    if ! run_check "Black formatting check" "black --check proptest/ tests/"; then
+        print_warning "Code formatting issues found. Run 'black proptest/ tests/' to fix"
         failed_checks+=("Black formatting")
     fi
 
     # Step 5: Import sorting check
-    if ! run_check "Import sorting check" "isort --check-only pyproptest/ tests/"; then
-        print_warning "Import sorting issues found. Run 'isort pyproptest/ tests/' to fix"
+    if ! run_check "Import sorting check" "isort --check-only proptest/ tests/"; then
+        print_warning "Import sorting issues found. Run 'isort proptest/ tests/' to fix"
         failed_checks+=("Import sorting")
     fi
 
     # Step 6: MyPy type checking
-    if ! run_check "MyPy type checking" "mypy pyproptest/"; then
+    if ! run_check "MyPy type checking" "mypy proptest/"; then
         failed_checks+=("MyPy type checking")
     fi
 
@@ -150,13 +150,13 @@ main() {
     fi
 
     # Step 8: Pytest tests with coverage
-    if ! run_check "Pytest tests with coverage" "pytest --cov=pyproptest --cov-report=term-missing -q >/dev/null 2>&1"; then
+    if ! run_check "Pytest tests with coverage" "pytest --cov=proptest --cov-report=term-missing -q >/dev/null 2>&1"; then
         failed_checks+=("Pytest tests")
     fi
 
     # Step 9: Security analysis (optional - don't fail on warnings)
     print_status "Running security analysis..."
-    if bandit -r pyproptest/ -s B311,B110 -f json -o bandit-report.json >/dev/null 2>&1; then
+    if bandit -r proptest/ -s B311,B110 -f json -o bandit-report.json >/dev/null 2>&1; then
         print_success "Security analysis completed"
     else
         print_warning "Security analysis found issues (check bandit-report.json)"

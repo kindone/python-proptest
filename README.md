@@ -1,37 +1,37 @@
-# PyPropTest
+# python-proptest
 
 A property-based testing framework for Python, inspired by Haskell's QuickCheck and Python's Hypothesis.
 
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Tests](https://github.com/kindone/pyproptest/workflows/CI/badge.svg)](https://github.com/kindone/pyproptest/actions)
-[![Coverage](https://codecov.io/gh/kindone/pyproptest/branch/main/graph/badge.svg)](https://codecov.io/gh/kindone/pyproptest)
-[![PyPI version](https://badge.fury.io/py/pyproptest.svg)](https://badge.fury.io/py/pyproptest)
+[![Tests](https://github.com/kindone/proptest/workflows/CI/badge.svg)](https://github.com/kindone/proptest/actions)
+[![Coverage](https://codecov.io/gh/kindone/proptest/branch/main/graph/badge.svg)](https://codecov.io/gh/kindone/proptest)
+[![PyPI version](https://badge.fury.io/py/proptest.svg)](https://badge.fury.io/py/proptest)
 
 ## What is Property-Based Testing?
 
 Property-based testing shifts the focus from example-based verification to defining universal *properties* or *invariants* that must hold true for an input domain. Instead of manually crafting test cases for specific inputs, you describe the *domain* of inputs your function expects and the *general characteristics* of the output.
 
-PyPropTest then generates hundreds or thousands of varied inputs, searching for edge cases or unexpected behaviors that violate your defined properties. This approach significantly increases test coverage and the likelihood of finding subtle bugs.
+python-proptest then generates hundreds or thousands of varied inputs, searching for edge cases or unexpected behaviors that violate your defined properties. This approach significantly increases test coverage and the likelihood of finding subtle bugs.
 
 ## Quick Start
 
 ### Installation
 
 ```bash
-pip install pyproptest
+pip install proptest
 ```
 
 For development dependencies:
 
 ```bash
-pip install pyproptest[dev]
+pip install proptest[dev]
 ```
 
 ### Simple Lambda-Based Tests (Recommended for Simple Properties)
 
 ```python
-from pyproptest import run_for_all, Gen
+from proptest import run_for_all, Gen
 
 def test_simple_properties():
     # Perfect for simple lambda-based properties
@@ -50,11 +50,11 @@ def test_simple_properties():
 
 ### Pytest Integration (Recommended for Most Use Cases)
 
-**The easiest way to use PyPropTest is with pytest!** Just add the `@for_all` decorator to your test methods, and PyPropTest automatically generates hundreds of random test cases:
+**The easiest way to use python-proptest is with pytest!** Just add the `@for_all` decorator to your test methods, and python-proptest automatically generates hundreds of random test cases:
 
 ```python
 import pytest
-from pyproptest import for_all, integers, text
+from proptest import for_all, integers, text
 
 class TestMathProperties:
     @for_all(integers(), integers())
@@ -82,11 +82,11 @@ class TestStringProperties:
 
 ### Unittest Integration
 
-**PyPropTest also works with Python's built-in unittest framework!** The `@for_all` decorator automatically detects unittest.TestCase classes and adapts accordingly:
+**python-proptest also works with Python's built-in unittest framework!** The `@for_all` decorator automatically detects unittest.TestCase classes and adapts accordingly:
 
 ```python
 import unittest
-from pyproptest import for_all, integers, text
+from proptest import for_all, integers, text
 
 class TestMathProperties(unittest.TestCase):
     @for_all(integers(), integers())
@@ -115,7 +115,7 @@ class TestStringProperties(unittest.TestCase):
 ### Standalone Function-Based Tests
 
 ```python
-from pyproptest import for_all, integers
+from proptest import for_all, integers
 
 @for_all(integers(), integers())
 def test_complex_math_property(x: int, y: int):
@@ -145,7 +145,7 @@ test_complex_math_property()
 
 **Perfect for teams using Python's built-in unittest framework!** Great for:
 
-- **Standard library integration**: No external dependencies beyond PyPropTest
+- **Standard library integration**: No external dependencies beyond python-proptest
 - **Unittest assertions**: Use `self.assertEqual()`, `self.assertTrue()`, etc.
 - **Mixed assertion styles**: Combine unittest assertions with regular `assert` statements
 - **Legacy codebases**: Easy migration from existing unittest test suites
@@ -166,7 +166,7 @@ Perfect for simple property checks that can be expressed as lambdas:
 - **🚀 Test Framework Integration**: Drop-in integration with both pytest and unittest - just add `@for_all()` decorator
 - **🔧 Automatic Framework Detection**: Automatically detects unittest.TestCase vs pytest vs standalone functions
 - **🎲 Automatic Randomization**: Each test method automatically runs with 100+ randomly generated inputs
-- **🔍 Automatic Shrinking**: When tests fail, PyPropTest finds minimal counterexamples
+- **🔍 Automatic Shrinking**: When tests fail, python-proptest finds minimal counterexamples
 - **📊 Comprehensive Generators**: Built-in generators for primitives, collections, and complex data structures
 - **🔧 Powerful Combinators**: Transform and combine generators to create sophisticated test data
 - **🏗️ Stateful Testing**: Test systems with internal state using action sequences
@@ -178,7 +178,7 @@ Perfect for simple property checks that can be expressed as lambdas:
 ### Testing List Operations
 
 ```python
-from pyproptest import run_for_all, Gen
+from proptest import run_for_all, Gen
 
 def test_list_reverse():
     def property_func(lst: list):
@@ -191,7 +191,7 @@ def test_list_reverse():
 ### Testing String Properties
 
 ```python
-from pyproptest import for_all, text
+from proptest import for_all, text
 
 @for_all(text(), text())
 def test_string_concatenation(s1: str, s2: str):
@@ -204,7 +204,7 @@ def test_string_concatenation(s1: str, s2: str):
 ### Testing Complex Data Structures
 
 ```python
-from pyproptest import run_for_all, Gen
+from proptest import run_for_all, Gen
 
 def test_json_roundtrip():
     def property_func(data: dict):
@@ -232,7 +232,7 @@ def test_json_roundtrip():
 ### Stateful Testing
 
 ```python
-from pyproptest import simple_stateful_property, Gen, SimpleAction
+from proptest import simple_stateful_property, Gen, SimpleAction
 
 def test_stack_operations():
     # Define a stack as a list
@@ -303,7 +303,7 @@ def test_stack_operations():
 pytest
 
 # Run with coverage
-pytest --cov=pyproptest
+pytest --cov=proptest
 
 # Run specific test file
 pytest tests/test_generators.py
@@ -312,14 +312,14 @@ pytest tests/test_generators.py
 ### Type Checking
 
 ```bash
-mypy pyproptest/
+mypy proptest/
 ```
 
 ### Code Formatting
 
 ```bash
-black pyproptest/ tests/
-isort pyproptest/ tests/
+black proptest/ tests/
+isort proptest/ tests/
 ```
 
 ## License
@@ -371,8 +371,8 @@ For major changes, please open an issue first to discuss what you would like to 
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/pyproptest.git
-cd pyproptest
+git clone https://github.com/your-username/proptest.git
+cd proptest
 
 # Create virtual environment
 python -m venv venv
@@ -385,10 +385,10 @@ pip install -e ".[dev,docs]"
 pytest
 
 # Run linting
-black pyproptest/ tests/
-isort pyproptest/ tests/
-flake8 pyproptest/ tests/
-mypy pyproptest/
+black proptest/ tests/
+isort proptest/ tests/
+flake8 proptest/ tests/
+mypy proptest/
 ```
 
 ## Acknowledgments

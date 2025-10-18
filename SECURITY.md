@@ -11,7 +11,7 @@ We release patches for security vulnerabilities in the following versions:
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in PyPropTest, please report it responsibly:
+If you discover a security vulnerability in python-proptest, please report it responsibly:
 
 ### How to Report
 
@@ -38,9 +38,9 @@ If you discover a security vulnerability in PyPropTest, please report it respons
 
 ## Security Best Practices
 
-When using PyPropTest:
+When using python-proptest:
 
-1. **Keep dependencies updated**: Regularly update PyPropTest and its dependencies
+1. **Keep dependencies updated**: Regularly update python-proptest and its dependencies
 2. **Use specific versions**: Pin to specific versions in production
 3. **Review generated data**: Be cautious with generated data in security-sensitive contexts
 4. **Validate inputs**: Always validate inputs from property-based tests before using in production
@@ -65,7 +65,7 @@ Property-based testing generates random data, which can include:
 ### Example: Safe String Generation
 
 ```python
-from pyproptest import for_all, Gen
+from proptest import for_all, Gen
 
 # Safe: Generate only printable ASCII characters
 safe_string_gen = Gen.str().filter(
@@ -104,4 +104,4 @@ For security-related questions or concerns, please contact:
 - **Security Email**: [INSERT SECURITY EMAIL]
 - **GitHub Security Advisories**: Use GitHub's private vulnerability reporting feature
 
-Thank you for helping keep PyPropTest secure!
+Thank you for helping keep python-proptest secure!
