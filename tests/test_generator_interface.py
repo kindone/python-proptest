@@ -8,7 +8,7 @@ with transformations, chaining, and filtering.
 import random
 import unittest
 
-from proptest import Gen, PropertyTestError, run_for_all
+from python_proptest import Gen, PropertyTestError, run_for_all
 
 
 class TestGeneratorInterface(unittest.TestCase):

@@ -8,7 +8,7 @@ for combining and transforming generators.
 import random
 import unittest
 
-from proptest import Gen, PropertyTestError, for_all, integers, run_for_all
+from python_proptest import Gen, PropertyTestError, for_all, integers, run_for_all
 
 
 class TestCombinators(unittest.TestCase):

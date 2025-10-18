@@ -8,8 +8,8 @@ and serves as a comprehensive test suite.
 import random
 import unittest
 
-from proptest import Gen, Property, PropertyTestError, Shrinkable, for_all
-from proptest.core.shrinker import (
+from python_proptest import Gen, Property, PropertyTestError, Shrinkable, for_all
+from python_proptest.core.shrinker import (
     DictShrinker,
     IntegerShrinker,
     ListShrinker,

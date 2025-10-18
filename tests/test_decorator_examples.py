@@ -7,7 +7,7 @@ more ergonomic property-based testing.
 
 import pytest
 
-from proptest import (
+from python_proptest import (
     Gen,
     assume,
     dictionaries,

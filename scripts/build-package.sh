@@ -62,11 +62,11 @@ if [ -d "dist" ] && [ "$(ls -A dist)" ]; then
     print_status "Package information:"
     python -m build --wheel --sdist --outdir dist/ >/dev/null 2>&1 || true
     
-    if [ -f "dist/proptest-*.whl" ]; then
+    if [ -f "dist/python-proptest-*.whl" ]; then
         echo "Wheel: $(ls dist/*.whl)"
     fi
     
-    if [ -f "dist/proptest-*.tar.gz" ]; then
+    if [ -f "dist/python-proptest-*.tar.gz" ]; then
         echo "Source: $(ls dist/*.tar.gz)"
     fi
     

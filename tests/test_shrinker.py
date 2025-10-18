@@ -8,8 +8,8 @@ for finding minimal failing cases.
 import random
 import unittest
 
-from proptest import Gen, PropertyTestError, Shrinkable, run_for_all
-from proptest.core.shrinker import (
+from python_proptest import Gen, PropertyTestError, Shrinkable, run_for_all
+from python_proptest.core.shrinker import (
     DictShrinker,
     IntegerShrinker,
     ListShrinker,
@@ -181,7 +181,7 @@ class TestShrinker(unittest.TestCase):
         assert shrinkable.shrinks().is_empty()  # No shrinks by default
 
         # Test with shrinks
-        from proptest.core.stream import Stream
+        from python_proptest.core.stream import Stream
 
         shrinkable_with_shrinks = Shrinkable(
             42, lambda: Stream.many([Shrinkable(21), Shrinkable(0)])

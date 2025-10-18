@@ -15,8 +15,8 @@ Thank you for your interest in contributing to python-proptest! This document pr
 1. Fork the repository on GitHub
 2. Clone your fork locally:
    ```bash
-   git clone https://github.com/your-username/proptest.git
-   cd proptest
+   git clone https://github.com/your-username/python-proptest.git
+   cd python-proptest
    ```
 
 3. Create a virtual environment:
@@ -39,7 +39,7 @@ Thank you for your interest in contributing to python-proptest! This document pr
 pytest
 
 # Run tests with coverage
-pytest --cov=proptest --cov-report=html
+pytest --cov=python_proptest --cov-report=html
 
 # Run specific test file
 pytest tests/test_generators.py
@@ -54,19 +54,19 @@ Before submitting a PR, ensure your code passes all quality checks:
 
 ```bash
 # Format code with black
-black proptest/ tests/
+black python_proptest/ tests/
 
 # Sort imports with isort
-isort proptest/ tests/
+isort python_proptest/ tests/
 
 # Lint with flake8
-flake8 proptest/ tests/
+flake8 python_proptest/ tests/
 
 # Type check with mypy
-mypy proptest/
+mypy python_proptest/
 
 # Security check with bandit
-bandit -r proptest/
+bandit -r python_proptest/
 
 # Check for known security vulnerabilities
 safety check
@@ -131,7 +131,7 @@ Follow conventional commit format:
 ### Example
 
 ```python
-from proptest import for_all, integers, text
+from python_proptest import for_all, integers, text
 
 class TestStringOperations:
     @for_all(text(), text())

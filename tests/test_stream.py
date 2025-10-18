@@ -6,7 +6,7 @@ These tests verify that the Stream class works correctly for lazy evaluation.
 
 import unittest
 
-from proptest import Stream
+from python_proptest import Stream
 
 
 class TestStream(unittest.TestCase):

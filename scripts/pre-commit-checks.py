@@ -126,37 +126,37 @@ def main():
 
     # Step 2: Critical flake8 checks
     if not run_command(
-        "flake8 proptest --count --select=E9,F63,F7,F82 --show-source --statistics",
+        "flake8 python_proptest --count --select=E9,F63,F7,F82 --show-source --statistics",
         "Critical flake8 checks"
     ):
         failed_checks.append("Critical flake8")
 
     # Step 3: Extended flake8 checks
     if not run_command(
-        "flake8 proptest --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics",
+        "flake8 python_proptest --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics",
         "Extended flake8 checks"
     ):
         failed_checks.append("Extended flake8")
 
     # Step 4: Black formatting check
     if not run_command(
-        "black --check proptest/ tests/",
+        "black --check python_proptest/ tests/",
         "Black formatting check"
     ):
-        print_warning("Code formatting issues found. Run 'black proptest/ tests/' to fix")
+        print_warning("Code formatting issues found. Run 'black python_proptest/ tests/' to fix")
         failed_checks.append("Black formatting")
 
     # Step 5: Import sorting check
     if not run_command(
-        "isort --check-only proptest/ tests/",
+        "isort --check-only python_proptest/ tests/",
         "Import sorting check"
     ):
-        print_warning("Import sorting issues found. Run 'isort proptest/ tests/' to fix")
+        print_warning("Import sorting issues found. Run 'isort python_proptest/ tests/' to fix")
         failed_checks.append("Import sorting")
 
     # Step 6: MyPy type checking
     if not run_command(
-        "mypy proptest/",
+        "mypy python_proptest/",
         "MyPy type checking"
     ):
         failed_checks.append("MyPy type checking")
@@ -171,7 +171,7 @@ def main():
 
     # Step 8: Pytest tests with coverage
     if not run_command(
-        "pytest --cov=proptest --cov-report=term-missing -q",
+        "pytest --cov=python_proptest --cov-report=term-missing -q",
         "Pytest tests with coverage",
         capture_output=True
     ):
@@ -179,7 +179,7 @@ def main():
 
     # Step 9: Security analysis (optional)
     run_command(
-        "bandit -r proptest/ -f json -o bandit-report.json",
+        "bandit -r python_proptest/ -f json -o bandit-report.json",
         "Security analysis",
         allow_failure=True
     )

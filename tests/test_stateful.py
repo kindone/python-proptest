@@ -7,7 +7,7 @@ These tests verify that stateful testing functionality works correctly.
 import random
 import unittest
 
-from proptest import (
+from python_proptest import (
     Action,
     Gen,
     SimpleAction,

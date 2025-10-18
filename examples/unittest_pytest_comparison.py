@@ -7,7 +7,7 @@ using both unittest and pytest frameworks.
 
 import unittest
 import pytest
-from proptest import for_all, Gen, integers, text
+from python_proptest import for_all, Gen, integers, text
 
 
 # =============================================================================

@@ -17,7 +17,7 @@ Consider verifying a round-trip property for a custom parser/serializer:
 
 ```python
 import json
-from proptest import run_for_all, Gen
+from python_proptest import run_for_all, Gen
 
 def test_serialize_parse_roundtrip():
     """Test that serializing and parsing preserves data."""
@@ -47,13 +47,13 @@ This PBT approach facilitates the discovery of edge cases and intricate bugs tha
 To add `python-proptest` to your project, run the following command:
 
 ```bash
-pip install proptest
+pip install python-proptest
 ```
 
 For development dependencies:
 
 ```bash
-pip install proptest[dev]
+pip install python-proptest[dev]
 ```
 
 ## Core Concepts and Features
@@ -77,7 +77,7 @@ python-proptest provides two main approaches for property-based testing:
 ### 1. Function-based Approach (Recommended for pytest)
 
 ```python
-from proptest import run_for_all, Gen
+from python_proptest import run_for_all, Gen
 
 def test_addition_commutativity():
     def property_func(x: int, y: int):
@@ -89,7 +89,7 @@ def test_addition_commutativity():
 ### 2. Decorator-based Approach
 
 ```python
-from proptest import for_all, integers
+from python_proptest import for_all, integers
 
 @for_all(integers(), integers())
 def test_addition_commutativity(x: int, y: int):
@@ -105,7 +105,7 @@ The `@for_all` decorator integrates seamlessly with pytest using direct decorati
 
 ```python
 import pytest
-from proptest import for_all, integers
+from python_proptest import for_all, integers
 
 class TestMathProperties:
     @for_all(integers(), integers())
@@ -124,7 +124,7 @@ python-proptest provides two main approaches for defining property tests. Choose
 Perfect for simple property checks that can be expressed as lambdas:
 
 ```python
-from proptest import run_for_all, Gen
+from python_proptest import run_for_all, Gen
 
 def test_simple_properties():
     # Type checks
@@ -151,7 +151,7 @@ def test_simple_properties():
 Perfect for complex assertions that benefit from explicit parameter signatures:
 
 ```python
-from proptest import for_all, integers, text
+from python_proptest import for_all, integers, text
 
 @for_all(integers(), integers())
 def test_complex_math_property(x: int, y: int):

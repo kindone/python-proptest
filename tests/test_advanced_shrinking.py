@@ -4,7 +4,7 @@ Tests for advanced shrinking functionality.
 
 import unittest
 
-from proptest.core.shrinker import (
+from python_proptest.core.shrinker import (
     Shrinkable,
     binary_search_shrinkable,
     shrink_element_wise,
@@ -26,7 +26,7 @@ class TestShrinkable(unittest.TestCase):
 
     def test_with_shrinks(self):
         """Test adding shrinking candidates."""
-        from proptest.core.stream import Stream
+        from python_proptest.core.stream import Stream
 
         shr = Shrinkable(2).with_shrinks(
             lambda: Stream.many([Shrinkable(0), Shrinkable(1)])
@@ -39,7 +39,7 @@ class TestShrinkable(unittest.TestCase):
 
     def test_concat_static(self):
         """Test concatenating static shrinking candidates."""
-        from proptest.core.stream import Stream
+        from python_proptest.core.stream import Stream
 
         shr = Shrinkable(100)
         shr2 = shr.concat_static(lambda: Stream.one(Shrinkable(200)))
@@ -50,7 +50,7 @@ class TestShrinkable(unittest.TestCase):
 
     def test_concat(self):
         """Test concatenating dependent shrinking candidates."""
-        from proptest.core.stream import Stream
+        from python_proptest.core.stream import Stream
 
         shr = Shrinkable(100)
         shr2 = shr.concat(lambda parent: Stream.one(Shrinkable(parent.value + 5)))
@@ -61,7 +61,7 @@ class TestShrinkable(unittest.TestCase):
 
     def test_and_then_static(self):
         """Test replacing shrinking candidates with static ones."""
-        from proptest.core.stream import Stream
+        from python_proptest.core.stream import Stream
 
         shr = Shrinkable(100)
         shr2 = shr.and_then_static(lambda: Stream.one(Shrinkable(200)))
@@ -72,7 +72,7 @@ class TestShrinkable(unittest.TestCase):
 
     def test_and_then(self):
         """Test replacing shrinking candidates with dependent ones."""
-        from proptest.core.stream import Stream
+        from python_proptest.core.stream import Stream
 
         shr = Shrinkable(100)
         shr2 = shr.and_then(lambda parent: Stream.one(Shrinkable(parent.value + 1)))
@@ -83,7 +83,7 @@ class TestShrinkable(unittest.TestCase):
 
     def test_map(self):
         """Test mapping over shrinkable values."""
-        from proptest.core.stream import Stream
+        from python_proptest.core.stream import Stream
 
         shr = Shrinkable(4).with_shrinks(
             lambda: Stream.many([Shrinkable(0), Shrinkable(2), Shrinkable(3)])
@@ -98,7 +98,7 @@ class TestShrinkable(unittest.TestCase):
 
     def test_filter(self):
         """Test filtering shrinking candidates."""
-        from proptest.core.stream import Stream
+        from python_proptest.core.stream import Stream
 
         shr = Shrinkable(4).with_shrinks(
             lambda: Stream.many([Shrinkable(0), Shrinkable(2), Shrinkable(3)])
@@ -118,7 +118,7 @@ class TestShrinkable(unittest.TestCase):
 
     def test_flat_map(self):
         """Test flat mapping over shrinkable values."""
-        from proptest.core.stream import Stream
+        from python_proptest.core.stream import Stream
 
         shr = Shrinkable(4).with_shrinks(
             lambda: Stream.many([Shrinkable(0), Shrinkable(2), Shrinkable(3)])
@@ -136,7 +136,7 @@ class TestShrinkable(unittest.TestCase):
 
     def test_get_nth_child(self):
         """Test getting nth child shrinkable."""
-        from proptest.core.stream import Stream
+        from python_proptest.core.stream import Stream
 
         shr = Shrinkable(4).with_shrinks(
             lambda: Stream.many([Shrinkable(0), Shrinkable(2), Shrinkable(3)])
@@ -152,7 +152,7 @@ class TestShrinkable(unittest.TestCase):
 
     def test_retrieve(self):
         """Test retrieving shrinkable by path."""
-        from proptest.core.stream import Stream
+        from python_proptest.core.stream import Stream
 
         shr = Shrinkable(4).with_shrinks(
             lambda: Stream.many(
@@ -226,7 +226,7 @@ class TestElementWiseShrinking(unittest.TestCase):
 
     def test_shrink_element_wise_single_element(self):
         """Test element-wise shrinking with single element."""
-        from proptest.core.stream import Stream
+        from python_proptest.core.stream import Stream
 
         elem = Shrinkable(5).with_shrinks(
             lambda: Stream.many([Shrinkable(3), Shrinkable(4)])
@@ -240,7 +240,7 @@ class TestElementWiseShrinking(unittest.TestCase):
 
     def test_shrink_element_wise_multiple_elements(self):
         """Test element-wise shrinking with multiple elements."""
-        from proptest.core.stream import Stream
+        from python_proptest.core.stream import Stream
 
         elem1 = Shrinkable(5).with_shrinks(lambda: Stream.one(Shrinkable(3)))
         elem2 = Shrinkable(7).with_shrinks(lambda: Stream.one(Shrinkable(6)))
@@ -315,7 +315,7 @@ class TestShrinkableArray(unittest.TestCase):
 
     def test_shrinkable_array_element_wise_only(self):
         """Test shrinkable array with element-wise shrinking only."""
-        from proptest.core.stream import Stream
+        from python_proptest.core.stream import Stream
 
         elem1 = Shrinkable(5).with_shrinks(lambda: Stream.one(Shrinkable(3)))
         elem2 = Shrinkable(7).with_shrinks(lambda: Stream.one(Shrinkable(6)))
@@ -329,7 +329,7 @@ class TestShrinkableArray(unittest.TestCase):
 
     def test_shrinkable_array_both(self):
         """Test shrinkable array with both membership and element-wise shrinking."""
-        from proptest.core.stream import Stream
+        from python_proptest.core.stream import Stream
 
         elem1 = Shrinkable(5).with_shrinks(lambda: Stream.one(Shrinkable(3)))
         elem2 = Shrinkable(7).with_shrinks(lambda: Stream.one(Shrinkable(6)))

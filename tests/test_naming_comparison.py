@@ -7,7 +7,7 @@ function-based run_for_all approaches.
 
 import unittest
 
-from proptest import Gen, for_all, integers, run_for_all
+from python_proptest import Gen, for_all, integers, run_for_all
 
 
 class TestNamingComparison(unittest.TestCase):

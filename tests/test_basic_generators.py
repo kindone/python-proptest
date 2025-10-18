@@ -4,7 +4,7 @@ Tests for basic generators.
 
 import unittest
 
-from proptest import (
+from python_proptest import (
     Gen,
     dictionaries,
     floats,

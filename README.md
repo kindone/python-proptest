@@ -4,9 +4,9 @@ A property-based testing framework for Python, inspired by Haskell's QuickCheck 
 
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Tests](https://github.com/kindone/proptest/workflows/CI/badge.svg)](https://github.com/kindone/proptest/actions)
-[![Coverage](https://codecov.io/gh/kindone/proptest/branch/main/graph/badge.svg)](https://codecov.io/gh/kindone/proptest)
-[![PyPI version](https://badge.fury.io/py/proptest.svg)](https://badge.fury.io/py/proptest)
+[![Tests](https://github.com/kindone/python-proptest/workflows/CI/badge.svg)](https://github.com/kindone/python-proptest/actions)
+[![Coverage](https://codecov.io/gh/kindone/python-proptest/branch/main/graph/badge.svg)](https://codecov.io/gh/kindone/python-proptest)
+[![PyPI version](https://badge.fury.io/py/python-proptest.svg)](https://badge.fury.io/py/python-proptest)
 
 ## What is Property-Based Testing?
 
@@ -19,19 +19,19 @@ python-proptest then generates hundreds or thousands of varied inputs, searching
 ### Installation
 
 ```bash
-pip install proptest
+pip install python-proptest
 ```
 
 For development dependencies:
 
 ```bash
-pip install proptest[dev]
+pip install python-proptest[dev]
 ```
 
 ### Simple Lambda-Based Tests (Recommended for Simple Properties)
 
 ```python
-from proptest import run_for_all, Gen
+from python_proptest import run_for_all, Gen
 
 def test_simple_properties():
     # Perfect for simple lambda-based properties
@@ -54,7 +54,7 @@ def test_simple_properties():
 
 ```python
 import pytest
-from proptest import for_all, integers, text
+from python_proptest import for_all, integers, text
 
 class TestMathProperties:
     @for_all(integers(), integers())
@@ -86,7 +86,7 @@ class TestStringProperties:
 
 ```python
 import unittest
-from proptest import for_all, integers, text
+from python_proptest import for_all, integers, text
 
 class TestMathProperties(unittest.TestCase):
     @for_all(integers(), integers())
@@ -115,7 +115,7 @@ class TestStringProperties(unittest.TestCase):
 ### Standalone Function-Based Tests
 
 ```python
-from proptest import for_all, integers
+from python_proptest import for_all, integers
 
 @for_all(integers(), integers())
 def test_complex_math_property(x: int, y: int):
@@ -178,7 +178,7 @@ Perfect for simple property checks that can be expressed as lambdas:
 ### Testing List Operations
 
 ```python
-from proptest import run_for_all, Gen
+from python_proptest import run_for_all, Gen
 
 def test_list_reverse():
     def property_func(lst: list):
@@ -191,7 +191,7 @@ def test_list_reverse():
 ### Testing String Properties
 
 ```python
-from proptest import for_all, text
+from python_proptest import for_all, text
 
 @for_all(text(), text())
 def test_string_concatenation(s1: str, s2: str):
@@ -204,7 +204,7 @@ def test_string_concatenation(s1: str, s2: str):
 ### Testing Complex Data Structures
 
 ```python
-from proptest import run_for_all, Gen
+from python_proptest import run_for_all, Gen
 
 def test_json_roundtrip():
     def property_func(data: dict):
@@ -232,7 +232,7 @@ def test_json_roundtrip():
 ### Stateful Testing
 
 ```python
-from proptest import simple_stateful_property, Gen, SimpleAction
+from python_proptest import simple_stateful_property, Gen, SimpleAction
 
 def test_stack_operations():
     # Define a stack as a list
@@ -303,7 +303,7 @@ def test_stack_operations():
 pytest
 
 # Run with coverage
-pytest --cov=proptest
+pytest --cov=python_proptest
 
 # Run specific test file
 pytest tests/test_generators.py
@@ -312,14 +312,14 @@ pytest tests/test_generators.py
 ### Type Checking
 
 ```bash
-mypy proptest/
+mypy python_proptest/
 ```
 
 ### Code Formatting
 
 ```bash
-black proptest/ tests/
-isort proptest/ tests/
+black python_proptest/ tests/
+isort python_proptest/ tests/
 ```
 
 ## License
@@ -371,8 +371,8 @@ For major changes, please open an issue first to discuss what you would like to 
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/proptest.git
-cd proptest
+git clone https://github.com/your-username/python-proptest.git
+cd python-proptest
 
 # Create virtual environment
 python -m venv venv
@@ -385,10 +385,10 @@ pip install -e ".[dev,docs]"
 pytest
 
 # Run linting
-black proptest/ tests/
-isort proptest/ tests/
-flake8 proptest/ tests/
-mypy proptest/
+black python_proptest/ tests/
+isort python_proptest/ tests/
+flake8 python_proptest/ tests/
+mypy python_proptest/
 ```
 
 ## Acknowledgments

@@ -54,7 +54,7 @@ print_success "Package installed successfully"
 # Test 1: Basic import
 print_status "Test 1: Basic import test..."
 if python -c "
-from proptest import Gen, PropertyTestError, run_for_all
+from python_proptest import Gen, PropertyTestError, run_for_all
 print('✅ Basic imports successful')
 "; then
     print_success "Basic import test passed"
@@ -66,7 +66,7 @@ fi
 # Test 2: Generator creation
 print_status "Test 2: Generator creation test..."
 if python -c "
-from proptest import Gen
+from python_proptest import Gen
 # Test that generators can be created
 int_gen = Gen.int()
 str_gen = Gen.str()
@@ -82,7 +82,7 @@ fi
 # Test 3: Property testing
 print_status "Test 3: Property testing test..."
 if python -c "
-from proptest import Gen, for_all
+from python_proptest import Gen, for_all
 
 @for_all(Gen.int(), Gen.int())
 def test_addition_commutative(x, y):
@@ -100,9 +100,9 @@ fi
 # Test 4: Package info
 print_status "Test 4: Package information..."
 if python -c "
-import proptest
-print(f'✅ Package version: {proptest.__version__ if hasattr(proptest, \"__version__\") else \"Unknown\"}')
-print(f'✅ Package location: {proptest.__file__}')
+import python_proptest
+print(f'✅ Package version: {python_proptest.__version__ if hasattr(python_proptest, \"__version__\") else \"Unknown\"}')
+print(f'✅ Package location: {python_proptest.__file__}')
 "; then
     print_success "Package information test passed"
 else
@@ -113,7 +113,7 @@ fi
 print_status "Test 5: Unittest integration test..."
 if python -c "
 import unittest
-from proptest import Gen, for_all
+from python_proptest import Gen, for_all
 
 class TestIntegration(unittest.TestCase):
     @for_all(Gen.int())

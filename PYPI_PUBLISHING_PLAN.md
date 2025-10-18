@@ -122,11 +122,11 @@ This document outlines the complete plan for publishing python-proptest to PyPI 
 
 ### Current Structure ✅
 ```
-proptest/
+python_proptest/
 ├── pyproject.toml          # ✅ Well configured
 ├── README.md               # ✅ Comprehensive
 ├── LICENSE                 # ✅ MIT
-├── proptest/            # ✅ Main package
+├── python_proptest/            # ✅ Main package
 │   ├── __init__.py        # ✅ Proper exports
 │   └── core/              # ✅ Well organized
 ├── tests/                 # ✅ Comprehensive tests
@@ -137,9 +137,9 @@ proptest/
 ### Build Artifacts (Will be created)
 ```
 dist/
-├── proptest-0.1.0.tar.gz           # Source distribution
-├── proptest-0.1.0-py3-none-any.whl # Universal wheel
-└── proptest-0.1.0.dist-info/       # Package metadata
+├── python-proptest-0.1.0.tar.gz           # Source distribution
+├── python-proptest-0.1.0-py3-none-any.whl # Universal wheel
+└── python-proptest-0.1.0.dist-info/       # Package metadata
 ```
 
 ## 🔧 Required Tools
@@ -210,14 +210,14 @@ pip install build twine
 
 ### Post-Publication
 - [ ] Package is available on PyPI
-- [ ] Installation works: `pip install proptest`
+- [ ] Installation works: `pip install python-proptest`
 - [ ] All functionality works as expected
 - [ ] Documentation reflects PyPI installation
 
 ## 🚨 Risk Mitigation
 
 ### Common Issues
-1. **Name Conflicts**: Check if `proptest` is available
+1. **Name Conflicts**: Check if `python-proptest` is available
 2. **Build Errors**: Test builds locally first
 3. **Upload Failures**: Use TestPyPI for testing
 4. **Installation Issues**: Test on multiple Python versions

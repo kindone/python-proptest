@@ -7,7 +7,7 @@ unittest.TestCase classes.
 
 import unittest
 
-from proptest import Gen, for_all, integers, text
+from python_proptest import Gen, for_all, integers, text
 
 
 class TestUnittestIntegration(unittest.TestCase):

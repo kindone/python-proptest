@@ -8,7 +8,7 @@ The most reliable and pytest-friendly approach is to nest the property test insi
 
 ```python
 import pytest
-from proptest import for_all, Gen, integers, text
+from python_proptest import for_all, Gen, integers, text
 
 class TestMathProperties:
     """Recommended approach: nested property tests."""
@@ -68,7 +68,7 @@ class TestMathProperties:
 For non-class-based tests, you can use standalone functions:
 
 ```python
-from proptest import for_all, integers
+from python_proptest import for_all, integers
 
 @for_all(integers(), integers())
 def test_addition_commutativity(x: int, y: int):
@@ -109,7 +109,7 @@ class TestConditionalProperties:
 
         @for_all(integers(), integers())
         def test_division_property(self, x: int, y: int):
-            from proptest import assume
+            from python_proptest import assume
             assume(y != 0)  # Skip test cases where y is 0
             assert (x // y) * y + (x % y) == x
 

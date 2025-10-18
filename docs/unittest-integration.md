@@ -8,7 +8,7 @@ python-proptest provides seamless integration with Python's built-in `unittest` 
 
 ```python
 import unittest
-from proptest import for_all, integers, text
+from python_proptest import for_all, integers, text
 
 class TestMathProperties(unittest.TestCase):
     """Test class for mathematical properties using unittest."""
@@ -76,7 +76,7 @@ class TestMixedAssertions(unittest.TestCase):
 ### Using Gen Class Directly
 
 ```python
-from proptest import for_all, Gen
+from python_proptest import for_all, Gen
 
 class TestWithGen(unittest.TestCase):
     @for_all(Gen.int(), Gen.str())

@@ -213,7 +213,7 @@ make test-all-python
 
 3. **Import sorting issues**: Auto-fix with:
    ```bash
-   isort proptest/ tests/
+   isort python_proptest/ tests/
    ```
 
 4. **Type checking errors**: Check the mypy output and fix type annotations

@@ -7,7 +7,7 @@ and serve as both documentation and tests.
 
 import unittest
 
-from proptest import Gen, PropertyTestError, run_for_all
+from python_proptest import Gen, PropertyTestError, run_for_all
 
 
 class TestBasicProperties(unittest.TestCase):

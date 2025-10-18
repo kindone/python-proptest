@@ -66,8 +66,8 @@ test_python_version() {
     # Test imports
     print_status "Testing imports for Python $version..."
     if $python_cmd -c "
-from proptest import Gen, PropertyTestError, run_for_all
-from proptest.core.generator import DictGenerator
+from python_proptest import Gen, PropertyTestError, run_for_all
+from python_proptest.core.generator import DictGenerator
 print('✅ All imports successful')
 " 2>/dev/null; then
         print_success "Imports work for Python $version"
@@ -81,7 +81,7 @@ print('✅ All imports successful')
     # Test basic functionality
     print_status "Testing basic functionality for Python $version..."
     if $python_cmd -c "
-from proptest import Gen
+from python_proptest import Gen
 # Test that generators can be created
 int_gen = Gen.int()
 str_gen = Gen.str()

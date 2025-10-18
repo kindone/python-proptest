@@ -8,7 +8,7 @@ with various parameters and edge cases.
 import random
 import unittest
 
-from proptest import Gen, PropertyTestError, run_for_all
+from python_proptest import Gen, PropertyTestError, run_for_all
 
 
 class TestComprehensiveGenerators(unittest.TestCase):

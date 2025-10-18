@@ -27,7 +27,7 @@ While the table above provides a quick overview, let's explore some common combi
 Transforms the output of a generator using a provided function `f`.
 
 ```python
-from proptest import Gen
+from python_proptest import Gen
 
 # Generate positive integers and map them to their string representation
 positive_int_gen = Gen.int(min_value=1, max_value=1000)
@@ -48,7 +48,7 @@ user_object_gen = user_id_gen.map(lambda id: {
 Selects only the values from a generator that satisfy a given `predicate` function. Be cautious: if the predicate is too restrictive, generation might become very slow or fail if it cannot find enough valid values within a reasonable number of attempts.
 
 ```python
-from proptest import Gen
+from python_proptest import Gen
 
 # Generate only even numbers between 0 and 20
 interval_gen = Gen.int(min_value=0, max_value=20)
@@ -66,7 +66,7 @@ non_empty_string_gen = possibly_empty_string_gen.filter(lambda s: len(s) > 0)
 Creates a *dependent* generator. The function `f` takes a value produced by the initial generator and returns a *new generator*. This is powerful for scenarios where the generation of one value depends on another.
 
 ```python
-from proptest import Gen
+from python_proptest import Gen
 
 # Generate a list whose length is also randomly generated
 length_gen = Gen.int(min_value=1, max_value=5)  # Generate a length first
@@ -88,7 +88,7 @@ pair_gen = x_gen.flat_map(lambda x:
 Randomly selects one of the provided generators to produce a value for each test case. To control the selection probability, you can wrap generators using `Gen.weighted_gen` (see the dedicated section below).
 
 ```python
-from proptest import Gen
+from python_proptest import Gen
 
 # Generate either a number or a boolean
 num_or_bool_gen = Gen.one_of(
@@ -111,7 +111,7 @@ specific_or_general_string_gen = Gen.one_of(
 Randomly selects one value from the provided list of literal values. To control the selection probability, you can wrap values using `Gen.weighted_value` (see the dedicated section below).
 
 ```python
-from proptest import Gen
+from python_proptest import Gen
 
 # Pick a specific HTTP status code
 status_gen = Gen.element_of(200, 201, 400, 404, 500)
@@ -127,7 +127,7 @@ option_gen = Gen.element_of('read', 'write', 'admin')
 Used within `Gen.one_of` and `Gen.element_of` respectively to influence the probability of selecting certain generators or values. The `weight` is a positive number between 0.0 and 1.0.
 
 ```python
-from proptest import Gen
+from python_proptest import Gen
 
 # Generate numbers, but make 0 appear much more often
 weighted_number_gen = Gen.one_of(
@@ -150,7 +150,7 @@ weighted_char_gen = Gen.element_of(
 Constructs instances of a `Class` by generating arguments for its constructor using the provided `arg_gens`.
 
 ```python
-from proptest import Gen
+from python_proptest import Gen
 
 class Point:
     def __init__(self, x: int, y: int):
@@ -171,7 +171,7 @@ point_gen = Gen.construct(
 ### Building Complex Data Structures
 
 ```python
-from proptest import Gen
+from python_proptest import Gen
 
 # Generate a user profile with nested data
 user_profile_gen = Gen.construct(
@@ -201,7 +201,7 @@ def tree_gen(depth: int = 0):
 ### Conditional Generation
 
 ```python
-from proptest import Gen
+from python_proptest import Gen
 
 # Generate different types based on a condition
 def conditional_gen():

@@ -26,7 +26,7 @@ You typically use factory functions to create a `StatefulProperty`:
 *   **`simple_stateful_property<ObjectType>(initial_gen, simple_action_gen_factory)`**: Use this when you don't need an explicit model. Checks are usually performed within the `SimpleAction` implementations (e.g., asserting invariants after an operation).
 
     ```python
-    from proptest import Gen, simple_stateful_property, SimpleAction
+    from python_proptest import Gen, simple_stateful_property, SimpleAction
 
     # Define the system type
     MySystem = list[int]
@@ -60,7 +60,7 @@ You typically use factory functions to create a `StatefulProperty`:
 *   **`stateful_property<ObjectType, ModelType>(initial_gen, model_factory, action_gen_factory)`**: Use this when you want to maintain a separate model to verify the system's behavior against.
 
     ```python
-    from proptest import Gen, stateful_property, Action
+    from python_proptest import Gen, stateful_property, Action
 
     # Define the system and model types
     MySystem = list[int]
@@ -115,7 +115,7 @@ The `StatefulProperty` instance provides several methods for configuration:
 *   `set_post_check(post_check_func)`: Sets a function to run after all actions in a sequence have completed successfully. Useful for final state validation. You can also use `set_post_check_without_model((obj: ObjectType) -> None)`.
 
 ```python
-from proptest import simple_stateful_property, Gen, SimpleAction
+from python_proptest import simple_stateful_property, Gen, SimpleAction
 
 def test_configured_stateful_property():
     # Define a simple counter system
@@ -158,7 +158,7 @@ def test_configured_stateful_property():
 ### Testing a Stack Data Structure
 
 ```python
-from proptest import simple_stateful_property, Gen, SimpleAction
+from python_proptest import simple_stateful_property, Gen, SimpleAction
 from typing import List
 
 def test_stack_implementation():
@@ -205,7 +205,7 @@ def test_stack_implementation():
 ### Testing a Bank Account with Model
 
 ```python
-from proptest import stateful_property, Gen, Action
+from python_proptest import stateful_property, Gen, Action
 from typing import Dict, Any
 
 def test_bank_account():
@@ -285,7 +285,7 @@ If a test sequence fails (an action throws an error or the `post_check` fails), 
 The goal is to present the simplest possible initial state and sequence of actions that trigger the failure, making debugging easier. The error message will report the shrunk arguments if successful.
 
 ```python
-from proptest import simple_stateful_property, Gen, SimpleAction
+from python_proptest import simple_stateful_property, Gen, SimpleAction
 
 def test_failing_stateful_property():
     # This will demonstrate shrinking in action

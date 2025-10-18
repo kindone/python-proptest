@@ -46,30 +46,30 @@ test:
 	@echo "🧪 Running unittest tests..."
 	python -m unittest discover tests -v
 	@echo "🧪 Running pytest tests..."
-	pytest --cov=proptest --cov-report=term-missing -v
+	pytest --cov=python_proptest --cov-report=term-missing -v
 
 # Run linting
 lint:
 	@echo "🔍 Running flake8 linting..."
-	flake8 proptest --count --select=E9,F63,F7,F82 --show-source --statistics
-	flake8 proptest --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics
+	flake8 python_proptest --count --select=E9,F63,F7,F82 --show-source --statistics
+	flake8 python_proptest --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics
 
 # Format code
 format:
 	@echo "🎨 Formatting code with black..."
-	black proptest/ tests/
+	black python_proptest/ tests/
 	@echo "📋 Sorting imports with isort..."
-	isort proptest/ tests/
+	isort python_proptest/ tests/
 
 # Type checking
 type-check:
 	@echo "🔍 Running mypy type checking..."
-	mypy proptest/
+	mypy python_proptest/
 
 # Security analysis
 security:
 	@echo "🔒 Running security analysis..."
-	bandit -r proptest/ -s B311,B110 -f json -o bandit-report.json
+	bandit -r python_proptest/ -s B311,B110 -f json -o bandit-report.json
 	safety check --json > safety-report.json || true
 
 # Quick pre-commit check (fast)

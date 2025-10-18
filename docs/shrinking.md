@@ -6,7 +6,7 @@ When `run_for_all` (either standalone or called on a `Property` instance) detect
 *   The error message thrown by `run_for_all` on failure typically includes the original failing input and the final, shrunk failing input.
 
 ```python
-from proptest import run_for_all, Gen, PropertyTestError
+from python_proptest import run_for_all, Gen, PropertyTestError
 
 # Example where shrinking is useful (using standalone run_for_all)
 def test_failing_property():
@@ -49,7 +49,7 @@ python-proptest's shrinking process follows these principles:
 ### Integer Shrinking
 
 ```python
-from proptest import run_for_all, Gen, PropertyTestError
+from python_proptest import run_for_all, Gen, PropertyTestError
 
 def test_integer_shrinking():
     def property_func(x: int):
@@ -66,7 +66,7 @@ def test_integer_shrinking():
 ### String Shrinking
 
 ```python
-from proptest import run_for_all, Gen, PropertyTestError
+from python_proptest import run_for_all, Gen, PropertyTestError
 
 def test_string_shrinking():
     def property_func(s: str):
@@ -83,7 +83,7 @@ def test_string_shrinking():
 ### List Shrinking
 
 ```python
-from proptest import run_for_all, Gen, PropertyTestError
+from python_proptest import run_for_all, Gen, PropertyTestError
 
 def test_list_shrinking():
     def property_func(lst: list):
@@ -100,7 +100,7 @@ def test_list_shrinking():
 ### Complex Structure Shrinking
 
 ```python
-from proptest import run_for_all, Gen, PropertyTestError
+from python_proptest import run_for_all, Gen, PropertyTestError
 
 def test_complex_shrinking():
     def property_func(data):
@@ -135,7 +135,7 @@ python-proptest includes advanced shrinking strategies for more complex scenario
 For collections, python-proptest can shrink individual elements while keeping the structure:
 
 ```python
-from proptest import run_for_all, Gen, PropertyTestError
+from python_proptest import run_for_all, Gen, PropertyTestError
 
 def test_element_wise_shrinking():
     def property_func(numbers: list):
@@ -154,7 +154,7 @@ def test_element_wise_shrinking():
 For sets and dictionaries, python-proptest can remove elements to find the minimal failing subset:
 
 ```python
-from proptest import run_for_all, Gen, PropertyTestError
+from python_proptest import run_for_all, Gen, PropertyTestError
 
 def test_membership_shrinking():
     def property_func(items: set):
@@ -175,7 +175,7 @@ You can influence the shrinking behavior by using specific generators or combina
 ### Using `Gen.just()` for Fixed Values
 
 ```python
-from proptest import run_for_all, Gen
+from python_proptest import run_for_all, Gen
 
 def test_with_fixed_values():
     def property_func(x: int):
@@ -189,7 +189,7 @@ def test_with_fixed_values():
 ### Using `Gen.element_of()` for Specific Values
 
 ```python
-from proptest import run_for_all, Gen, PropertyTestError
+from python_proptest import run_for_all, Gen, PropertyTestError
 
 def test_with_specific_values():
     def property_func(x: int):
@@ -207,7 +207,7 @@ def test_with_specific_values():
 You can control shrinking behavior through the `Property` class:
 
 ```python
-from proptest import Property, Gen
+from python_proptest import Property, Gen
 
 def my_property(x: int):
     return x < 100

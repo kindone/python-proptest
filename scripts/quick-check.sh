@@ -21,7 +21,7 @@ echo "========================"
 
 # Critical flake8 checks
 print_status "Critical flake8 checks..."
-if flake8 proptest --count --select=E9,F63,F7,F82 --show-source --statistics; then
+if flake8 python_proptest --count --select=E9,F63,F7,F82 --show-source --statistics; then
     print_success "Critical flake8 passed"
 else
     print_error "Critical flake8 failed"
@@ -30,16 +30,16 @@ fi
 
 # Black formatting
 print_status "Black formatting check..."
-if black --check proptest/ tests/; then
+if black --check python_proptest/ tests/; then
     print_success "Formatting passed"
 else
-    print_error "Formatting issues found - run 'black proptest/ tests/' to fix"
+    print_error "Formatting issues found - run 'black python_proptest/ tests/' to fix"
     exit 1
 fi
 
 # MyPy type checking
 print_status "MyPy type checking..."
-if mypy proptest/; then
+if mypy python_proptest/; then
     print_success "Type checking passed"
 else
     print_error "Type checking failed"

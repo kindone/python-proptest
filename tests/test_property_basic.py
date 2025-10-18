@@ -7,7 +7,7 @@ with various function signatures and edge cases.
 
 import unittest
 
-from proptest import Gen, Property, PropertyTestError, run_for_all
+from python_proptest import Gen, Property, PropertyTestError, run_for_all
 
 
 class TestPropertyBasic(unittest.TestCase):

@@ -65,7 +65,7 @@ Property-based testing generates random data, which can include:
 ### Example: Safe String Generation
 
 ```python
-from proptest import for_all, Gen
+from python_proptest import for_all, Gen
 
 # Safe: Generate only printable ASCII characters
 safe_string_gen = Gen.str().filter(

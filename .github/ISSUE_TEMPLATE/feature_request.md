@@ -19,7 +19,7 @@ A clear and concise description of any alternative solutions or features you've 
 **Use case example**
 ```python
 # Please provide a code example showing how you'd like to use this feature
-from proptest import for_all, integers
+from python_proptest import for_all, integers
 
 # Your example here
 ```

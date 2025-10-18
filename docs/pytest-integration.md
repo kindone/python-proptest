@@ -8,7 +8,7 @@ python-proptest provides seamless integration with pytest through the `@for_all`
 
 ```python
 import pytest
-from proptest import for_all, Gen, integers, text
+from python_proptest import for_all, Gen, integers, text
 
 class TestMathProperties:
     """Test class for mathematical properties."""
@@ -86,7 +86,7 @@ class TestWithAssumptions:
         """Test assume() functionality in pytest context."""
         @for_all(integers(), integers())
         def test_with_assume(self, x: int, y: int):
-            from proptest import assume
+            from python_proptest import assume
             assume(y != 0)  # Skip test cases where y is 0
             # Use a simpler assertion to avoid floating point precision issues
             assert isinstance(x, int)
@@ -172,7 +172,7 @@ pytest -m "not slow" -v
 
 ```python
 import pytest
-from proptest import for_all, Gen, integers, text
+from python_proptest import for_all, Gen, integers, text
 
 class TestCompleteExample:
     """Complete example of pytest integration."""

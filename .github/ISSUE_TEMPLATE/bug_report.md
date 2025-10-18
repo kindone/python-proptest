@@ -23,7 +23,7 @@ A clear and concise description of what you expected to happen.
 **Code example**
 ```python
 # Please provide a minimal code example that reproduces the issue
-from proptest import for_all, integers
+from python_proptest import for_all, integers
 
 @for_all(integers())
 def test_example(x: int):
