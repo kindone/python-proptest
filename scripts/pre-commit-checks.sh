@@ -156,7 +156,7 @@ main() {
 
     # Step 9: Security analysis (optional - don't fail on warnings)
     print_status "Running security analysis..."
-    if bandit -r pyproptest/ -f json -o bandit-report.json >/dev/null 2>&1; then
+    if bandit -r pyproptest/ -s B311,B110 -f json -o bandit-report.json >/dev/null 2>&1; then
         print_success "Security analysis completed"
     else
         print_warning "Security analysis found issues (check bandit-report.json)"

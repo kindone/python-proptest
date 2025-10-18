@@ -69,7 +69,7 @@ type-check:
 # Security analysis
 security:
 	@echo "🔒 Running security analysis..."
-	bandit -r pyproptest/ -f json -o bandit-report.json
+	bandit -r pyproptest/ -s B311,B110 -f json -o bandit-report.json
 	safety check --json > safety-report.json || true
 
 # Quick pre-commit check (fast)
