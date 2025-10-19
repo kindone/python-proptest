@@ -97,22 +97,22 @@ class FilteredGenerator(Generator[T]):
             f"Could not generate value satisfying predicate after "
             f"{self.max_attempts} attempts"
         )
-    
+
     def _filter_shrinks(self, shrinkable: Shrinkable[T]):
-        """Filter shrinking candidates to only include those that satisfy the predicate."""
+        """Filter shrinking candidates by predicate."""
         from python_proptest.core.stream import Stream
-        
+
         def filtered_stream():
             original_stream = shrinkable.shrinks()
             filtered_candidates = []
-            
+
             # Get all candidates from the original stream
             for candidate in original_stream:
                 if self.predicate(candidate.value):
                     filtered_candidates.append(candidate)
-            
+
             return Stream.many(filtered_candidates)
-        
+
         return filtered_stream()
 
 
@@ -292,12 +292,20 @@ class IntGenerator(Generator[int]):
         if value > target:
             if target >= self.min_value and target <= self.max_value:
                 shrinks.append(Shrinkable(target))
-            if value > target + 1 and target + 1 >= self.min_value and target + 1 <= self.max_value:
+            if (
+                value > target + 1
+                and target + 1 >= self.min_value
+                and target + 1 <= self.max_value
+            ):
                 shrinks.append(Shrinkable(target + 1))
         elif value < target:
             if target <= self.max_value and target >= self.min_value:
                 shrinks.append(Shrinkable(target))
-            if value < target - 1 and target - 1 <= self.max_value and target - 1 >= self.min_value:
+            if (
+                value < target - 1
+                and target - 1 <= self.max_value
+                and target - 1 >= self.min_value
+            ):
                 shrinks.append(Shrinkable(target - 1))
 
         # Binary search shrinking towards min_value
@@ -307,7 +315,7 @@ class IntGenerator(Generator[int]):
                 mid = (value + self.min_value) // 2
                 if mid >= self.min_value and mid <= self.max_value and mid != value:
                     shrinks.append(Shrinkable(mid))
-            
+
             # Try shrinking towards max_value (for negative values)
             if value < self.max_value:
                 mid = (value + self.max_value) // 2

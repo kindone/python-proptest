@@ -170,7 +170,11 @@ class TestDictGenerator(unittest.TestCase):
 class TestCombinators(unittest.TestCase):
     """Test generator combinators."""
 
-    @for_all(Gen.one_of(Gen.int(min_value=0, max_value=10), Gen.str(min_length=1, max_length=3)))
+    @for_all(
+        Gen.one_of(
+            Gen.int(min_value=0, max_value=10), Gen.str(min_length=1, max_length=3)
+        )
+    )
     def test_one_of_generator(self, x):
         """Test one_of combinator."""
         assert isinstance(x, (int, str))
