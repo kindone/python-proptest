@@ -54,21 +54,21 @@ def test_simple_properties():
 
 ```python
 import pytest
-from python_proptest import for_all, integers, text
+from python_proptest import for_all, Gen
 
 class TestMathProperties:
-    @for_all(integers(), integers())
+    @for_all(Gen.int(), Gen.int())
     def test_addition_commutativity(self, x: int, y: int):
         """Test that addition is commutative - automatically runs 100+ random cases!"""
         assert x + y == y + x
 
-    @for_all(integers(), integers())
+    @for_all(Gen.int(), Gen.int())
     def test_multiplication_associativity(self, x: int, y: int, z: int):
         """Test that multiplication is associative."""
         assert (x * y) * z == x * (y * z)
 
 class TestStringProperties:
-    @for_all(text(), text())
+    @for_all(Gen.str(), Gen.str())
     def test_string_concatenation(self, s1: str, s2: str):
         """Test string concatenation properties."""
         result = s1 + s2
@@ -86,21 +86,21 @@ class TestStringProperties:
 
 ```python
 import unittest
-from python_proptest import for_all, integers, text
+from python_proptest import for_all, Gen
 
 class TestMathProperties(unittest.TestCase):
-    @for_all(integers(), integers())
+    @for_all(Gen.int(), Gen.int())
     def test_addition_commutativity(self, x: int, y: int):
         """Test that addition is commutative using unittest assertions."""
         self.assertEqual(x + y, y + x)
 
-    @for_all(integers(), integers(), integers())
+    @for_all(Gen.int(), Gen.int(), Gen.int())
     def test_multiplication_associativity(self, x: int, y: int, z: int):
         """Test that multiplication is associative."""
         self.assertEqual((x * y) * z, x * (y * z))
 
 class TestStringProperties(unittest.TestCase):
-    @for_all(text(), text())
+    @for_all(Gen.str(), Gen.str())
     def test_string_concatenation(self, s1: str, s2: str):
         """Test string concatenation properties."""
         result = s1 + s2
@@ -115,9 +115,9 @@ class TestStringProperties(unittest.TestCase):
 ### Standalone Function-Based Tests
 
 ```python
-from python_proptest import for_all, integers
+from python_proptest import for_all, Gen
 
-@for_all(integers(), integers())
+@for_all(Gen.int(), Gen.int())
 def test_complex_math_property(x: int, y: int):
     """Test complex mathematical property with multiple conditions."""
     result = x * y + x + y
@@ -191,9 +191,9 @@ def test_list_reverse():
 ### Testing String Properties
 
 ```python
-from python_proptest import for_all, text
+from python_proptest import for_all, Gen
 
-@for_all(text(), text())
+@for_all(Gen.str(), Gen.str())
 def test_string_concatenation(s1: str, s2: str):
     result = s1 + s2
     assert len(result) == len(s1) + len(s2)

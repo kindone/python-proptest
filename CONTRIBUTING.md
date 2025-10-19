@@ -131,10 +131,10 @@ Follow conventional commit format:
 ### Example
 
 ```python
-from python_proptest import for_all, integers, text
+from python_proptest import for_all, Gen
 
 class TestStringOperations:
-    @for_all(text(), text())
+    @for_all(Gen.str(), Gen.str())
     def test_string_concatenation_length(self, s1: str, s2: str):
         """Test that string concatenation preserves length property."""
         result = s1 + s2

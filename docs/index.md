@@ -89,9 +89,9 @@ def test_addition_commutativity():
 ### 2. Decorator-based Approach
 
 ```python
-from python_proptest import for_all, integers
+from python_proptest import for_all, Gen
 
-@for_all(integers(), integers())
+@for_all(Gen.int(), Gen.int())
 def test_addition_commutativity(x: int, y: int):
     assert x + y == y + x
 
@@ -105,10 +105,10 @@ The `@for_all` decorator integrates seamlessly with pytest using direct decorati
 
 ```python
 import pytest
-from python_proptest import for_all, integers
+from python_proptest import for_all, Gen
 
 class TestMathProperties:
-    @for_all(integers(), integers())
+    @for_all(Gen.int(), Gen.int())
     def test_addition_commutativity(self, x: int, y: int):
         """Test that addition is commutative - direct decoration!"""
         assert x + y == y + x
@@ -151,9 +151,9 @@ def test_simple_properties():
 Perfect for complex assertions that benefit from explicit parameter signatures:
 
 ```python
-from python_proptest import for_all, integers, text
+from python_proptest import for_all, Gen
 
-@for_all(integers(), integers())
+@for_all(Gen.int(), Gen.int())
 def test_complex_math_property(x: int, y: int):
     """Test complex mathematical property with multiple conditions."""
     result = x * y + x + y
@@ -161,7 +161,7 @@ def test_complex_math_property(x: int, y: int):
     assert result >= y
     assert result % 2 == (x + y) % 2
 
-@for_all(text(), text())
+@for_all(Gen.str(), Gen.str())
 def test_string_operations(s1: str, s2: str):
     """Test string operations with multiple assertions."""
     combined = s1 + s2

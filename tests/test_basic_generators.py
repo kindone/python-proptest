@@ -170,30 +170,22 @@ class TestDictGenerator(unittest.TestCase):
 class TestCombinators(unittest.TestCase):
     """Test generator combinators."""
 
-    @for_all(one_of(integers(min_value=0, max_value=10), text(min_size=1, max_size=3)))
+    @for_all(Gen.one_of(Gen.int(min_value=0, max_value=10), Gen.str(min_length=1, max_length=3)))
     def test_one_of_generator(self, x):
         """Test one_of combinator."""
         assert isinstance(x, (int, str))
 
-    @for_all(just(42))
+    @for_all(Gen.just(42))
     def test_just_generator(self, x: int):
         """Test just combinator."""
         assert x == 42
 
-    def test_map_generator(self):
+    @for_all(Gen.int(min_value=1, max_value=10).map(lambda n: f"Number: {n}"))
+    def test_map_generator(self, x: str):
         """Test map combinator."""
+        assert isinstance(x, str) and x.startswith("Number: ")
 
-        @for_all(integers(min_value=1, max_value=10).map(lambda n: f"Number: {n}"))
-        def test_map(self, x: str):
-            assert isinstance(x, str) and x.startswith("Number: ")
-
-        test_map(self)
-
-    def test_filter_generator(self):
+    @for_all(Gen.int(min_value=0, max_value=100).filter(lambda x: x % 2 == 0))
+    def test_filter_generator(self, x: int):
         """Test filter combinator."""
-
-        @for_all(integers(min_value=0, max_value=100).filter(lambda x: x % 2 == 0))
-        def test_filter(self, x: int):
-            assert x % 2 == 0
-
-        test_filter(self)
+        assert x % 2 == 0
