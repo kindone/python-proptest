@@ -27,25 +27,62 @@ Thank you for your interest in contributing to python-proptest! This document pr
 
 4. Install the package in development mode with all dependencies:
    ```bash
-   pip install -e ".[dev,docs]"
+   make install
    ```
+
+## Available Commands
+
+The project includes a comprehensive Makefile with useful development commands:
+
+```bash
+# Show all available commands
+make help
+
+# Quick Commands
+make quick-check    # Run quick pre-commit checks (fast)
+make pre-commit     # Run full pre-commit checks
+make all-checks     # Run all CI checks
+
+# Individual Checks
+make install        # Install dependencies
+make test           # Run all tests (unittest + pytest)
+make lint           # Run flake8 linting
+make format         # Format code with black and isort
+make type-check     # Run mypy type checking
+make security       # Run security analysis
+
+# Python Version Testing
+make test-python38  # Test Python 3.8 compatibility
+make test-all-python # Test all available Python versions
+
+# PyPI Publishing
+make bump-version   # Bump version (patch/minor/major)
+make build-package  # Build package for PyPI distribution
+make test-package   # Test built package locally
+make upload-testpypi # Upload to TestPyPI
+make upload-pypi    # Upload to production PyPI
+
+# Utilities
+make clean          # Clean up generated files
+make clean-whitespace # Clean trailing whitespaces from all files
+```
 
 ## Development Workflow
 
 ### Running Tests
 
 ```bash
-# Run all tests
-pytest
+# Run all tests (unittest + pytest with coverage)
+make test
 
-# Run tests with coverage
-pytest --cov=python_proptest --cov-report=html
+# Run quick pre-commit checks (fast)
+make quick-check
 
-# Run specific test file
-pytest tests/test_generators.py
+# Run full pre-commit checks
+make pre-commit
 
-# Run tests with verbose output
-pytest -v
+# Run all CI checks
+make all-checks
 ```
 
 ### Code Quality
@@ -53,23 +90,30 @@ pytest -v
 Before submitting a PR, ensure your code passes all quality checks:
 
 ```bash
-# Format code with black
-black python_proptest/ tests/
+# Format code with black and isort
+make format
 
-# Sort imports with isort
-isort python_proptest/ tests/
+# Run linting checks
+make lint
 
-# Lint with flake8
-flake8 python_proptest/ tests/
+# Run type checking
+make type-check
 
-# Type check with mypy
-mypy python_proptest/
+# Run security analysis
+make security
 
-# Security check with bandit
-bandit -r python_proptest/
+# Run all quality checks at once
+make all-checks
+```
 
-# Check for known security vulnerabilities
-safety check
+### Python Version Testing
+
+```bash
+# Test Python 3.8 compatibility
+make test-python38
+
+# Test all available Python versions
+make test-all-python
 ```
 
 ### Building Documentation
@@ -106,9 +150,25 @@ Follow conventional commit format:
 1. Create a feature branch from `main`
 2. Make your changes
 3. Add tests for new functionality
-4. Ensure all tests pass
-5. Update documentation if needed
-6. Submit a pull request
+4. Run pre-commit checks: `make pre-commit`
+5. Ensure all tests pass: `make all-checks`
+6. Update documentation if needed
+7. Submit a pull request
+
+### Pre-commit Workflow
+
+Before committing, run the pre-commit checks to ensure code quality:
+
+```bash
+# Quick check (fast, for frequent commits)
+make quick-check
+
+# Full check (comprehensive, before pushing)
+make pre-commit
+
+# All CI checks (before submitting PR)
+make all-checks
+```
 
 ## Code Style
 
@@ -177,12 +237,31 @@ class TestStringOperations:
 
 ## Release Process
 
-Releases are managed through GitHub Actions:
+Releases can be managed through GitHub Actions or manually using the Makefile commands:
 
+### Automated Release (Recommended)
 1. Update version in `pyproject.toml`
 2. Create a git tag: `git tag v0.1.1`
 3. Push the tag: `git push origin v0.1.1`
 4. GitHub Actions will automatically build and publish to PyPI
+
+### Manual Release
+```bash
+# Bump version (patch/minor/major)
+make bump-version
+
+# Build package for PyPI distribution
+make build-package
+
+# Test built package locally
+make test-package
+
+# Upload to TestPyPI for testing
+make upload-testpypi
+
+# Upload to production PyPI
+make upload-pypi
+```
 
 ## Getting Help
 
