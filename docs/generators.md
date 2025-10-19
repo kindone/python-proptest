@@ -11,9 +11,14 @@ Generators are the foundation of property-based testing in `python-proptest`. Th
 | `Gen.float()`             | Generates floating-point numbers (incl. `inf`, `-inf`, `nan`).     | `min_value`, `max_value`                              | `Gen.float(min_value=0.0, max_value=1.0)`                                         |
 | `Gen.int()`  | Generates integers in the range `[min_value, max_value]`.                   | `min_value`, `max_value`                                       | `Gen.int(min_value=0, max_value=10)`                                 |
 | `Gen.str()`  | Generates strings (defaults to ASCII).                          | `min_length` (def: 0), `max_length` (def: 10)        | `Gen.str(min_length=0, max_length=5)`                                    |
-| `Gen.ascii_str(...)`    | Generates strings containing only ASCII chars (0-127).          | `min_length` (def: 0), `max_length` (def: 10)        | `Gen.ascii_str(min_length=1, max_length=8)`                               |
-| `Gen.unicode_str(...)`  | Generates strings containing Unicode chars.                     | `min_length` (def: 0), `max_length` (def: 10)        | `Gen.unicode_str(min_length=1, max_length=8)`                             |
-| `Gen.printable_ascii_str(...)` | Generates strings containing only printable ASCII chars.  | `min_length` (def: 0), `max_length` (def: 10)        | `Gen.printable_ascii_str(min_length=5, max_length=5)`                      |
+| `Gen.ascii_string(...)`    | Generates strings containing only ASCII chars (0-127).          | `min_length` (def: 0), `max_length` (def: 10)        | `Gen.ascii_string(min_length=1, max_length=8)`                               |
+| `Gen.unicode_string(...)`  | Generates strings containing Unicode chars.                     | `min_length` (def: 0), `max_length` (def: 10)        | `Gen.unicode_string(min_length=1, max_length=8)`                             |
+| `Gen.printable_ascii_string(...)` | Generates strings containing only printable ASCII chars.  | `min_length` (def: 0), `max_length` (def: 10)        | `Gen.printable_ascii_string(min_length=5, max_length=5)`                      |
+| `Gen.ascii_char()`        | Generates ASCII character codes (0-127).                  | None                                                | `Gen.ascii_char()`                                                             |
+| `Gen.unicode_char()`      | Generates Unicode character codes (avoiding surrogate pairs). | None                                                | `Gen.unicode_char()`                                                           |
+| `Gen.printable_ascii_char()` | Generates printable ASCII character codes (32-126).    | None                                                | `Gen.printable_ascii_char()`                                                   |
+| `Gen.in_range(min, max)`  | Generates integers in range [min, max) (exclusive).      | `min_value`, `max_value`                            | `Gen.in_range(0, 10)`                                                         |
+| `Gen.unique_list(elem, min_length, max_length)` | Generates lists with unique elements, sorted. | `element_gen`, `min_length` (def: 0), `max_length` (def: 10) | `Gen.unique_list(Gen.int(min_value=1, max_value=5), min_length=1, max_length=3)` |
 | **Containers**            |                                                                 |                                                    |                                                       |
 | `Gen.list(elem, min_length, max_length)` | Generates lists with elements from `elem`.                   | `element_gen`, `min_length` (def: 0), `max_length` (def: 10) | `Gen.list(Gen.bool(), min_length=2, max_length=4)`                      |
 | `Gen.set(elem, min_size, max_size)`   | Generates `set` objects with elements from `elem`.            | `element_gen`, `min_size` (def: 0), `max_size` (def: 10)   | `Gen.set(Gen.int(min_value=1, max_value=3), min_size=1, max_size=3)`                   |
@@ -47,10 +52,43 @@ Generates strings. You can control the character set and length.
 Gen.str(min_length=5, max_length=10)  # Default character set is printable ASCII
 
 # Generates Unicode strings of exactly length 3
-Gen.unicode_str(min_length=3, max_length=3)
+Gen.unicode_string(min_length=3, max_length=3)
 
 # Generates printable ASCII strings of length 0 to 5
-Gen.printable_ascii_str(min_length=0, max_length=5)
+Gen.printable_ascii_string(min_length=0, max_length=5)
+
+# Generates ASCII strings of length 1 to 3
+Gen.ascii_string(min_length=1, max_length=3)
+```
+
+**Character Generators**
+
+```python
+# Generates ASCII character codes (0-127)
+Gen.ascii_char()
+
+# Generates Unicode character codes (avoiding surrogate pairs)
+Gen.unicode_char()
+
+# Generates printable ASCII character codes (32-126)
+Gen.printable_ascii_char()
+```
+
+**Integer Generators**
+
+```python
+# Generates integers in range [0, 10) (exclusive of 10)
+Gen.in_range(0, 10)
+
+# Generates integers in range [0, 10] (inclusive of 10)
+Gen.interval(0, 10)
+```
+
+**List Generators**
+
+```python
+# Generates lists with unique elements, sorted
+Gen.unique_list(Gen.int(min_value=1, max_value=5), min_length=1, max_length=3)
 ```
 
 **`Gen.list()`**

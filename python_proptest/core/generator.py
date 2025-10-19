@@ -294,6 +294,13 @@ class Gen:
         return ListGenerator(element_generator, min_length, max_length)
 
     @staticmethod
+    def unique_list(
+        element_generator: "Generator", min_length: int = 0, max_length: int = 10
+    ) -> "UniqueListGenerator":
+        """Generate random lists with unique elements from the given generator."""
+        return UniqueListGenerator(element_generator, min_length, max_length)
+
+    @staticmethod
     def dict(
         key_generator: "Generator",
         value_generator: "Generator",
@@ -345,9 +352,45 @@ class Gen:
         return UnicodeStringGenerator(min_length, max_length)
 
     @staticmethod
+    def ascii_string(min_length: int = 0, max_length: int = 20) -> "StringGenerator":
+        """Generate random ASCII strings (characters 0-127)."""
+        return StringGenerator(min_length, max_length, "ascii")
+
+    @staticmethod
+    def printable_ascii_string(
+        min_length: int = 0, max_length: int = 20
+    ) -> "StringGenerator":
+        """Generate random printable ASCII strings (characters 32-126)."""
+        return StringGenerator(min_length, max_length, "printable_ascii")
+
+    @staticmethod
+    def ascii_char() -> "IntGenerator":
+        """Generate single ASCII character codes (0-127)."""
+        return IntGenerator(0, 127)
+
+    @staticmethod
+    def unicode_char() -> "UnicodeCharGenerator":
+        """Generate single Unicode character codes (avoiding surrogate pairs)."""
+        return UnicodeCharGenerator()
+
+    @staticmethod
+    def printable_ascii_char() -> "IntGenerator":
+        """Generate single printable ASCII character codes (32-126)."""
+        return IntGenerator(32, 126)
+
+    @staticmethod
     def interval(min_value: int, max_value: int) -> "IntGenerator":
         """Generate random integers in the specified range (inclusive)."""
         return IntGenerator(min_value, max_value)
+
+    @staticmethod
+    def in_range(min_value: int, max_value: int) -> "IntGenerator":
+        """Generate random integers in range [min_value, max_value) (exclusive)."""
+        min_val: int = min_value
+        max_val: int = max_value
+        if min_val >= max_val:
+            raise ValueError(f"invalid range: min ({min_val}) >= max ({max_val})")
+        return IntGenerator(min_val, max_val - 1)
 
     @staticmethod
     def integers(min_value: int, max_value: int) -> "IntGenerator":
@@ -458,13 +501,95 @@ class IntGenerator(Generator[int]):
         return shrinks
 
 
+class UniqueListGenerator(Generator[List[T]]):
+    """Generator for lists with unique elements."""
+
+    def __init__(
+        self, element_generator: "Generator[T]", min_length: int, max_length: int
+    ):
+        self.element_generator = element_generator
+        self.min_length = min_length
+        self.max_length = max_length
+
+    def generate(self, rng: Random) -> Shrinkable[List[T]]:
+        """Generate a list with unique elements."""
+        # Use set generator and convert to list
+        set_gen = SetGenerator(self.element_generator, self.min_length, self.max_length)
+        set_shrinkable = set_gen.generate(rng)
+
+        # Convert set to sorted list
+        unique_list = list(set_shrinkable.value)
+        unique_list.sort()
+
+        # Generate shrinks by converting set shrinks to list shrinks
+        shrinks = []
+        for set_shrink in set_shrinkable.shrinks():
+            shrink_list = list(set_shrink.value)
+            shrink_list.sort()
+            shrinks.append(Shrinkable(shrink_list))
+
+        from python_proptest.core.stream import Stream
+
+        return Shrinkable(unique_list, lambda: Stream.many(shrinks))
+
+
+class UnicodeCharGenerator(Generator[int]):
+    """Generator for Unicode character codes avoiding surrogate pairs."""
+
+    def generate(self, rng: Random) -> Shrinkable[int]:
+        """Generate a Unicode character code avoiding surrogate pairs."""
+        # Generate a random number in the range [1, 0xD7FF + (0x10FFFF - 0xE000 + 1)]
+        # Then map it to avoid surrogate pairs (U+D800 to U+DFFF)
+        max_range = 0xD7FF + (0x10FFFF - 0xE000 + 1)
+        code = rng.randint(1, max_range)
+
+        # Skip surrogate pair range D800-DFFF
+        if code >= 0xD800:
+            code += 0xE000 - 0xD800
+
+        shrinks = self._generate_shrinks(code)
+        from python_proptest.core.stream import Stream
+
+        return Shrinkable(code, lambda: Stream.many(shrinks))
+
+    def _generate_shrinks(self, value: int) -> List[Shrinkable[int]]:
+        """Generate shrinking candidates for a Unicode character code."""
+        shrinks = []
+
+        # Shrink towards 1 (minimum valid Unicode)
+        if value > 1:
+            shrinks.append(Shrinkable(1))
+            if value > 2:
+                shrinks.append(Shrinkable(2))
+
+        # Binary search shrinking
+        if value > 1:
+            mid = (value + 1) // 2
+            if mid != value:
+                shrinks.append(Shrinkable(mid))
+
+        return shrinks
+
+
 class StringGenerator(Generator[str]):
     """Generator for strings."""
 
     def __init__(self, min_length: int, max_length: int, charset: str):
         self.min_length = min_length
         self.max_length = max_length
-        self.charset = charset
+        self.charset = self._get_charset(charset)
+
+    def _get_charset(self, charset: str) -> str:
+        """Convert charset specification to actual character set."""
+        if charset == "ascii":
+            # ASCII characters 0-127
+            return "".join(chr(i) for i in range(128))
+        elif charset == "printable_ascii":
+            # Printable ASCII characters 32-126
+            return "".join(chr(i) for i in range(32, 127))
+        else:
+            # Use the provided charset as-is
+            return charset
 
     def generate(self, rng: Random) -> Shrinkable[str]:
         length = rng.randint(self.min_length, self.max_length)
@@ -660,9 +785,7 @@ class OneOfGenerator(Generator[T]):
     def __init__(self, generators: List[Any]):
         if not generators:
             raise ValueError("At least one generator must be provided")
-        self.weighted_generators = normalize_weighted_generators(
-            generators
-        )
+        self.weighted_generators = normalize_weighted_generators(generators)
 
     def generate(self, rng: Random) -> Shrinkable[T]:
         # Selection loop: repeatedly pick a generator index and check against its weight
@@ -695,6 +818,7 @@ class ElementOfGenerator(Generator[T]):
                     if wv.value != value
                 ]
                 from python_proptest.core.stream import Stream
+
                 return Shrinkable(value, lambda: Stream.many(shrinks))
 
 

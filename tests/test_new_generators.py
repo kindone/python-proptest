@@ -295,7 +295,15 @@ class TestNewGenMethods(unittest.TestCase):
 
     def test_gen_weighted_value(self):
         """Test Gen.weighted_value method."""
-        gen = Gen.weighted_value(Gen.int(1, 5), 0.8)
+        weighted_value = Gen.weighted_value(42, 0.8)
+
+        # Should return a WeightedValue object
+        assert weighted_value.value == 42
+        assert weighted_value.weight == 0.8
+
+    def test_gen_weighted_gen(self):
+        """Test Gen.weighted_gen method."""
+        gen = Gen.weighted_gen(Gen.int(1, 5), 0.8)
         rng = __import__("random").Random(42)
 
         # Should work the same as the original generator

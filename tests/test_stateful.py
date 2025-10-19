@@ -35,7 +35,7 @@ class TestStateful(unittest.TestCase):
 
         # Create weighted action generator
         action_gen = simpleActionGenOf(
-            list, push_gen, pop_gen, Gen.weighted_value(clear_gen, 0.1)
+            list, push_gen, pop_gen, Gen.weighted_gen(clear_gen, 0.1)
         )
 
         # Create stateful property
@@ -154,8 +154,8 @@ class TestStateful(unittest.TestCase):
         rare_action = Gen.just(SimpleAction(lambda obj: obj.clear() if obj else None))
 
         # Weight the actions (common_action should be selected more often)
-        weighted_common = Gen.weighted_value(common_action, 0.8)
-        weighted_rare = Gen.weighted_value(rare_action, 0.2)
+        weighted_common = Gen.weighted_gen(common_action, 0.8)
+        weighted_rare = Gen.weighted_gen(rare_action, 0.2)
 
         action_gen = simpleActionGenOf(list, weighted_common, weighted_rare)
 
