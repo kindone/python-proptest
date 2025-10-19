@@ -27,9 +27,10 @@ You typically use factory functions to create a `StatefulProperty`:
 
     ```python
     from python_proptest import Gen, simple_stateful_property, SimpleAction
+    from typing import List
 
     # Define the system type
-    MySystem = list[int]
+    MySystem = List[int]
 
     # Generator for the initial state (e.g., an empty list)
     initial_gen = Gen.just([])
@@ -61,10 +62,11 @@ You typically use factory functions to create a `StatefulProperty`:
 
     ```python
     from python_proptest import Gen, stateful_property, Action
+    from typing import List, Dict
 
     # Define the system and model types
-    MySystem = list[int]
-    MyModel = dict[str, int]  # Simplified model: {"count": int}
+    MySystem = List[int]
+    MyModel = Dict[str, int]  # Simplified model: {"count": int}
 
     # Initial state generator
     initial_gen = Gen.list(Gen.int(), min_length=0, max_length=10)

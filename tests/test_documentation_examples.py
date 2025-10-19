@@ -7,6 +7,7 @@ and stay up-to-date with the API changes.
 
 import json
 import unittest
+from typing import List
 
 from python_proptest import Gen, Property, PropertyTestError, for_all, run_for_all
 
@@ -624,7 +625,7 @@ class TestStatefulTestingDocumentationExamples(unittest.TestCase):
         )
 
         # Define the system type
-        MySystem = list[int]
+        MySystem = List[int]
 
         # Generator for the initial state (e.g., an empty list)
         initial_gen = Gen.just([])
@@ -651,7 +652,7 @@ class TestStatefulTestingDocumentationExamples(unittest.TestCase):
         from python_proptest import Action, actionGenOf, statefulProperty
 
         # Define the system type
-        MySystem = list[int]
+        MySystem = List[int]
         ModelType = int  # Model is just the sum of elements
 
         # Generator for the initial state
