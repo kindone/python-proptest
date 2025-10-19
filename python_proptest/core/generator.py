@@ -15,6 +15,38 @@ T = TypeVar("T")
 U = TypeVar("U")
 
 
+class WeightedValue(Generic[T]):
+    """Represents a value with an associated weight for weighted selection."""
+
+    def __init__(self, value: T, weight: float):
+        self.value = value
+        self.weight = weight
+
+
+class Weighted(Generic[T]):
+    """Wraps a Generator with an associated weight for weighted selection."""
+
+    def __init__(self, generator: "Generator[T]", weight: float):
+        self.generator = generator
+        self.weight = weight
+
+    def generate(self, rng: "Random") -> "Shrinkable[T]":
+        """Generate a value using the wrapped generator."""
+        return self.generator.generate(rng)
+
+    def map(self, transformer: Callable[[T], U]) -> "Generator[U]":
+        """Apply a transformation to the wrapped generator."""
+        return self.generator.map(transformer)
+
+    def filter(self, predicate: Callable[[T], bool]) -> "Generator[T]":
+        """Filter the wrapped generator."""
+        return self.generator.filter(predicate)
+
+    def flat_map(self, gen_factory: Callable[[T], "Generator[U]"]) -> "Generator[U]":
+        """Apply flat_map to the wrapped generator."""
+        return self.generator.flat_map(gen_factory)
+
+
 class Random(Protocol):
     """Protocol for random number generators."""
 
@@ -29,6 +61,102 @@ class Random(Protocol):
     def choice(self, seq: List[T]) -> T:
         """Choose a random element from sequence."""
         ...
+
+
+def is_weighted_value(element: Any) -> bool:
+    """Type check to determine if an element is weighted."""
+    return isinstance(element, WeightedValue)
+
+
+def is_weighted_generator(gen: Any) -> bool:
+    """Type check to determine if a generator is weighted."""
+    return isinstance(gen, Weighted)
+
+
+def normalize_weighted_values(values: List[Any]) -> List[WeightedValue]:
+    """Normalize weights so they sum to 1.0, handling mixed weighted/unweighted."""
+    if not values:
+        raise ValueError("At least one value must be provided")
+
+    sum_weight = 0.0
+    num_unassigned = 0
+
+    # First pass: collect weighted values and count unweighted ones
+    weighted_values = []
+    for raw_or_weighted in values:
+        if is_weighted_value(raw_or_weighted):
+            weighted = raw_or_weighted
+            sum_weight += weighted.weight
+            weighted_values.append(weighted)
+        else:
+            num_unassigned += 1
+            # Temporarily assign 0 weight to unweighted values
+            weighted_values.append(WeightedValue(raw_or_weighted, 0.0))
+
+    # Validate the sum of explicitly assigned weights
+    if sum_weight < 0.0 or sum_weight > 1.0:
+        raise ValueError(
+            "invalid weights: sum must be between 0.0 (exclusive) and 1.0 (inclusive)"
+        )
+
+    # Distribute remaining probability mass among unweighted values
+    if num_unassigned > 0:
+        rest = 1.0 - sum_weight
+        if rest <= 0.0:
+            raise ValueError(
+                "invalid weights: rest of weights must be greater than 0.0"
+            )
+
+        per_unassigned = rest / num_unassigned
+        weighted_values = [
+            WeightedValue(wv.value, per_unassigned) if wv.weight == 0.0 else wv
+            for wv in weighted_values
+        ]
+
+    return weighted_values
+
+
+def normalize_weighted_generators(generators: List[Any]) -> List[Weighted]:
+    """Normalize weights so they sum to 1.0, handling mixed weighted/unweighted."""
+    if not generators:
+        raise ValueError("At least one generator must be provided")
+
+    sum_weight = 0.0
+    num_unassigned = 0
+
+    # First pass: collect weighted generators and count unweighted ones
+    weighted_generators = []
+    for raw_or_weighted in generators:
+        if is_weighted_generator(raw_or_weighted):
+            weighted = raw_or_weighted
+            sum_weight += weighted.weight
+            weighted_generators.append(weighted)
+        else:
+            num_unassigned += 1
+            # Temporarily assign 0 weight to unweighted generators
+            weighted_generators.append(Weighted(raw_or_weighted, 0.0))
+
+    # Validate the sum of explicitly assigned weights
+    if sum_weight < 0.0 or sum_weight > 1.0:
+        raise ValueError(
+            "invalid weights: sum must be between 0.0 (exclusive) and 1.0 (inclusive)"
+        )
+
+    # Distribute remaining probability mass among unweighted generators
+    if num_unassigned > 0:
+        rest = 1.0 - sum_weight
+        if rest <= 0.0:
+            raise ValueError(
+                "invalid weights: rest of weights must be greater than 0.0"
+            )
+
+        per_unassigned = rest / num_unassigned
+        weighted_generators = [
+            Weighted(wg.generator, per_unassigned) if wg.weight == 0.0 else wg
+            for wg in weighted_generators
+        ]
+
+    return weighted_generators
 
 
 class Generator(ABC, Generic[T]):
@@ -177,12 +305,12 @@ class Gen:
 
     @staticmethod
     def one_of(*generators):
-        """Randomly choose from multiple generators."""
+        """Randomly choose from multiple generators with optional weights."""
         return OneOfGenerator(list(generators))
 
     @staticmethod
     def element_of(*values):
-        """Randomly choose from multiple values."""
+        """Randomly choose from multiple values with optional weights."""
         if not values:
             raise ValueError("At least one value must be provided")
         return ElementOfGenerator(list(values))
@@ -193,9 +321,14 @@ class Gen:
         return JustGenerator(value)
 
     @staticmethod
-    def weighted_value(generator: "Generator", weight: float) -> "Generator":
-        """Create a weighted generator (for compatibility with stateful tests)."""
-        return generator
+    def weighted_gen(generator: "Generator", weight: float) -> "Weighted":
+        """Wraps a generator with a weight for Gen.one_of."""
+        return Weighted(generator, weight)
+
+    @staticmethod
+    def weighted_value(value: T, weight: float) -> "WeightedValue":
+        """Wraps a value with a weight for Gen.element_of."""
+        return WeightedValue(value, weight)
 
     @staticmethod
     def set(
@@ -522,33 +655,47 @@ class DictGenerator(Generator[Dict[T, U]]):
 
 
 class OneOfGenerator(Generator[T]):
-    """Generator that randomly chooses from multiple generators."""
+    """Generator that randomly chooses from multiple generators with weights."""
 
-    def __init__(self, generators: List[Generator[T]]):
+    def __init__(self, generators: List[Any]):
         if not generators:
             raise ValueError("At least one generator must be provided")
-        self.generators = generators
+        self.weighted_generators = normalize_weighted_generators(
+            generators
+        )
 
     def generate(self, rng: Random) -> Shrinkable[T]:
-        generator = rng.choice(self.generators)
-        return generator.generate(rng)
+        # Selection loop: repeatedly pick a generator index and check against its weight
+        while True:
+            dice = rng.randint(0, len(self.weighted_generators) - 1)
+            weighted_gen = self.weighted_generators[dice]
+            if rng.random() < weighted_gen.weight:
+                return weighted_gen.generate(rng)
 
 
 class ElementOfGenerator(Generator[T]):
-    """Generator that randomly chooses from multiple values."""
+    """Generator that randomly chooses from multiple values with optional weights."""
 
-    def __init__(self, values: List[T]):
+    def __init__(self, values: List[Any]):
         if not values:
             raise ValueError("At least one value must be provided")
-        self.values = values
+        self.weighted_values = normalize_weighted_values(values)
 
     def generate(self, rng: Random) -> Shrinkable[T]:
-        value = rng.choice(self.values)
-        # Generate shrinks by trying other values
-        shrinks = [Shrinkable(v) for v in self.values if v != value]
-        from python_proptest.core.stream import Stream
-
-        return Shrinkable(value, lambda: Stream.many(shrinks))
+        # Selection loop: repeatedly pick a value index and check against its weight
+        while True:
+            dice = rng.randint(0, len(self.weighted_values) - 1)
+            weighted_value = self.weighted_values[dice]
+            if rng.random() < weighted_value.weight:
+                value = weighted_value.value
+                # Generate shrinks by trying other values
+                shrinks = [
+                    Shrinkable(wv.value)
+                    for wv in self.weighted_values
+                    if wv.value != value
+                ]
+                from python_proptest.core.stream import Stream
+                return Shrinkable(value, lambda: Stream.many(shrinks))
 
 
 class JustGenerator(Generator[T]):
