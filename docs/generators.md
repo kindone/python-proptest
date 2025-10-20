@@ -7,7 +7,7 @@ Generators are the foundation of property-based testing in `python-proptest`. Th
 | Generator                 | Description                                                     | Key Parameters                                     | Example Usage                                         |
 | :------------------------ | :-------------------------------------------------------------- | :------------------------------------------------- | :---------------------------------------------------- |
 | **Primitives**            |                                                                 |                                                    |                                                       |
-| `Gen.bool()`             | Generates `True` or `False`.                                    | `true_prob` (def: 0.5)                              | `Gen.bool()`                                       |
+| `Gen.bool()`             | Generates `True` or `False` with configurable probability.     | `true_prob` (def: 0.5)                              | `Gen.bool(true_prob=0.8)`                                       |
 | `Gen.float()`             | Generates floating-point numbers (incl. `inf`, `-inf`, `nan`).     | `min_value`, `max_value`                              | `Gen.float(min_value=0.0, max_value=1.0)`                                         |
 | `Gen.int()`  | Generates integers in the range `[min_value, max_value]`.                   | `min_value`, `max_value`                                       | `Gen.int(min_value=0, max_value=10)`                                 |
 | `Gen.str()`  | Generates strings (defaults to ASCII).                          | `min_length` (def: 0), `max_length` (def: 10)        | `Gen.str(min_length=0, max_length=5)`                                    |
@@ -82,26 +82,43 @@ Gen.float(min_value=0.0, max_value=0.001)
 - Generating probabilities or percentages
 - Creating test measurements or coordinates
 
-### `Gen.bool()`
+### `Gen.bool(true_prob)`
 
-Generates random boolean values (`True` or `False`).
+Generates random boolean values (`True` or `False`) with configurable probability.
 
 **Parameters:**
-- None
+- `true_prob` (float, default: 0.5): Probability of generating `True` (0.0 to 1.0)
 
 **Examples:**
 ```python
-# Generate random booleans
+# Generate random booleans (50% True, 50% False)
 Gen.bool()
 
+# Generate mostly True values (80% True, 20% False)
+Gen.bool(true_prob=0.8)
+
+# Generate mostly False values (10% True, 90% False)
+Gen.bool(true_prob=0.1)
+
+# Always generate True
+Gen.bool(true_prob=1.0)
+
+# Always generate False
+Gen.bool(true_prob=0.0)
+
 # Use with other generators
-Gen.tuple(Gen.bool(), Gen.int())
+Gen.tuple(Gen.bool(true_prob=0.7), Gen.int())
+
+# Generate lists of biased booleans
+Gen.list(Gen.bool(true_prob=0.3), min_length=1, max_length=5)
 ```
 
 **Use Cases:**
-- Testing conditional logic
-- Generating feature flags
-- Creating binary choices
+- Testing conditional logic with biased inputs
+- Generating feature flags with realistic distributions
+- Creating binary choices with weighted probabilities
+- Testing boolean operations with edge cases
+- Simulating real-world boolean distributions
 
 ### `Gen.str(min_length, max_length)`
 

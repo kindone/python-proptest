@@ -275,9 +275,15 @@ class Gen:
         return StringGenerator(min_length, max_length, charset)
 
     @staticmethod
-    def bool() -> "BoolGenerator":
-        """Generate random booleans."""
-        return BoolGenerator()
+    def bool(true_prob: float = 0.5) -> "BoolGenerator":
+        """Generate random booleans with specified probability of True.
+
+        Args:
+            true_prob: Probability of generating True (0.0 to 1.0, default: 0.5)
+        """
+        if not 0.0 <= true_prob <= 1.0:
+            raise ValueError("true_prob must be between 0.0 and 1.0")
+        return BoolGenerator(true_prob)
 
     @staticmethod
     def float(
@@ -623,10 +629,13 @@ class StringGenerator(Generator[str]):
 
 
 class BoolGenerator(Generator[bool]):
-    """Generator for booleans."""
+    """Generator for booleans with configurable probability."""
+
+    def __init__(self, true_prob: float = 0.5):
+        self.true_prob = true_prob
 
     def generate(self, rng: Random) -> Shrinkable[bool]:
-        value = rng.choice([True, False])
+        value = rng.random() < self.true_prob
         shrinks = self._generate_shrinks(value)
         from python_proptest.core.stream import Stream
 

@@ -237,7 +237,7 @@ def test_stack_operations():
 **Primitive Generators:**
 - `Gen.int(min_value, max_value)` - Random integers
 - `Gen.float(min_value, max_value)` - Random floats  
-- `Gen.bool()` - Random booleans
+- `Gen.bool(true_prob)` - Random booleans with configurable probability
 - `Gen.str(min_length, max_length)` - Random strings (ASCII)
 - `Gen.ascii_string(min_length, max_length)` - ASCII strings (0-127)
 - `Gen.printable_ascii_string(min_length, max_length)` - Printable ASCII strings (32-126)
