@@ -60,16 +60,17 @@ jobs:
 
     - name: Test with pytest
       run: |
-        pytest --cov=python_proptest --cov-report=xml --cov-report=term-missing
+        pytest --cov=python_proptest --cov-branch --cov-report=xml --cov-report=term-missing
 
     - name: Upload coverage to Codecov
       if: matrix.python-version == '3.11'
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v5
       with:
-        file: ./coverage.xml
+        files: ./coverage.xml
         flags: unittests
         name: codecov-umbrella
         fail_ci_if_error: false
+        token: ${{ secrets.CODECOV_TOKEN }}
 
   build:
     runs-on: ubuntu-latest
@@ -106,10 +107,6 @@ jobs:
       run: |
         twine upload dist/*
 
-    - name: Upload coverage reports to Codecov
-      uses: codecov/codecov-action@v5
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
 
   publish:
     runs-on: ubuntu-latest
