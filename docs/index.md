@@ -78,6 +78,7 @@ python-proptest provides two main approaches for property-based testing:
 ### Available Generators
 
 **Primitive Generators:**
+
 - `Gen.int(min_value, max_value)` - Random integers
 - `Gen.float(min_value, max_value)` - Random floats
 - `Gen.bool(true_prob)` - Random booleans with configurable probability
@@ -93,6 +94,7 @@ python-proptest provides two main approaches for property-based testing:
 - `Gen.integers(min_value, max_value)` - Alias for interval
 
 **Container Generators:**
+
 - `Gen.list(element_gen, min_length, max_length)` - Lists
 - `Gen.unique_list(element_gen, min_length, max_length)` - Lists with unique elements (sorted)
 - `Gen.set(element_gen, min_size, max_size)` - Sets
@@ -100,18 +102,21 @@ python-proptest provides two main approaches for property-based testing:
 - `Gen.tuple(*generators)` - Fixed-size tuples
 
 **Special Generators:**
+
 - `Gen.just(value)` - Always generates the same value
 - `Gen.lazy(func)` - Defers evaluation until generation
 - `Gen.construct(Type, *generators)` - Creates class instances
 - `Gen.chain_tuple(tuple_gen, gen_factory)` - Chains tuple generation with dependent values
 
 **Selection Combinators:**
+
 - `Gen.one_of(*generators)` - Randomly chooses from multiple generators
 - `Gen.element_of(*values)` - Randomly chooses from multiple values
 - `Gen.weighted_gen(generator, weight)` - Wraps generator with weight for one_of
 - `Gen.weighted_value(value, weight)` - Wraps value with weight for element_of
 
 **Transformation Combinators:**
+
 - `generator.map(func)` - Transforms generated values
 - `generator.filter(predicate)` - Filters values by predicate
 - `generator.flat_map(func)` - Creates dependent generators

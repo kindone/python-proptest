@@ -148,6 +148,8 @@ class TestDecoratorAPIExamples:
     def test_example_decorator(self):
         """Test the @example decorator for specific test cases."""
 
+        cases = []
+
         @for_all(integers())
         @example(42)
         @example(-1)
@@ -155,9 +157,13 @@ class TestDecoratorAPIExamples:
         def test_integer_examples(x: int):
             """Test specific integer examples"""
             assert isinstance(x, int)
+            cases.append(x)
 
         # Run the test
         test_integer_examples()
+        assert cases.index(42) >= 0
+        assert cases.index(-1) >= 0
+        assert cases.index(0) >= 0
 
     def test_settings_decorator(self):
         """Test the @settings decorator for configuration."""

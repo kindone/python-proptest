@@ -54,6 +54,10 @@ def for_all(
     """
 
     def decorator(func: Callable) -> Callable:
+        # Preserve any existing _proptest_examples and _proptest_settings attributes
+        existing_examples = getattr(func, "_proptest_examples", [])
+        existing_settings = getattr(func, "_proptest_settings", {})
+
         # Get function signature to validate argument count
         sig = inspect.signature(func)
         params = [
@@ -159,7 +163,10 @@ def for_all(
                             actual_generators.append(gen)
 
                     property_test = Property(
-                        test_property, num_runs=num_runs, seed=seed
+                        test_property,
+                        num_runs=num_runs,
+                        seed=seed,
+                        examples=existing_examples,
                     )
                     property_test.for_all(*actual_generators)
                     return None  # Test frameworks expect test functions to return
@@ -213,7 +220,10 @@ def for_all(
                             actual_generators.append(gen)
 
                     property_test = Property(
-                        assertion_property, num_runs=num_runs, seed=seed
+                        assertion_property,
+                        num_runs=num_runs,
+                        seed=seed,
+                        examples=existing_examples,
                     )
                     property_test.for_all(*actual_generators)
                     return None  # Pytest expects test functions to return None
@@ -235,6 +245,10 @@ def for_all(
         wrapper._proptest_is_pytest_method = is_pytest_method  # type: ignore
         wrapper._proptest_is_unittest_method = is_unittest_method  # type: ignore
         wrapper._proptest_is_test_method = is_test_method  # type: ignore
+
+        # Preserve examples and settings from other decorators
+        wrapper._proptest_examples = existing_examples  # type: ignore
+        wrapper._proptest_settings = existing_settings  # type: ignore
 
         return wrapper
 

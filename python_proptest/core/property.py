@@ -6,7 +6,7 @@ for running property-based tests.
 """
 
 import random
-from typing import Any, Callable, List, Optional, TypeVar, Union
+from typing import Any, Callable, List, Optional, Tuple, TypeVar, Union
 
 from .generator import Generator, Random
 
@@ -45,10 +45,12 @@ class Property:
         property_func: Callable[..., bool],
         num_runs: int = 100,
         seed: Optional[Union[str, int]] = None,
+        examples: Optional[List[Tuple[Any, ...]]] = None,
     ):
         self.property_func = property_func
         self.num_runs = num_runs
         self.seed = seed
+        self.examples = examples or []
         self._rng = self._create_rng()
 
     def _create_rng(self) -> Random:
@@ -81,6 +83,30 @@ class Property:
         if len(generators) == 0:
             raise ValueError("At least one generator must be provided")
 
+        # Test examples first
+        for example_inputs in self.examples:
+            if len(example_inputs) != len(generators):
+                continue  # Skip examples with wrong number of arguments
+
+            try:
+                result = self.property_func(*example_inputs)
+                if not result:
+                    # Example failed, create error
+                    raise PropertyTestError(
+                        f"Property failed on example: {example_inputs}",
+                        failing_inputs=list(example_inputs),
+                        minimal_inputs=list(example_inputs),
+                    )
+            except Exception as e:
+                if "Assumption failed" in str(e):
+                    continue  # Skip examples that fail assumptions
+                raise PropertyTestError(
+                    f"Property failed on example: {example_inputs}",
+                    failing_inputs=list(example_inputs),
+                    minimal_inputs=list(example_inputs),
+                ) from e
+
+        # Then run random tests
         for run in range(self.num_runs):
             try:
                 # Generate test inputs
