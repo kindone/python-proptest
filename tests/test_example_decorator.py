@@ -1,7 +1,8 @@
 """Tests for @example decorator and its interaction with @for_all."""
 
 import unittest
-from python_proptest import Gen, for_all, example, settings, run_for_all
+
+from python_proptest import Gen, example, for_all, run_for_all, settings
 
 
 class TestExampleDecorator(unittest.TestCase):

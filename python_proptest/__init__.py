@@ -15,6 +15,7 @@ from .core.decorators import (
     integers,
     just,
     lists,
+    matrix,
     note,
     one_of,
     run_property_test,
@@ -24,7 +25,7 @@ from .core.decorators import (
 from .core.either import Either, Left, Right
 from .core.generator import Gen, Generator
 from .core.option import None_, Option, Some, none
-from .core.property import Property, PropertyTestError, run_for_all
+from .core.property import Property, PropertyTestError, run_for_all, run_matrix
 from .core.shrinker import Shrinkable
 from .core.stateful import (
     Action,
@@ -45,6 +46,7 @@ __email__ = "jradoo@gmail.com"
 __all__ = [
     "for_all",
     "run_for_all",
+    "run_matrix",
     "Property",
     "PropertyTestError",
     "Generator",
@@ -71,6 +73,7 @@ __all__ = [
     "simpleStatefulProperty",
     "given",
     "example",
+    "matrix",
     "settings",
     "assume",
     "note",

@@ -1,7 +1,8 @@
 """Simple tests to verify that @example decorator actually executes examples."""
 
 import unittest
-from python_proptest import Gen, for_all, example, Property
+
+from python_proptest import Gen, Property, example, for_all
 
 
 class TestExampleSimple(unittest.TestCase):

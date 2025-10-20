@@ -1,6 +1,6 @@
 import unittest
 
-from python_proptest import Gen, for_all, example, settings, given
+from python_proptest import Gen, example, for_all, given, settings
 
 
 class TestDecoratorCombinations(unittest.TestCase):

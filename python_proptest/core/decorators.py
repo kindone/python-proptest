@@ -6,7 +6,8 @@ property-based testing with complex functions.
 """
 
 import inspect
-from typing import Any, Callable, Union
+import itertools
+from typing import Any, Callable, Dict, Iterable, List, Tuple, Union
 
 from .generator import Generator
 from .property import Property, PropertyTestError
@@ -54,9 +55,10 @@ def for_all(
     """
 
     def decorator(func: Callable) -> Callable:
-        # Preserve any existing _proptest_examples and _proptest_settings attributes
+        # Preserve any existing _proptest_examples / _proptest_settings / _proptest_matrix
         existing_examples = getattr(func, "_proptest_examples", [])
         existing_settings = getattr(func, "_proptest_settings", {})
+        existing_matrix = getattr(func, "_proptest_matrix", None)
 
         # Get function signature to validate argument count
         sig = inspect.signature(func)
@@ -172,6 +174,9 @@ def for_all(
                         seed=override_seed,
                         examples=existing_examples,
                     )
+                    # Execute matrix cases first (do not count toward num_runs)
+                    if existing_matrix:
+                        _run_matrix_cases(func, args[0], existing_matrix)
                     property_test.for_all(*actual_generators)
                     return None  # Test frameworks expect test functions to return
                     # None
@@ -233,6 +238,9 @@ def for_all(
                         seed=override_seed,
                         examples=existing_examples,
                     )
+                    # Execute matrix cases first (do not count toward num_runs)
+                    if existing_matrix:
+                        _run_matrix_cases(func, None, existing_matrix)
                     property_test.for_all(*actual_generators)
                     return None  # Pytest expects test functions to return None
                 except PropertyTestError as e:
@@ -254,9 +262,11 @@ def for_all(
         wrapper._proptest_is_unittest_method = is_unittest_method  # type: ignore
         wrapper._proptest_is_test_method = is_test_method  # type: ignore
 
-        # Preserve examples and settings from other decorators
+        # Preserve examples, settings, and matrix from other decorators
         wrapper._proptest_examples = existing_examples  # type: ignore
         wrapper._proptest_settings = existing_settings  # type: ignore
+        if existing_matrix is not None:
+            wrapper._proptest_matrix = existing_matrix  # type: ignore
 
         return wrapper
 
@@ -292,6 +302,73 @@ def example(*values: Any):
         return func
 
     return decorator
+
+
+def matrix(**kwargs: Iterable[Any]):
+    """
+    Decorator to provide an exhaustive matrix (Cartesian product) of example values.
+
+    Usage:
+        @for_all(Gen.int(), Gen.str())
+        @matrix(x=[0, 1], s=["a", "b"])
+        def test_property(x: int, s: str):
+            ...
+
+    Notes:
+        - Matrix cases are executed once per combination, before examples/random runs.
+        - Matrix cases do not count toward settings(num_runs).
+    """
+
+    def decorator(func: Callable) -> Callable:
+        # Store matrix spec for later use
+        if not hasattr(func, "_proptest_matrix"):
+            func._proptest_matrix = {}  # type: ignore
+        # Merge if applied multiple times - later decorators overwrite earlier ones
+        current = getattr(func, "_proptest_matrix")  # type: ignore
+        current.update(kwargs)
+        return func
+
+    return decorator
+
+
+def _run_matrix_cases(
+    func: Callable, self_obj: Any, matrix_spec: Dict[str, Iterable[Any]]
+):
+    # Build argument order from function signature (skip self when present)
+    sig = inspect.signature(func)
+    params: List[str] = [
+        p.name for p in sig.parameters.values() if p.kind == p.POSITIONAL_OR_KEYWORD
+    ]
+    is_method = bool(params and params[0] == "self")
+    call_params = params[1:] if is_method else params
+
+    # Only run matrix cases if all call parameters are covered by matrix spec
+    if not all(name in matrix_spec for name in call_params):
+        return
+
+    # Only include parameters that are actually needed by the function
+    needed_keys = [k for k in matrix_spec.keys() if k in call_params]
+    if not needed_keys:
+        return
+
+    # Construct cartesian product in key order
+    values_product = itertools.product(*[list(matrix_spec[k]) for k in needed_keys])
+
+    for combo in values_product:
+        # Map provided keys to their values
+        arg_map: Dict[str, Any] = dict(zip(needed_keys, combo))
+        # Build positional args in function param order
+        args_in_order: List[Any] = [arg_map[name] for name in call_params]
+        try:
+            if is_method:
+                func(self_obj, *args_in_order)
+            else:
+                func(*args_in_order)
+        except Exception as e:
+            # Handle assume() calls by checking for "Assumption failed"
+            if "Assumption failed" in str(e):
+                continue  # Skip this matrix case
+            raise  # Re-raise other exceptions
 
 
 def settings(**kwargs):

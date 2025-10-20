@@ -6,7 +6,7 @@ for running property-based tests.
 """
 
 import random
-from typing import Any, Callable, List, Optional, Tuple, TypeVar, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, TypeVar, Union
 
 from .generator import Generator, Random
 
@@ -235,6 +235,52 @@ def run_for_all(
     """
     property_test = Property(property_func, num_runs, seed)
     return property_test.for_all(*generators)
+
+
+def run_matrix(
+    test_func: Callable[..., Any],
+    matrix_spec: Dict[str, Iterable[Any]],
+    *,
+    self_obj: Optional[Any] = None,
+) -> None:
+    """
+    Execute an exhaustive matrix (Cartesian product) of inputs for a test function.
+
+    Matrix cases are executed once each, without shrinking and without counting
+    toward property num_runs.
+    """
+    # Resolve parameter order
+    import inspect
+    import itertools
+
+    sig = inspect.signature(test_func)
+    params: List[str] = [
+        p.name for p in sig.parameters.values() if p.kind == p.POSITIONAL_OR_KEYWORD
+    ]
+    is_method = bool(params and params[0] == "self")
+    call_params = params[1:] if is_method else params
+
+    # Only run matrix cases if all call parameters are covered by matrix spec
+    if not all(name in matrix_spec for name in call_params):
+        return
+
+    # Only include parameters that are actually needed by the function
+    needed_keys = [k for k in matrix_spec.keys() if k in call_params]
+    if not needed_keys:
+        return
+
+    values_product = itertools.product(*[list(matrix_spec[k]) for k in needed_keys])
+
+    for combo in values_product:
+        arg_map: Dict[str, Any] = dict(zip(needed_keys, combo))
+        args_in_order: List[Any] = [arg_map[name] for name in call_params]
+        if is_method or self_obj is not None:
+            target = self_obj
+            if target is None:
+                raise ValueError("self_obj must be provided for bound methods")
+            test_func(target, *args_in_order)
+        else:
+            test_func(*args_in_order)
 
 
 # Convenience function for pytest integration
