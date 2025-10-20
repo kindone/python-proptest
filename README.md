@@ -6,7 +6,7 @@ A property-based testing framework for Python, inspired by Haskell's QuickCheck 
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Tests](https://github.com/kindone/python-proptest/workflows/CI/badge.svg)](https://github.com/kindone/python-proptest/actions)
 [![Coverage](https://codecov.io/gh/kindone/python-proptest/branch/main/graph/badge.svg)](https://codecov.io/gh/kindone/python-proptest)
-[![PyPI version](https://badge.fury.io/py/python-proptest.svg)](https://badge.fury.io/py/python-proptest)
+[![PyPI version](https://img.shields.io/pypi/v/python-proptest.svg)](https://pypi.org/project/python-proptest/)
 
 ## What is Property-Based Testing?
 
