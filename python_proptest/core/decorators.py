@@ -162,10 +162,14 @@ def for_all(
                             # It's already a Generator
                             actual_generators.append(gen)
 
+                    # Apply settings overrides if provided
+                    override_num_runs = existing_settings.get("num_runs", num_runs)
+                    override_seed = existing_settings.get("seed", seed)
+
                     property_test = Property(
                         test_property,
-                        num_runs=num_runs,
-                        seed=seed,
+                        num_runs=override_num_runs,
+                        seed=override_seed,
                         examples=existing_examples,
                     )
                     property_test.for_all(*actual_generators)
@@ -219,10 +223,14 @@ def for_all(
                             # It's already a Generator
                             actual_generators.append(gen)
 
+                    # Apply settings overrides if provided
+                    override_num_runs = existing_settings.get("num_runs", num_runs)
+                    override_seed = existing_settings.get("seed", seed)
+
                     property_test = Property(
                         assertion_property,
-                        num_runs=num_runs,
-                        seed=seed,
+                        num_runs=override_num_runs,
+                        seed=override_seed,
                         examples=existing_examples,
                     )
                     property_test.for_all(*actual_generators)

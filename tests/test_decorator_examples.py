@@ -168,14 +168,19 @@ class TestDecoratorAPIExamples:
     def test_settings_decorator(self):
         """Test the @settings decorator for configuration."""
 
+        num_cases = 0
+
         @for_all(integers())
         @settings(num_runs=50)
         def test_with_custom_settings(x: int):
             """Test with custom settings"""
             assert isinstance(x, int)
+            nonlocal num_cases
+            num_cases += 1
 
         # Run the test
         test_with_custom_settings()
+        assert num_cases == 50
 
     def test_assume_function(self):
         """Test the assume() function for conditional testing."""
