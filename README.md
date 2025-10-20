@@ -55,7 +55,7 @@ def test_simple_properties():
 **Pytest Integration:**
 ```python
 import pytest
-from python_proptest import for_all, Gen
+from python_proptest import for_all, Gen, matrix, example, settings
 
 class TestMathProperties:
     @for_all(Gen.int(), Gen.int())
@@ -76,6 +76,15 @@ class TestStringProperties:
         assert len(result) == len(s1) + len(s2)
         assert result.startswith(s1)
         assert result.endswith(s2)
+
+class TestMatrixProperties:
+    @for_all(Gen.int(), Gen.int())
+    @matrix(x=[0, 1, -1], y=[0, 1, -1])  # Test edge cases exhaustively
+    @example(42, 24)                      # Test specific known values
+    @settings(num_runs=50, seed=42)       # Configure test parameters
+    def test_addition_with_matrix(self, x: int, y: int):
+        """Test addition with matrix cases, examples, and random generation."""
+        assert x + y == y + x
 
 # Run pytest. Methods are automatically parameterized
 ```
@@ -274,6 +283,12 @@ def test_stack_operations():
 - `generator.filter(predicate)` - Filters values by predicate
 - `generator.flat_map(func)` - Creates dependent generators
 
+**Decorators:**
+- `@for_all(*generators, num_runs, seed)` - Core property-based testing decorator
+- `@example(*values)` - Provides specific example values to test
+- `@settings(num_runs, seed)` - Configures test parameters
+- `@matrix(**kwargs)` - Provides exhaustive Cartesian product testing
+
 ### Property Testing Approaches
 
 - **Function-based**: `run_for_all(property_func, *generators)`
@@ -286,6 +301,7 @@ def test_stack_operations():
 - [Generators](docs/generators.md)
 - [Combinators](docs/combinators.md)
 - [Properties](docs/properties.md)
+- [Decorators](docs/decorators.md)
 - [Shrinking](docs/shrinking.md)
 - [Stateful Testing](docs/stateful-testing.md)
 

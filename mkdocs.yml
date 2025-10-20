@@ -53,6 +53,11 @@ plugins:
 nav:
   - 'Introduction': index.md
   - 'Generators': generators.md
+  - 'Combinators': combinators.md
   - 'Properties': properties.md
+  - 'Decorators': decorators.md
   - 'Shrinking': shrinking.md
-  - 'Examples': examples.md
+  - 'Stateful Testing': stateful-testing.md
+  - 'Pytest Integration': pytest-integration.md
+  - 'Unittest Integration': unittest-integration.md
+  - 'Pytest Best Practices': pytest-best-practices.md

@@ -12,6 +12,7 @@ The core workflow involves:
 2.  **Specifying generators:** Mechanisms for creating random data conforming to certain types or constraints, often built by composing simpler generators using **combinators**. See [Generators](generators.md) and [Combinators](combinators.md).
 3.  **Execution:** `python-proptest` automatically runs the property function against numerous generated inputs (typically 100+).
 4.  **Shrinking:** If a test case fails (the property returns `false` or throws), `python-proptest` attempts to find a minimal counterexample by simplifying the failing input. See [Shrinking](shrinking.md).
+5.  **Enhanced testing:** Use decorators like `@example`, `@settings`, and `@matrix` for specific test cases, configuration, and exhaustive testing. See [Decorators](decorators.md).
 
 Consider verifying a round-trip property for a custom parser/serializer:
 
@@ -121,6 +122,13 @@ python-proptest provides two main approaches for property-based testing:
 - `generator.filter(predicate)` - Filters values by predicate
 - `generator.flat_map(func)` - Creates dependent generators
 
+**Decorators:**
+
+- `@for_all(*generators, num_runs, seed)` - Core property-based testing decorator
+- `@example(*values)` - Provides specific example values to test
+- `@settings(num_runs, seed)` - Configures test parameters
+- `@matrix(**kwargs)` - Provides exhaustive Cartesian product testing
+
 ### 1. Function-based Approach (Works with both pytest and unittest)
 
 ```python
@@ -136,9 +144,12 @@ def test_addition_commutativity():
 ### 2. Decorator-based Approach
 
 ```python
-from python_proptest import for_all, Gen
+from python_proptest import for_all, Gen, example, settings, matrix
 
 @for_all(Gen.int(), Gen.int())
+@matrix(x=[0, 1], y=[0, 1])  # Test edge cases exhaustively
+@example(42, 24)             # Test specific known values
+@settings(num_runs=50, seed=42)  # Configure test parameters
 def test_addition_commutativity(x: int, y: int):
     assert x + y == y + x
 
