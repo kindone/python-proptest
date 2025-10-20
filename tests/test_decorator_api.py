@@ -58,7 +58,7 @@ class TestDecoratorAPI(unittest.TestCase):
         test_multiplication_associativity()
 
     def test_decorator_with_mixed_types(self):
-        """Test @given decorator with mixed types."""
+        """Test @for_all decorator with mixed types."""
 
         @for_all(integers(), text(min_size=1, max_size=10))
         def test_string_length_property(x: int, s: str):
@@ -71,7 +71,7 @@ class TestDecoratorAPI(unittest.TestCase):
         test_string_length_property()
 
     def test_decorator_with_lists(self):
-        """Test @given decorator with list strategies."""
+        """Test @for_all decorator with list strategies."""
 
         @for_all(lists(integers(), min_size=0, max_size=10))
         def test_list_sorting(lst: list):
@@ -89,7 +89,7 @@ class TestDecoratorAPI(unittest.TestCase):
         test_list_sorting()
 
     def test_decorator_with_dictionaries(self):
-        """Test @given decorator with dictionary strategies."""
+        """Test @for_all decorator with dictionary strategies."""
 
         @for_all(
             dictionaries(
@@ -108,7 +108,7 @@ class TestDecoratorAPI(unittest.TestCase):
         test_dictionary_properties()
 
     def test_decorator_with_one_of(self):
-        """Test @given decorator with one_of strategy."""
+        """Test @for_all decorator with one_of strategy."""
 
         @for_all(one_of(integers(), floats(), text()))
         def test_mixed_type_property(value):
@@ -120,7 +120,7 @@ class TestDecoratorAPI(unittest.TestCase):
         test_mixed_type_property()
 
     def test_decorator_with_example(self):
-        """Test @given decorator with @example."""
+        """Test @for_all decorator with @example."""
 
         @for_all(integers())
         @example(42)
@@ -134,7 +134,7 @@ class TestDecoratorAPI(unittest.TestCase):
         test_integer_properties()
 
     def test_decorator_with_settings(self):
-        """Test @given decorator with @settings."""
+        """Test @for_all decorator with @settings."""
 
         @for_all(integers())
         @settings(num_runs=50, seed=42)
@@ -146,7 +146,7 @@ class TestDecoratorAPI(unittest.TestCase):
         test_with_custom_settings()
 
     def test_decorator_with_assume(self):
-        """Test @given decorator with assume."""
+        """Test @for_all decorator with assume."""
 
         @for_all(integers(), integers())
         def test_division_property(x: int, y: int):
@@ -161,7 +161,7 @@ class TestDecoratorAPI(unittest.TestCase):
         test_division_property()
 
     def test_decorator_with_note(self):
-        """Test @given decorator with note."""
+        """Test @for_all decorator with note."""
 
         @for_all(integers())
         def test_with_note(x: int):
@@ -347,11 +347,11 @@ if __name__ == "__main__":
     # Run some examples
     print("Running decorator API examples...")
 
-    @given(integers(), integers())
+    @for_all(integers(), integers())
     def example_commutativity(x: int, y: int):
         assert x + y == y + x
 
-    @given(lists(integers(), min_size=0, max_size=10))
+    @for_all(lists(integers(), min_size=0, max_size=10))
     def example_list_sorting(lst: list):
         if len(lst) <= 1:
             return

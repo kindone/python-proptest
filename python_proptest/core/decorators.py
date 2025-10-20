@@ -250,7 +250,7 @@ def example(*values: Any):
     Decorator to provide example values for a property test.
 
     Usage:
-        @given(Gen.int(), Gen.str())
+        @for_all(Gen.int(), Gen.str())
         @example(42, "hello")
         def test_property(x: int, s: str):
             assert x > 0 or len(s) > 0
@@ -277,7 +277,7 @@ def settings(**kwargs):
     Decorator to configure property test settings.
 
     Usage:
-        @given(Gen.int())
+        @for_all(Gen.int())
         @settings(num_runs=1000, seed=42)
         def test_property(x: int):
             assert x * 0 == 0
@@ -304,7 +304,7 @@ def assume(condition: bool):
     Skip the current test case if the condition is False.
 
     Usage:
-        @given(Gen.int(), Gen.int())
+        @for_all(Gen.int(), Gen.int())
         def test_division(x: int, y: int):
             assume(y != 0)  # Skip cases where y is 0
             assert x / y * y == x
@@ -325,7 +325,7 @@ def note(message: str):
     Add a note to the test output (useful for debugging).
 
     Usage:
-        @given(Gen.int())
+        @for_all(Gen.int())
         def test_property(x: int):
             note(f"Testing with x = {x}")
             assert x * 2 == x + x
@@ -342,10 +342,10 @@ def note(message: str):
 # Convenience function for running decorated tests
 def run_property_test(func: Callable) -> Any:
     """
-    Run a property test function that has been decorated with @given.
+    Run a property test function that has been decorated with @for_all.
 
     Usage:
-        @given(Gen.int())
+        @for_all(Gen.int())
         def test_property(x: int):
             assert x * 0 == 0
 
@@ -359,7 +359,7 @@ def run_property_test(func: Callable) -> Any:
         Result of the property test
     """
     if not hasattr(func, "_proptest_generators"):
-        raise ValueError(f"Function {func.__name__} is not decorated with @given")
+        raise ValueError(f"Function {func.__name__} is not decorated with @for_all")
 
     return func()
 
