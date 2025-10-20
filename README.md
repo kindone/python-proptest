@@ -77,7 +77,7 @@ class TestStringProperties:
         assert result.startswith(s1)
         assert result.endswith(s2)
 
-# Just run: pytest
+# Run pytest. Methods are automatically parameterized
 ```
 
 **Unittest Integration:**
@@ -105,8 +105,7 @@ class TestStringProperties(unittest.TestCase):
         self.assertTrue(result.startswith(s1))
         self.assertTrue(result.endswith(s2))
 
-# Just run: python -m unittest
-# Each test method automatically runs with 100+ random inputs.
+# Run unittest. Methods are automatically parameterized
 ```
 
 
@@ -126,38 +125,6 @@ def test_complex_math_property(x: int, y: int):
 # Run the test
 test_complex_math_property()
 ```
-
-## When to Use Each Approach
-
-### Use `@for_all` with pytest or unittest
-
-**This approach works well with both pytest and unittest.** Suitable for:
-
-- **Framework integration**: Works with both pytest and unittest
-- **Automatic test discovery**: Both pytest and unittest find and run your property-based tests
-- **IDE support**: Full debugging, breakpoints, and parameter inspection
-- **Complex assertions**: Multiple conditions and complex generator transformations
-- **Team collaboration**: Standard testing workflow everyone understands
-
-### Use `@for_all` with unittest
-
-**Suitable for teams using Python's built-in unittest framework.** Good for:
-
-- **Standard library integration**: No external dependencies beyond python-proptest
-- **Unittest assertions**: Use `self.assertEqual()`, `self.assertTrue()`, etc.
-- **Mixed assertion styles**: Combine unittest assertions with regular `assert` statements
-- **Legacy codebases**: Easy migration from existing unittest test suites
-- **CI/CD compatibility**: Works with any unittest-compatible test runner
-
-### Use `run_for_all` for Simple Lambda-Based Tests
-
-Suitable for simple property checks that can be expressed as lambdas:
-
-- **Type checks**: `lambda x: isinstance(x, int)`
-- **Range validations**: `lambda x: 0 <= x <= 100`
-- **Simple assertions**: `lambda lst: all(isinstance(x, int) for x in lst)`
-- **Seed-based reproducibility testing**
-- **Quick prototyping**: When you want to test a property without creating a full test class
 
 ## Features
 
@@ -265,19 +232,48 @@ def test_stack_operations():
 
 ## API Overview
 
-### Generators
+### Available Generators
 
-- **Primitives**: `Gen.int()`, `Gen.float()`, `Gen.str()`, `Gen.bool()`
-- **Collections**: `Gen.list()`, `Gen.dict()`, `Gen.set()`, `Gen.tuple()`
-- **Special**: `Gen.just()`, `Gen.lazy()`, `Gen.one_of()`, `Gen.element_of()`
+**Primitive Generators:**
+- `Gen.int(min_value, max_value)` - Random integers
+- `Gen.float(min_value, max_value)` - Random floats  
+- `Gen.bool()` - Random booleans
+- `Gen.str(min_length, max_length)` - Random strings (ASCII)
+- `Gen.ascii_string(min_length, max_length)` - ASCII strings (0-127)
+- `Gen.printable_ascii_string(min_length, max_length)` - Printable ASCII strings (32-126)
+- `Gen.unicode_string(min_length, max_length)` - Unicode strings
+- `Gen.ascii_char()` - ASCII character codes (0-127)
+- `Gen.unicode_char()` - Unicode character codes (avoiding surrogate pairs)
+- `Gen.printable_ascii_char()` - Printable ASCII character codes (32-126)
+- `Gen.in_range(min_value, max_value)` - Integers in range [min, max) (exclusive)
+- `Gen.interval(min_value, max_value)` - Integers in range [min, max] (inclusive)
+- `Gen.integers(min_value, max_value)` - Alias for interval
 
-### Combinators
+**Container Generators:**
+- `Gen.list(element_gen, min_length, max_length)` - Lists
+- `Gen.unique_list(element_gen, min_length, max_length)` - Lists with unique elements (sorted)
+- `Gen.set(element_gen, min_size, max_size)` - Sets
+- `Gen.dict(key_gen, value_gen, min_size, max_size)` - Dictionaries
+- `Gen.tuple(*generators)` - Fixed-size tuples
 
-- **Transformation**: `generator.map()`, `generator.filter()`, `generator.flat_map()`
-- **Selection**: `Gen.one_of()`, `Gen.element_of()`, `Gen.weighted_gen()`
-- **Construction**: `Gen.construct()`
+**Special Generators:**
+- `Gen.just(value)` - Always generates the same value
+- `Gen.lazy(func)` - Defers evaluation until generation
+- `Gen.construct(Type, *generators)` - Creates class instances
+- `Gen.chain_tuple(tuple_gen, gen_factory)` - Chains tuple generation with dependent values
 
-### Properties
+**Selection Combinators:**
+- `Gen.one_of(*generators)` - Randomly chooses from multiple generators
+- `Gen.element_of(*values)` - Randomly chooses from multiple values
+- `Gen.weighted_gen(generator, weight)` - Wraps generator with weight for one_of
+- `Gen.weighted_value(value, weight)` - Wraps value with weight for element_of
+
+**Transformation Combinators:**
+- `generator.map(func)` - Transforms generated values
+- `generator.filter(predicate)` - Filters values by predicate
+- `generator.flat_map(func)` - Creates dependent generators
+
+### Property Testing Approaches
 
 - **Function-based**: `run_for_all(property_func, *generators)`
 - **Decorator-based**: `@for_all(*generators)`

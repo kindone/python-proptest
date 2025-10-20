@@ -74,7 +74,47 @@ Understanding these key components will help you use `python-proptest` effective
 
 python-proptest provides two main approaches for property-based testing:
 
-> **Note**: python-proptest treats pytest and unittest as equal, first-class testing frameworks. Both are fully supported with identical functionality - choose based on your project's existing testing infrastructure and team preferences.
+
+### Available Generators
+
+**Primitive Generators:**
+- `Gen.int(min_value, max_value)` - Random integers
+- `Gen.float(min_value, max_value)` - Random floats  
+- `Gen.bool()` - Random booleans
+- `Gen.str(min_length, max_length)` - Random strings (ASCII)
+- `Gen.ascii_string(min_length, max_length)` - ASCII strings (0-127)
+- `Gen.printable_ascii_string(min_length, max_length)` - Printable ASCII strings (32-126)
+- `Gen.unicode_string(min_length, max_length)` - Unicode strings
+- `Gen.ascii_char()` - ASCII character codes (0-127)
+- `Gen.unicode_char()` - Unicode character codes (avoiding surrogate pairs)
+- `Gen.printable_ascii_char()` - Printable ASCII character codes (32-126)
+- `Gen.in_range(min_value, max_value)` - Integers in range [min, max) (exclusive)
+- `Gen.interval(min_value, max_value)` - Integers in range [min, max] (inclusive)
+- `Gen.integers(min_value, max_value)` - Alias for interval
+
+**Container Generators:**
+- `Gen.list(element_gen, min_length, max_length)` - Lists
+- `Gen.unique_list(element_gen, min_length, max_length)` - Lists with unique elements (sorted)
+- `Gen.set(element_gen, min_size, max_size)` - Sets
+- `Gen.dict(key_gen, value_gen, min_size, max_size)` - Dictionaries
+- `Gen.tuple(*generators)` - Fixed-size tuples
+
+**Special Generators:**
+- `Gen.just(value)` - Always generates the same value
+- `Gen.lazy(func)` - Defers evaluation until generation
+- `Gen.construct(Type, *generators)` - Creates class instances
+- `Gen.chain_tuple(tuple_gen, gen_factory)` - Chains tuple generation with dependent values
+
+**Selection Combinators:**
+- `Gen.one_of(*generators)` - Randomly chooses from multiple generators
+- `Gen.element_of(*values)` - Randomly chooses from multiple values
+- `Gen.weighted_gen(generator, weight)` - Wraps generator with weight for one_of
+- `Gen.weighted_value(value, weight)` - Wraps value with weight for element_of
+
+**Transformation Combinators:**
+- `generator.map(func)` - Transforms generated values
+- `generator.filter(predicate)` - Filters values by predicate
+- `generator.flat_map(func)` - Creates dependent generators
 
 ### 1. Function-based Approach (Works with both pytest and unittest)
 

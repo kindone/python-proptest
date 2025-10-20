@@ -30,132 +30,516 @@ Generators are the foundation of property-based testing in `python-proptest`. Th
 
 *(Defaults for length/size are typically 0 and 10, but check implementation for specifics)*
 
-## Examples
+## Primitive Generators
 
-Here are some more detailed examples illustrating how to use various generators:
+### `Gen.int(min_value, max_value)`
 
-**`Gen.float()`**
+Generates random integers within the specified range (inclusive).
 
-Generates standard floating-point numbers, but also includes special values crucial for testing numerical robustness:
+**Parameters:**
+- `min_value` (int, default: -1000): Minimum integer value to generate
+- `max_value` (int, default: 1000): Maximum integer value to generate
 
+**Examples:**
 ```python
-# Can produce: 3.14, -0.0, inf, -inf, nan
-Gen.float()
+# Generate integers from 0 to 100
+Gen.int(min_value=0, max_value=100)
+
+# Generate negative integers
+Gen.int(min_value=-50, max_value=-1)
+
+# Generate single value (when min_value == max_value)
+Gen.int(min_value=42, max_value=42)
 ```
 
-**`Gen.str()`**
+**Use Cases:**
+- Testing mathematical operations
+- Generating array indices
+- Creating test IDs or counts
 
-Generates strings. You can control the character set and length.
+### `Gen.float(min_value, max_value)`
 
+Generates random floating-point numbers within the specified range.
+
+**Parameters:**
+- `min_value` (float, default: -1000.0): Minimum float value to generate
+- `max_value` (float, default: 1000.0): Maximum float value to generate
+
+**Examples:**
 ```python
-# Generates ASCII strings of length 5 to 10
-Gen.str(min_length=5, max_length=10)  # Default character set is printable ASCII
+# Generate floats from 0.0 to 1.0
+Gen.float(min_value=0.0, max_value=1.0)
 
-# Generates Unicode strings of exactly length 3
-Gen.unicode_string(min_length=3, max_length=3)
+# Generate negative floats
+Gen.float(min_value=-10.0, max_value=-0.1)
 
-# Generates printable ASCII strings of length 0 to 5
-Gen.printable_ascii_string(min_length=0, max_length=5)
-
-# Generates ASCII strings of length 1 to 3
-Gen.ascii_string(min_length=1, max_length=3)
+# Generate very small floats
+Gen.float(min_value=0.0, max_value=0.001)
 ```
 
-**Character Generators**
+**Use Cases:**
+- Testing floating-point arithmetic
+- Generating probabilities or percentages
+- Creating test measurements or coordinates
 
+### `Gen.bool()`
+
+Generates random boolean values (`True` or `False`).
+
+**Parameters:**
+- None
+
+**Examples:**
 ```python
-# Generates ASCII character codes (0-127)
+# Generate random booleans
+Gen.bool()
+
+# Use with other generators
+Gen.tuple(Gen.bool(), Gen.int())
+```
+
+**Use Cases:**
+- Testing conditional logic
+- Generating feature flags
+- Creating binary choices
+
+### `Gen.str(min_length, max_length)`
+
+Generates random strings with ASCII characters.
+
+**Parameters:**
+- `min_length` (int, default: 0): Minimum string length
+- `max_length` (int, default: 20): Maximum string length
+
+**Examples:**
+```python
+# Generate strings of length 5 to 10
+Gen.str(min_length=5, max_length=10)
+
+# Generate single character strings
+Gen.str(min_length=1, max_length=1)
+
+# Generate empty strings (min_length=0)
+Gen.str(min_length=0, max_length=0)
+```
+
+**Use Cases:**
+- Testing string operations
+- Generating usernames or identifiers
+- Creating test data for text processing
+
+### `Gen.ascii_string(min_length, max_length)`
+
+Generates random strings containing only ASCII characters (0-127).
+
+**Parameters:**
+- `min_length` (int, default: 0): Minimum string length
+- `max_length` (int, default: 20): Maximum string length
+
+**Examples:**
+```python
+# Generate ASCII strings of length 1 to 8
+Gen.ascii_string(min_length=1, max_length=8)
+
+# Generate fixed-length ASCII strings
+Gen.ascii_string(min_length=5, max_length=5)
+```
+
+**Use Cases:**
+- Testing ASCII-only systems
+- Generating legacy-compatible strings
+- Creating test data for systems with ASCII restrictions
+
+### `Gen.printable_ascii_string(min_length, max_length)`
+
+Generates random strings containing only printable ASCII characters (32-126).
+
+**Parameters:**
+- `min_length` (int, default: 0): Minimum string length
+- `max_length` (int, default: 20): Maximum string length
+
+**Examples:**
+```python
+# Generate printable ASCII strings
+Gen.printable_ascii_string(min_length=1, max_length=10)
+
+# Generate fixed-length printable strings
+Gen.printable_ascii_string(min_length=5, max_length=5)
+```
+
+**Use Cases:**
+- Testing user input validation
+- Generating displayable text
+- Creating test data for human-readable strings
+
+### `Gen.unicode_string(min_length, max_length)`
+
+Generates random strings containing Unicode characters.
+
+**Parameters:**
+- `min_length` (int, default: 0): Minimum string length
+- `max_length` (int, default: 20): Maximum string length
+
+**Examples:**
+```python
+# Generate Unicode strings
+Gen.unicode_string(min_length=1, max_length=10)
+
+# Generate short Unicode strings
+Gen.unicode_string(min_length=1, max_length=3)
+```
+
+**Use Cases:**
+- Testing internationalization
+- Generating multi-language text
+- Creating test data for Unicode-aware systems
+
+### `Gen.ascii_char()`
+
+Generates single ASCII character codes (0-127).
+
+**Parameters:**
+- None
+
+**Examples:**
+```python
+# Generate ASCII character codes
 Gen.ascii_char()
 
-# Generates Unicode character codes (avoiding surrogate pairs)
+# Use with map to get actual characters
+Gen.ascii_char().map(chr)
+```
+
+**Use Cases:**
+- Testing character processing
+- Generating single character inputs
+- Creating test data for character-based operations
+
+### `Gen.unicode_char()`
+
+Generates single Unicode character codes (avoiding surrogate pairs).
+
+**Parameters:**
+- None
+
+**Examples:**
+```python
+# Generate Unicode character codes
 Gen.unicode_char()
 
-# Generates printable ASCII character codes (32-126)
-Gen.printable_ascii_char()
+# Use with map to get actual characters
+Gen.unicode_char().map(chr)
 ```
 
-**Integer Generators**
+**Use Cases:**
+- Testing Unicode character handling
+- Generating international characters
+- Creating test data for Unicode-aware systems
 
+### `Gen.printable_ascii_char()`
+
+Generates single printable ASCII character codes (32-126).
+
+**Parameters:**
+- None
+
+**Examples:**
 ```python
-# Generates integers in range [0, 10) (exclusive of 10)
+# Generate printable ASCII character codes
+Gen.printable_ascii_char()
+
+# Use with map to get actual characters
+Gen.printable_ascii_char().map(chr)
+```
+
+**Use Cases:**
+- Testing printable character processing
+- Generating displayable characters
+- Creating test data for user-visible text
+
+### `Gen.in_range(min_value, max_value)`
+
+Generates random integers in range [min_value, max_value) (exclusive of max_value).
+
+**Parameters:**
+- `min_value` (int): Minimum integer value (inclusive)
+- `max_value` (int): Maximum integer value (exclusive)
+
+**Examples:**
+```python
+# Generate integers from 0 to 9 (exclusive of 10)
 Gen.in_range(0, 10)
 
-# Generates integers in range [0, 10] (inclusive of 10)
+# Generate array indices
+Gen.in_range(0, len(my_array))
+```
+
+**Use Cases:**
+- Generating array indices
+- Creating ranges for iteration
+- Testing boundary conditions
+
+### `Gen.interval(min_value, max_value)`
+
+Generates random integers in range [min_value, max_value] (inclusive of both bounds).
+
+**Parameters:**
+- `min_value` (int): Minimum integer value (inclusive)
+- `max_value` (int): Maximum integer value (inclusive)
+
+**Examples:**
+```python
+# Generate integers from 0 to 10 (inclusive)
 Gen.interval(0, 10)
+
+# Generate dice rolls (1 to 6)
+Gen.interval(1, 6)
 ```
 
-**List Generators**
+**Use Cases:**
+- Testing inclusive ranges
+- Generating dice rolls or random selections
+- Creating bounded integer values
 
+### `Gen.integers(min_value, max_value)`
+
+Alias for `Gen.interval()` for compatibility.
+
+**Parameters:**
+- `min_value` (int): Minimum integer value (inclusive)
+- `max_value` (int): Maximum integer value (inclusive)
+
+**Examples:**
 ```python
-# Generates lists with unique elements, sorted
-Gen.unique_list(Gen.int(min_value=1, max_value=5), min_length=1, max_length=3)
+# Same as Gen.interval(0, 10)
+Gen.integers(0, 10)
 ```
 
-**`Gen.list()`**
+## Container Generators
 
-Generates lists where each element is created by the provided element generator.
+### `Gen.list(element_gen, min_length, max_length)`
 
+Generates random lists with elements from the specified generator.
+
+**Parameters:**
+- `element_gen` (Generator): Generator for list elements
+- `min_length` (int, default: 0): Minimum list length
+- `max_length` (int, default: 10): Maximum list length
+
+**Examples:**
 ```python
-# Generates lists of 2 to 5 booleans
-# e.g., [True, False], [False, False, True, True]
+# Generate lists of 2 to 5 booleans
 Gen.list(Gen.bool(), min_length=2, max_length=5)
 
-# Generates lists of 0 to 10 strings, each 1-3 chars long
-Gen.list(Gen.str(min_length=1, max_length=3), min_length=0, max_length=10)
+# Generate lists of integers
+Gen.list(Gen.int(min_value=1, max_value=100), min_length=0, max_length=10)
+
+# Generate lists of strings
+Gen.list(Gen.str(min_length=1, max_length=5), min_length=1, max_length=3)
 ```
 
-**`Gen.dict()`**
+**Use Cases:**
+- Testing list operations
+- Generating test data collections
+- Creating sequences for processing
 
-Generates dictionaries with string keys generated by `key_gen` and values generated by the provided `value_gen`.
+### `Gen.unique_list(element_gen, min_length, max_length)`
 
+Generates random lists with unique elements, sorted.
+
+**Parameters:**
+- `element_gen` (Generator): Generator for list elements
+- `min_length` (int, default: 0): Minimum list length
+- `max_length` (int, default: 10): Maximum list length
+
+**Examples:**
 ```python
-# Generates dictionaries with 1 to 3 key-value pairs,
-# where keys are 1-char strings (a-z) and values are floats.
-# e.g., {"a": 1.2, "b": -inf}, {"z": 10.0}
-key_gen = Gen.str(min_length=1, max_length=1).map(
-    lambda s: chr(97 + (ord(s[0]) % 26))  # Generate a-z keys
-)
-Gen.dict(key_gen, Gen.float(), min_size=1, max_size=3)
+# Generate unique integer lists
+Gen.unique_list(Gen.int(min_value=1, max_value=10), min_length=1, max_length=5)
+
+# Generate unique string lists
+Gen.unique_list(Gen.str(min_length=1, max_length=3), min_length=2, max_length=4)
 ```
 
-**`Gen.tuple()`**
+**Use Cases:**
+- Testing unique value processing
+- Generating sorted test data
+- Creating sets represented as lists
 
-Generates fixed-size tuples with elements of potentially different types, determined by the sequence of generators provided.
+### `Gen.set(element_gen, min_size, max_size)`
 
+Generates random sets with elements from the specified generator.
+
+**Parameters:**
+- `element_gen` (Generator): Generator for set elements
+- `min_size` (int, default: 0): Minimum set size
+- `max_size` (int, default: 10): Maximum set size
+
+**Examples:**
 ```python
-# Generates pairs of (bool, float)
-# e.g., (True, 15.0), (False, -3.1)
-Gen.tuple(Gen.bool(), Gen.float())
+# Generate sets of integers
+Gen.set(Gen.int(min_value=1, max_value=10), min_size=1, max_size=5)
 
-# Generates triples of (str, int, str)
-# e.g., ("hello", 5, "world"), ("", -100, "test")
-Gen.tuple(Gen.str(min_length=0, max_length=5), Gen.int(min_value=-100, max_value=100), Gen.str(min_length=1, max_length=4))
+# Generate sets of strings
+Gen.set(Gen.str(min_length=1, max_length=3), min_size=2, max_size=4)
 ```
 
-**`Gen.just(value)`**
+**Use Cases:**
+- Testing set operations
+- Generating unique collections
+- Creating test data for set-based algorithms
 
-A generator that *always* produces the exact `value` provided. Useful for including specific edge cases or constants in your generated data mix (often used with `Gen.one_of`).
+### `Gen.dict(key_gen, value_gen, min_size, max_size)`
 
+Generates random dictionaries with keys and values from specified generators.
+
+**Parameters:**
+- `key_gen` (Generator): Generator for dictionary keys
+- `value_gen` (Generator): Generator for dictionary values
+- `min_size` (int, default: 0): Minimum dictionary size
+- `max_size` (int, default: 10): Maximum dictionary size
+
+**Examples:**
 ```python
-# Always generates the number 42
+# Generate string-to-int dictionaries
+Gen.dict(Gen.str(min_length=1, max_length=3), Gen.int(), min_size=1, max_size=5)
+
+# Generate int-to-string dictionaries
+Gen.dict(Gen.int(min_value=1, max_value=10), Gen.str(min_length=1, max_length=5))
+```
+
+**Use Cases:**
+- Testing dictionary operations
+- Generating configuration data
+- Creating test data for key-value processing
+
+### `Gen.tuple(*generators)`
+
+Generates fixed-size tuples with elements from the specified generators.
+
+**Parameters:**
+- `*generators` (Generator): Variable number of generators for tuple elements
+
+**Examples:**
+```python
+# Generate pairs of (bool, int)
+Gen.tuple(Gen.bool(), Gen.int())
+
+# Generate triples of (str, int, float)
+Gen.tuple(Gen.str(), Gen.int(), Gen.float())
+
+# Generate single-element tuples
+Gen.tuple(Gen.str())
+```
+
+**Use Cases:**
+- Testing tuple operations
+- Generating coordinate pairs
+- Creating structured test data
+
+## Special Generators
+
+### `Gen.just(value)`
+
+Always generates the exact value provided.
+
+**Parameters:**
+- `value` (Any): The value to always generate
+
+**Examples:**
+```python
+# Always generate 42
 Gen.just(42)
 
-# Always generates None
+# Always generate None
 Gen.just(None)
+
+# Always generate a specific string
+Gen.just("hello")
 ```
 
-**`Gen.lazy(value_factory)`**
+**Use Cases:**
+- Including specific edge cases
+- Creating constants in test data
+- Combining with `Gen.one_of()` for mixed generation
 
-Defers the execution of a function that produces a value `T`. The function is only called when the generator's `generate` method is invoked. This is useful for delaying expensive computations or breaking simple circular dependencies in definitions.
+### `Gen.lazy(func)`
 
+Defers execution of a function until generation time.
+
+**Parameters:**
+- `func` (Callable[[], T]): Function that returns a value when called
+
+**Examples:**
 ```python
-# Example: Deferring an expensive calculation
+# Defer expensive calculation
 def expensive_calculation():
-    # ... imagine complex logic here ...
-    return result
+    return complex_computation()
 
-lazy_result_gen = Gen.lazy(expensive_calculation)
+Gen.lazy(expensive_calculation)
+
+# Defer current time
+Gen.lazy(lambda: datetime.now())
 ```
+
+**Use Cases:**
+- Delaying expensive computations
+- Breaking circular dependencies
+- Generating time-sensitive values
+
+### `Gen.construct(Type, *generators)`
+
+Creates instances of a class using the specified generators for constructor arguments.
+
+**Parameters:**
+- `Type` (type): Class to instantiate
+- `*generators` (Generator): Generators for constructor arguments
+
+**Examples:**
+```python
+class Point:
+    def __init__(self, x: int, y: int):
+        self.x = x
+        self.y = y
+
+# Generate Point instances
+Gen.construct(Point, Gen.int(), Gen.int())
+
+class Person:
+    def __init__(self, name: str, age: int):
+        self.name = name
+        self.age = age
+
+# Generate Person instances
+Gen.construct(Person, Gen.str(min_length=1, max_length=10), Gen.int(min_value=0, max_value=120))
+```
+
+**Use Cases:**
+- Testing custom classes
+- Generating domain objects
+- Creating structured test data
+
+### `Gen.chain_tuple(tuple_gen, gen_factory)`
+
+Chains tuple generation with dependent value generation.
+
+**Parameters:**
+- `tuple_gen` (Generator): Generator that produces tuples
+- `gen_factory` (Callable): Function that takes tuple values and returns a generator
+
+**Examples:**
+```python
+# Generate (x, y) pairs, then generate z based on x and y
+def create_z_gen(x, y):
+    return Gen.int(min_value=x, max_value=y)
+
+Gen.chain_tuple(Gen.tuple(Gen.int(), Gen.int()), create_z_gen)
+```
+
+**Use Cases:**
+- Creating dependent test data
+- Generating related values
+- Building complex data structures
 
 Beyond the built-in generators, `python-proptest` provides **combinators**: functions that transform or combine existing generators to create new, more complex ones. This is how you build generators for your specific data types and constraints.
 

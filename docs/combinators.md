@@ -18,210 +18,400 @@ Combinators are higher-order functions that manipulate or combine existing gener
 | **Class Construction**                       |                                                                          |                                      |                                                                               |
 | `Gen.construct(Class, ...arg_gens)`           | Creates class instances using `Class(...args)` from `arg_gens`.       | `Constructor`, `...argument_generators` | `Gen.construct(Point, Gen.int(), Gen.int())` (Construct Point object)       |
 
-## Detailed Combinator Examples
+## Selection Combinators
 
-While the table above provides a quick overview, let's explore some common combinators with more illustrative examples.
+### `Gen.one_of(*generators)`
 
-### `generator.map(f)`
+Randomly chooses one generator from the provided generators to produce a value. Each generator has an equal probability of being selected unless weights are specified.
 
-Transforms the output of a generator using a provided function `f`.
+**Parameters:**
+- `*generators` (Generator or Weighted): Variable number of generators, optionally wrapped with `Gen.weighted_gen()`
 
+**Examples:**
 ```python
-from python_proptest import Gen
+# Equal probability selection
+Gen.one_of(
+    Gen.int(min_value=0, max_value=10),
+    Gen.int(min_value=20, max_value=30),
+    Gen.str(min_length=1, max_length=5)
+)
 
-# Generate positive integers and map them to their string representation
-positive_int_gen = Gen.int(min_value=1, max_value=1000)
-positive_int_string_gen = positive_int_gen.map(lambda num: str(num))
-# Generates strings like "1", "5", "999"
+# Weighted selection
+Gen.one_of(
+    Gen.weighted_gen(Gen.str(), 0.8),  # 80% probability
+    Gen.weighted_gen(Gen.int(), 0.2)   # 20% probability
+)
 
-# Generate user objects with an ID and a derived email
-user_id_gen = Gen.int(min_value=1, max_value=100)
-user_object_gen = user_id_gen.map(lambda id: {
-    "id": id,
-    "email": f"user{id}@example.com"
-})
-# Generates objects like {"id": 42, "email": "user42@example.com"}
+# Mixed weighted and unweighted
+Gen.one_of(
+    Gen.weighted_gen(Gen.str(), 0.5),  # 50% probability
+    Gen.int(),                         # 25% probability (remaining split)
+    Gen.bool()                         # 25% probability (remaining split)
+)
 ```
+
+**Use Cases:**
+- Creating union types
+- Testing multiple data types
+- Implementing weighted random selection
+- Creating complex data distributions
+
+### `Gen.element_of(*values)`
+
+Randomly chooses one value from the provided values. Each value has an equal probability of being selected unless weights are specified.
+
+**Parameters:**
+- `*values` (Any or WeightedValue): Variable number of values, optionally wrapped with `Gen.weighted_value()`
+
+**Examples:**
+```python
+# Equal probability selection
+Gen.element_of("red", "green", "blue", "yellow")
+
+# Prime numbers
+Gen.element_of(2, 3, 5, 7, 11, 13, 17, 19)
+
+# Weighted selection
+Gen.element_of(
+    Gen.weighted_value("common", 0.7),    # 70% probability
+    Gen.weighted_value("rare", 0.3)       # 30% probability
+)
+
+# Mixed weighted and unweighted
+Gen.element_of(
+    Gen.weighted_value("frequent", 0.6),  # 60% probability
+    "normal",                             # 20% probability
+    "rare"                                # 20% probability
+)
+```
+
+**Use Cases:**
+- Testing enum-like values
+- Creating categorical data
+- Implementing weighted choices
+- Testing specific edge cases
+
+### `Gen.weighted_gen(generator, weight)`
+
+Wraps a generator with a weight for use in `Gen.one_of()`. The weight determines the probability of selecting this generator.
+
+**Parameters:**
+- `generator` (Generator): The generator to wrap
+- `weight` (float): Probability weight (0.0 to 1.0)
+
+**Examples:**
+```python
+# Create weighted generators
+common_gen = Gen.weighted_gen(Gen.str(), 0.8)
+rare_gen = Gen.weighted_gen(Gen.int(), 0.2)
+
+# Use in one_of
+Gen.one_of(common_gen, rare_gen)
+
+# Multiple weighted generators
+Gen.one_of(
+    Gen.weighted_gen(Gen.str(min_length=1, max_length=3), 0.5),
+    Gen.weighted_gen(Gen.int(min_value=1, max_value=10), 0.3),
+    Gen.weighted_gen(Gen.bool(), 0.2)
+)
+```
+
+**Use Cases:**
+- Creating realistic data distributions
+- Testing with biased inputs
+- Implementing weighted random selection
+- Simulating real-world scenarios
+
+### `Gen.weighted_value(value, weight)`
+
+Wraps a value with a weight for use in `Gen.element_of()`. The weight determines the probability of selecting this value.
+
+**Parameters:**
+- `value` (Any): The value to wrap
+- `weight` (float): Probability weight (0.0 to 1.0)
+
+**Examples:**
+```python
+# Create weighted values
+common_value = Gen.weighted_value("success", 0.9)
+rare_value = Gen.weighted_value("error", 0.1)
+
+# Use in element_of
+Gen.element_of(common_value, rare_value)
+
+# Multiple weighted values
+Gen.element_of(
+    Gen.weighted_value("low", 0.5),
+    Gen.weighted_value("medium", 0.3),
+    Gen.weighted_value("high", 0.2)
+)
+```
+
+**Use Cases:**
+- Creating realistic categorical distributions
+- Testing with biased inputs
+- Implementing weighted choices
+- Simulating real-world scenarios
+
+## Transformation Combinators
+
+### `generator.map(func)`
+
+Transforms each generated value using the provided function. This is one of the most commonly used combinators.
+
+**Parameters:**
+- `func` (Callable[[T], U]): Function that transforms a value of type T to type U
+
+**Examples:**
+```python
+# Transform integers to strings
+Gen.int(min_value=1, max_value=100).map(lambda n: str(n))
+
+# Transform to custom objects
+def create_user(id_num):
+    return {"id": id_num, "email": f"user{id_num}@example.com"}
+
+Gen.int(min_value=1, max_value=1000).map(create_user)
+
+# Transform to tuples
+Gen.int().map(lambda x: (x, x * 2, x * 3))
+
+# Transform strings
+Gen.str().map(lambda s: s.upper())
+
+# Transform lists
+Gen.list(Gen.int()).map(lambda lst: sorted(lst))
+```
+
+**Use Cases:**
+- Converting between data types
+- Creating custom objects
+- Applying transformations to generated data
+- Building complex data structures
 
 ### `generator.filter(predicate)`
 
-Selects only the values from a generator that satisfy a given `predicate` function. Be cautious: if the predicate is too restrictive, generation might become very slow or fail if it cannot find enough valid values within a reasonable number of attempts.
+Only keeps values that satisfy the given predicate function. Be cautious with restrictive predicates as they can slow down generation.
 
+**Parameters:**
+- `predicate` (Callable[[T], bool]): Function that returns True for values to keep
+
+**Examples:**
 ```python
-from python_proptest import Gen
+# Filter even numbers
+Gen.int().filter(lambda n: n % 2 == 0)
 
-# Generate only even numbers between 0 and 20
-interval_gen = Gen.int(min_value=0, max_value=20)
-even_number_gen = interval_gen.filter(lambda n: n % 2 == 0)
-# Generates 0, 2, 4, ..., 20
+# Filter non-empty strings
+Gen.str().filter(lambda s: len(s) > 0)
 
-# Generate non-empty strings
-possibly_empty_string_gen = Gen.str(min_length=0, max_length=5)
-non_empty_string_gen = possibly_empty_string_gen.filter(lambda s: len(s) > 0)
-# Generates strings like "a", "hello", but never ""
+# Filter positive numbers
+Gen.float().filter(lambda x: x > 0)
+
+# Filter lists with specific properties
+Gen.list(Gen.int()).filter(lambda lst: len(lst) > 2 and all(x > 0 for x in lst))
+
+# Filter based on multiple conditions
+Gen.int().filter(lambda n: n > 0 and n < 100 and n % 3 == 0)
 ```
 
-### `generator.flat_map(f)` / `generator.chain(f)`
+**Use Cases:**
+- Restricting value ranges
+- Testing specific conditions
+- Creating constrained test data
+- Implementing business rules
 
-Creates a *dependent* generator. The function `f` takes a value produced by the initial generator and returns a *new generator*. This is powerful for scenarios where the generation of one value depends on another.
+**Performance Considerations:**
+- Avoid overly restrictive predicates
+- Consider using `Gen.in_range()` instead of filtering ranges
+- Use `Gen.one_of()` for categorical filtering
 
+### `generator.flat_map(func)`
+
+Creates a dependent generator where the function takes a generated value and returns a new generator. This is powerful for creating related test data.
+
+**Parameters:**
+- `func` (Callable[[T], Generator[U]]): Function that takes a value and returns a generator
+
+**Examples:**
 ```python
-from python_proptest import Gen
-
-# Generate a list whose length is also randomly generated
-length_gen = Gen.int(min_value=1, max_value=5)  # Generate a length first
-array_with_random_length_gen = length_gen.flat_map(lambda length:
-    Gen.list(Gen.bool(), min_length=length, max_length=length)  # Use the generated length
+# Generate string length based on integer
+Gen.int(min_value=1, max_value=10).flat_map(
+    lambda length: Gen.str(min_length=length, max_length=length)
 )
-# Generates lists like [True], [False, True, False], [True, True, True, True] etc.
 
-# Generate a pair [x, y] where y > x
-x_gen = Gen.int(min_value=0, max_value=10)
-pair_gen = x_gen.flat_map(lambda x:
-    Gen.int(min_value=x + 1, max_value=20).map(lambda y: [x, y])  # Generate y based on x, then map to pair
+# Generate list size based on integer
+Gen.int(min_value=1, max_value=5).flat_map(
+    lambda size: Gen.list(Gen.int(), min_length=size, max_length=size)
 )
-# Generates pairs like [0, 1], [5, 15], [10, 11], etc.
+
+# Generate dependent values
+def create_dependent_data(x):
+    if x > 0:
+        return Gen.int(min_value=1, max_value=x)
+    else:
+        return Gen.int(min_value=x, max_value=-1)
+
+Gen.int().flat_map(create_dependent_data)
+
+# Generate nested structures
+Gen.int(min_value=1, max_value=3).flat_map(
+    lambda depth: Gen.list(
+        Gen.str(min_length=depth, max_length=depth),
+        min_length=depth,
+        max_length=depth
+    )
+)
 ```
 
-### `Gen.one_of(...gens)`
+**Use Cases:**
+- Creating dependent test data
+- Generating related values
+- Building complex nested structures
+- Implementing conditional generation
 
-Randomly selects one of the provided generators to produce a value for each test case. To control the selection probability, you can wrap generators using `Gen.weighted_gen` (see the dedicated section below).
+## Class Construction Combinators
 
+### `Gen.construct(Type, *generators)`
+
+Creates instances of a class using the specified generators for constructor arguments.
+
+**Parameters:**
+- `Type` (type): Class to instantiate
+- `*generators` (Generator): Generators for constructor arguments
+
+**Examples:**
 ```python
-from python_proptest import Gen
-
-# Generate either a number or a boolean
-num_or_bool_gen = Gen.one_of(
-    Gen.int(min_value=-10, max_value=10),
-    Gen.bool()
-)
-# Generates values like 5, True, -2, False, 0
-
-# Generate specific string constants or a generic short string
-specific_or_general_string_gen = Gen.one_of(
-    Gen.just(""),        # Empty string
-    Gen.just("error"),   # Specific keyword
-    Gen.str(min_length=1, max_length=5)     # A short random string
-)
-# Generates "", "error", "abc", "test", etc.
-```
-
-### `Gen.element_of(...values)`
-
-Randomly selects one value from the provided list of literal values. To control the selection probability, you can wrap values using `Gen.weighted_value` (see the dedicated section below).
-
-```python
-from python_proptest import Gen
-
-# Pick a specific HTTP status code
-status_gen = Gen.element_of(200, 201, 400, 404, 500)
-# Generates 200, 404, 500, etc.
-
-# Pick a predefined configuration option
-option_gen = Gen.element_of('read', 'write', 'admin')
-# Generates 'read', 'write', or 'admin'
-```
-
-### `Gen.weighted_gen(gen, weight)` and `Gen.weighted_value(value, weight)`
-
-Used within `Gen.one_of` and `Gen.element_of` respectively to influence the probability of selecting certain generators or values. The `weight` is a positive number between 0.0 and 1.0.
-
-```python
-from python_proptest import Gen
-
-# Generate numbers, but make 0 appear much more often
-weighted_number_gen = Gen.one_of(
-    Gen.weighted_gen(Gen.just(0), 0.8),          # 80% chance of getting 0
-    Gen.weighted_gen(Gen.int(min_value=1, max_value=100), 0.2)  # 20% chance of getting 1-100
-)
-# Generates 0, 0, 5, 0, 42, 0, 0, ...
-
-# Pick a character, biasing heavily towards 'a'
-weighted_char_gen = Gen.element_of(
-    Gen.weighted_value('a', 0.8),  # 80%
-    Gen.weighted_value('b', 0.1),  # 10%
-    Gen.weighted_value('c', 0.1)   # 10%
-)
-# Generates 'a' roughly 9 out of 11 times
-```
-
-### `Gen.construct(Class, ...arg_gens)`
-
-Constructs instances of a `Class` by generating arguments for its constructor using the provided `arg_gens`.
-
-```python
-from python_proptest import Gen
-
+# Simple class construction
 class Point:
     def __init__(self, x: int, y: int):
         self.x = x
         self.y = y
 
-# Generate Point objects with coordinates between -10 and 10
-point_gen = Gen.construct(
-    Point,
-    Gen.int(min_value=-10, max_value=10),  # Generator for the 'x' argument
-    Gen.int(min_value=-10, max_value=10)   # Generator for the 'y' argument
+Gen.construct(Point, Gen.int(), Gen.int())
+
+# Complex class construction
+class Person:
+    def __init__(self, name: str, age: int, email: str):
+        self.name = name
+        self.age = age
+        self.email = email
+
+Gen.construct(
+    Person,
+    Gen.str(min_length=1, max_length=20),
+    Gen.int(min_value=0, max_value=120),
+    Gen.str(min_length=5, max_length=50)
 )
-# Generates Point instances like Point(3, -5), Point(0, 0)
+
+# Using with other combinators
+class Rectangle:
+    def __init__(self, width: float, height: float):
+        self.width = width
+        self.height = height
+
+Gen.construct(
+    Rectangle,
+    Gen.float(min_value=0.1, max_value=100.0),
+    Gen.float(min_value=0.1, max_value=100.0)
+).filter(lambda rect: rect.width > rect.height)  # Only tall rectangles
 ```
+
+**Use Cases:**
+- Testing custom classes
+- Generating domain objects
+- Creating structured test data
+- Testing object-oriented code
 
 ## Advanced Combinator Patterns
 
-### Building Complex Data Structures
+### Chaining Combinators
+
+Combinators can be chained together to create complex generators:
 
 ```python
-from python_proptest import Gen
+# Chain multiple transformations
+Gen.int(min_value=1, max_value=100)\
+    .filter(lambda x: x % 2 == 0)\
+    .map(lambda x: x * 2)\
+    .map(str)
 
-# Generate a user profile with nested data
-user_profile_gen = Gen.construct(
-    UserProfile,
-    Gen.str(min_length=1, max_length=20),  # name
-    Gen.int(min_value=18, max_value=100),  # age
-    Gen.list(Gen.str(min_length=1, max_length=10), min_length=0, max_length=5),  # hobbies
-    Gen.dict(Gen.str(min_length=1, max_length=10), Gen.str(), min_size=0, max_size=3)  # metadata
-)
+# Chain with selection
+Gen.one_of(
+    Gen.int().filter(lambda x: x > 0),
+    Gen.str().filter(lambda s: len(s) > 0)
+).map(lambda x: f"Value: {x}")
 
-# Generate a tree-like structure
-def tree_gen(depth: int = 0):
-    if depth > 3:
-        return Gen.just(None)  # Leaf node
-
-    return Gen.one_of(
-        Gen.just(None),  # Leaf
-        Gen.construct(
-            TreeNode,
-            Gen.str(),  # value
-            Gen.lazy(lambda: tree_gen(depth + 1)),  # left child
-            Gen.lazy(lambda: tree_gen(depth + 1))   # right child
-        )
-    )
+# Chain with construction
+Gen.construct(
+    Point,
+    Gen.int().filter(lambda x: x > 0),
+    Gen.int().filter(lambda y: y > 0)
+).filter(lambda p: p.x + p.y > 10)
 ```
 
 ### Conditional Generation
 
+Use `flat_map` for conditional generation:
+
 ```python
-from python_proptest import Gen
+# Conditional based on value
+Gen.int().flat_map(
+    lambda x: Gen.str(min_length=1, max_length=5) if x > 0 
+              else Gen.just("negative")
+)
 
-# Generate different types based on a condition
-def conditional_gen():
-    type_gen = Gen.element_of('string', 'number', 'boolean')
-
-    return type_gen.flat_map(lambda t:
-        Gen.str() if t == 'string' else
-        Gen.int() if t == 'number' else
-        Gen.bool()
-    )
-
-# Generate a list where each element depends on the previous
-def dependent_list_gen():
-    return Gen.int(min_value=1, max_value=5).flat_map(lambda length:
-        Gen.list(
-            Gen.int(min_value=0, max_value=10).filter(lambda x: x > 0),
-            min_length=length,
-            max_length=length
-        )
-    )
+# Conditional based on type
+Gen.one_of(Gen.int(), Gen.str()).flat_map(
+    lambda x: Gen.list(Gen.int(), min_length=1, max_length=3) if isinstance(x, int)
+              else Gen.list(Gen.str(), min_length=1, max_length=3)
+)
 ```
 
-These combinators provide the building blocks for creating sophisticated generators that can model complex real-world data structures and scenarios. By combining them effectively, you can create property-based tests that thoroughly exercise your code with realistic and diverse inputs.
+### Recursive Generation
+
+Use `Gen.lazy()` for recursive generators:
+
+```python
+# Recursive tree structure
+def tree_gen():
+    return Gen.one_of(
+        Gen.just(None),  # Leaf node
+        Gen.construct(
+            TreeNode,
+            Gen.int(),
+            Gen.lazy(tree_gen),  # Left subtree
+            Gen.lazy(tree_gen)   # Right subtree
+        )
+    )
+
+class TreeNode:
+    def __init__(self, value, left, right):
+        self.value = value
+        self.left = left
+        self.right = right
+```
+
+## Best Practices
+
+### Performance Considerations
+
+1. **Avoid overly restrictive filters**: Use `Gen.in_range()` instead of filtering ranges
+2. **Use appropriate generators**: Choose the right generator for your needs
+3. **Consider weights**: Use weighted selection for realistic distributions
+4. **Chain efficiently**: Order transformations to minimize rejected values
+
+### Readability Tips
+
+1. **Use descriptive names**: Name your generators clearly
+2. **Break down complex generators**: Split complex logic into smaller parts
+3. **Add comments**: Explain complex generation logic
+4. **Use type hints**: Help with IDE support and documentation
+
+### Testing Strategies
+
+1. **Test edge cases**: Use `Gen.just()` for specific values
+2. **Test realistic data**: Use weighted selection for realistic distributions
+3. **Test boundary conditions**: Use `Gen.in_range()` for boundary testing
+4. **Test error conditions**: Use `Gen.element_of()` for error cases
+
+Combinators are the key to creating sophisticated test data that matches your specific needs. By combining and transforming basic generators, you can create generators for any data structure or constraint your tests require.
