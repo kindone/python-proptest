@@ -36,7 +36,7 @@ Properties define the expected behavior of your code over a range of inputs.
 
 ## Defining and Running Properties with `run_for_all(...)` (Lambda-Based)
 
-*   **`run_for_all(predicate: Callable[..., bool | None], *generators: Generator[Any])`**: Perfect for simple property checks that can be expressed as lambdas. This is the most concise way to define and immediately check a property. It implicitly creates and runs the property. You don't need to manually create a `Property` object.
+*   **`run_for_all(predicate: Callable[..., bool | None], *generators: Generator[Any])`**: Suitable for simple property checks that can be expressed as lambdas. This is a concise way to define and immediately check a property. It implicitly creates and runs the property. You don't need to manually create a `Property` object.
 
     ```python
     from python_proptest import run_for_all, Gen
@@ -80,7 +80,7 @@ Properties define the expected behavior of your code over a range of inputs.
 
 ## Decorator-based Properties
 
-python-proptest also supports a decorator-based approach for defining properties, similar to Hypothesis. This is perfect for complex assertions that benefit from explicit parameter signatures:
+python-proptest also supports a decorator-based approach for defining properties, similar to Hypothesis. This is suitable for complex assertions that benefit from explicit parameter signatures:
 
 ```python
 from python_proptest import for_all, integers, text
@@ -109,7 +109,7 @@ python-proptest provides multiple ways to define property tests. Choose based on
 
 ### Use `run_for_all` for Simple Lambda-Based Tests
 
-Perfect for simple property checks that can be expressed as lambdas:
+Suitable for simple property checks that can be expressed as lambdas:
 
 ```python
 from python_proptest import run_for_all, Gen
@@ -138,7 +138,7 @@ def test_simple_properties():
 
 ### Use `@for_all` for Complex Function-Based Tests
 
-Perfect for complex assertions that benefit from explicit parameter signatures:
+Suitable for complex assertions that benefit from explicit parameter signatures:
 
 ```python
 from python_proptest import for_all, integers, text

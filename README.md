@@ -34,7 +34,7 @@ pip install python-proptest[dev]
 from python_proptest import run_for_all, Gen
 
 def test_simple_properties():
-    # Perfect for simple lambda-based properties
+    # Suitable for simple lambda-based properties
     result = run_for_all(
         lambda x, y: x + y == y + x,  # Addition is commutative
         Gen.int(), Gen.int()
@@ -48,10 +48,11 @@ def test_simple_properties():
     assert result is True
 ```
 
-### Pytest Integration (Recommended for Most Use Cases)
+### Framework Integration
 
-**The easiest way to use python-proptest is with pytest!** Just add the `@for_all` decorator to your test methods, and python-proptest automatically generates hundreds of random test cases:
+**python-proptest works with both pytest and unittest.** Just add the `@for_all` decorator to your test methods, and python-proptest automatically generates hundreds of random test cases:
 
+**Pytest Integration:**
 ```python
 import pytest
 from python_proptest import for_all, Gen
@@ -59,7 +60,7 @@ from python_proptest import for_all, Gen
 class TestMathProperties:
     @for_all(Gen.int(), Gen.int())
     def test_addition_commutativity(self, x: int, y: int):
-        """Test that addition is commutative - automatically runs 100+ random cases!"""
+        """Test that addition is commutative - automatically runs 100+ random cases."""
         assert x + y == y + x
 
     @for_all(Gen.int(), Gen.int())
@@ -77,13 +78,9 @@ class TestStringProperties:
         assert result.endswith(s2)
 
 # Just run: pytest
-# Each test method automatically runs with 100+ random inputs!
 ```
 
-### Unittest Integration
-
-**python-proptest also works with Python's built-in unittest framework!** The `@for_all` decorator automatically detects unittest.TestCase classes and adapts accordingly:
-
+**Unittest Integration:**
 ```python
 import unittest
 from python_proptest import for_all, Gen
@@ -91,10 +88,10 @@ from python_proptest import for_all, Gen
 class TestMathProperties(unittest.TestCase):
     @for_all(Gen.int(), Gen.int())
     def test_addition_commutativity(self, x: int, y: int):
-        """Test that addition is commutative using unittest assertions."""
+        """Test that addition is commutative - automatically runs 100+ random cases."""
         self.assertEqual(x + y, y + x)
 
-    @for_all(Gen.int(), Gen.int(), Gen.int())
+    @for_all(Gen.int(), Gen.int())
     def test_multiplication_associativity(self, x: int, y: int, z: int):
         """Test that multiplication is associative."""
         self.assertEqual((x * y) * z, x * (y * z))
@@ -108,9 +105,10 @@ class TestStringProperties(unittest.TestCase):
         self.assertTrue(result.startswith(s1))
         self.assertTrue(result.endswith(s2))
 
-# Run with: python -m unittest
-# Or with: pytest (both frameworks work!)
+# Just run: python -m unittest
+# Each test method automatically runs with 100+ random inputs.
 ```
+
 
 ### Standalone Function-Based Tests
 
@@ -131,19 +129,19 @@ test_complex_math_property()
 
 ## When to Use Each Approach
 
-### Use `@for_all` with pytest (Recommended)
+### Use `@for_all` with pytest or unittest
 
-**This is the recommended approach for most users!** Perfect for:
+**This approach works well with both pytest and unittest.** Suitable for:
 
-- **Pytest integration**: Works seamlessly with your existing test suite
-- **Automatic test discovery**: pytest finds and runs your property-based tests
+- **Framework integration**: Works with both pytest and unittest
+- **Automatic test discovery**: Both pytest and unittest find and run your property-based tests
 - **IDE support**: Full debugging, breakpoints, and parameter inspection
 - **Complex assertions**: Multiple conditions and complex generator transformations
-- **Team collaboration**: Standard pytest workflow everyone understands
+- **Team collaboration**: Standard testing workflow everyone understands
 
 ### Use `@for_all` with unittest
 
-**Perfect for teams using Python's built-in unittest framework!** Great for:
+**Suitable for teams using Python's built-in unittest framework.** Good for:
 
 - **Standard library integration**: No external dependencies beyond python-proptest
 - **Unittest assertions**: Use `self.assertEqual()`, `self.assertTrue()`, etc.
@@ -153,7 +151,7 @@ test_complex_math_property()
 
 ### Use `run_for_all` for Simple Lambda-Based Tests
 
-Perfect for simple property checks that can be expressed as lambdas:
+Suitable for simple property checks that can be expressed as lambdas:
 
 - **Type checks**: `lambda x: isinstance(x, int)`
 - **Range validations**: `lambda x: 0 <= x <= 100`
@@ -387,19 +385,19 @@ Production uploads happen automatically when you:
 
 ## Contributing
 
-Contributions are welcome! Please see our [Contributing Guide](CONTRIBUTING.md) for details on how to get started.
+Contributions are welcome. Please see our [Contributing Guide](CONTRIBUTING.md) for details on how to get started.
 
 ### Quick Start for Contributors
 
 1. Fork the repository
 2. Clone your fork: `git clone https://github.com/your-username/python-proptest.git`
-3. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Create a feature branch: `git checkout -b feature/new-feature`
 4. Set up development environment: `make install`
 5. Make your changes and add tests
 6. Run quality checks: `make pre-commit`
 7. Ensure all tests pass: `make all-checks`
-8. Commit your changes: `git commit -m 'feat: add amazing feature'`
-9. Push to your branch: `git push origin feature/amazing-feature`
+8. Commit your changes: `git commit -m 'feat: add new feature'`
+9. Push to your branch: `git push origin feature/new-feature`
 10. Open a Pull Request
 
 For major changes, please open an issue first to discuss what you would like to change.

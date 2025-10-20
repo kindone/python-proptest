@@ -15,16 +15,16 @@ class TestMathProperties:
 
     @for_all(integers(), integers())
     def test_addition_commutativity(self, x: int, y: int):
-        """Test that addition is commutative - direct decoration!"""
+        """Test that addition is commutative - direct decoration."""
         assert x + y == y + x
 
     @for_all(integers(), integers(), integers())
     def test_multiplication_associativity(self, x: int, y: int, z: int):
-        """Test that multiplication is associative - direct decoration!"""
+        """Test that multiplication is associative - direct decoration."""
         assert (x * y) * z == x * (y * z)
 ```
 
-**✅ Direct decoration now works!** The `@for_all` decorator automatically detects pytest context and handles the `self` parameter correctly.
+**✅ Direct decoration works.** The `@for_all` decorator automatically detects pytest context and handles the `self` parameter correctly.
 
 ### Alternative: Nested Approach (Still Supported)
 
@@ -156,7 +156,7 @@ pytest -m "not slow" -v
 
 1. **Automatic Detection**: The `@for_all` decorator automatically detects pytest context by checking for `self` parameter
 2. **Seamless Integration**: Works with pytest's test discovery and execution
-3. **Proper Error Handling**: Failing properties raise `AssertionError` for better pytest integration
+3. **Proper Error Handling**: Failing properties raise `AssertionError` for seamless pytest integration
 4. **Shrinking Support**: Minimal counterexamples are automatically found and reported
 5. **Backward Compatibility**: Standalone functions continue to work as before
 
@@ -206,4 +206,4 @@ class TestCompleteExample:
             test_failing_property(self)
 ```
 
-This integration makes python-proptest a powerful tool for property-based testing within the pytest ecosystem, providing the benefits of both frameworks seamlessly combined.
+This integration makes python-proptest a useful tool for property-based testing within the pytest ecosystem, providing the benefits of both frameworks combined.

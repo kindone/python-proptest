@@ -1,10 +1,12 @@
 # Pytest Integration Best Practices
 
-python-proptest provides seamless integration with pytest through the `@for_all` decorator. This document explains the recommended approaches and why certain patterns work better than others.
+python-proptest provides seamless integration with pytest through the `@for_all` decorator. This document explains effective approaches for pytest users and why certain patterns work well with pytest's testing model.
 
-## ✅ Recommended Approach: Nested Property Tests
+> **Note**: If you're using unittest, see [Unittest Integration](unittest-integration.md) for framework-specific guidance. Both pytest and unittest are fully supported with identical functionality.
 
-The most reliable and pytest-friendly approach is to nest the property test inside the pytest method:
+## ✅ Effective Approach: Nested Property Tests
+
+A reliable and pytest-friendly approach is to nest the property test inside the pytest method:
 
 ```python
 import pytest
@@ -46,7 +48,7 @@ class TestMathProperties:
 1. **No Fixture Conflicts**: Pytest doesn't try to inject parameters as fixtures
 2. **Clear Test Structure**: Each pytest method is a clear test case
 3. **Proper Error Reporting**: Failures are reported with clear test method names
-4. **Pytest Discovery**: Works perfectly with pytest's test discovery
+4. **Pytest Discovery**: Works well with pytest's test discovery
 5. **IDE Support**: IDEs can properly identify and run individual tests
 
 ## ❌ Problematic Approach: Direct Method Decoration
@@ -188,7 +190,7 @@ def test_commutativity(self, x: int, y: int):
     assert x + y == y + x
 ```
 
-### To Nested Approach (Recommended)
+### To Nested Approach (Effective for pytest)
 ```python
 # ✅ New working approach
 def test_commutativity(self):

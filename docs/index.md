@@ -74,7 +74,9 @@ Understanding these key components will help you use `python-proptest` effective
 
 python-proptest provides two main approaches for property-based testing:
 
-### 1. Function-based Approach (Recommended for pytest)
+> **Note**: python-proptest treats pytest and unittest as equal, first-class testing frameworks. Both are fully supported with identical functionality - choose based on your project's existing testing infrastructure and team preferences.
+
+### 1. Function-based Approach (Works with both pytest and unittest)
 
 ```python
 from python_proptest import run_for_all, Gen
@@ -99,10 +101,11 @@ def test_addition_commutativity(x: int, y: int):
 test_addition_commutativity()
 ```
 
-### 3. Pytest Integration
+### 3. Framework Integration
 
-The `@for_all` decorator integrates seamlessly with pytest using direct decoration:
+The `@for_all` decorator integrates with both pytest and unittest using direct decoration:
 
+**Pytest Integration:**
 ```python
 import pytest
 from python_proptest import for_all, Gen
@@ -110,8 +113,20 @@ from python_proptest import for_all, Gen
 class TestMathProperties:
     @for_all(Gen.int(), Gen.int())
     def test_addition_commutativity(self, x: int, y: int):
-        """Test that addition is commutative - direct decoration!"""
+        """Test that addition is commutative - direct decoration."""
         assert x + y == y + x
+```
+
+**Unittest Integration:**
+```python
+import unittest
+from python_proptest import for_all, Gen
+
+class TestMathProperties(unittest.TestCase):
+    @for_all(Gen.int(), Gen.int())
+    def test_addition_commutativity(self, x: int, y: int):
+        """Test that addition is commutative - direct decoration."""
+        self.assertEqual(x + y, y + x)
 ```
 
 
@@ -121,7 +136,7 @@ python-proptest provides two main approaches for defining property tests. Choose
 
 ### Use `run_for_all` for Simple Lambda-Based Tests
 
-Perfect for simple property checks that can be expressed as lambdas:
+Suitable for simple property checks that can be expressed as lambdas:
 
 ```python
 from python_proptest import run_for_all, Gen
@@ -148,7 +163,7 @@ def test_simple_properties():
 
 ### Use `@for_all` for Complex Function-Based Tests
 
-Perfect for complex assertions that benefit from explicit parameter signatures:
+Suitable for complex assertions that benefit from explicit parameter signatures:
 
 ```python
 from python_proptest import for_all, Gen
@@ -177,4 +192,4 @@ def test_string_operations(s1: str, s2: str):
 - **Use `run_for_all`** for seed-based reproducibility testing
 - **Use `@for_all`** for tests with complex generator transformations
 
-All approaches provide the same functionality - choose based on your testing framework and preferences. For more details on pytest integration, see [Pytest Integration](pytest-integration.md) and [Pytest Best Practices](pytest-best-practices.md).
+All approaches provide the same functionality - choose based on your testing framework and preferences. For more details on framework integration, see [Pytest Integration](pytest-integration.md), [Unittest Integration](unittest-integration.md), and [Pytest Best Practices](pytest-best-practices.md).

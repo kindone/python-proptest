@@ -2,6 +2,8 @@
 
 python-proptest provides seamless integration with Python's built-in `unittest` framework through the `@for_all` decorator. The decorator automatically detects whether it's being used in a unittest context (unittest.TestCase methods), pytest context, or standalone functions and adapts accordingly.
 
+> **Note**: If you're using pytest, see [Pytest Integration](pytest-integration.md) and [Pytest Best Practices](pytest-best-practices.md) for framework-specific guidance. Both pytest and unittest are fully supported with identical functionality.
+
 ## Basic Usage
 
 ### Unittest TestCase Methods
@@ -36,7 +38,7 @@ class TestMathProperties(unittest.TestCase):
         self.assertTrue(result.endswith(s2))
 ```
 
-**✅ Direct decoration works!** The `@for_all` decorator automatically detects unittest context and handles the `self` parameter correctly.
+**✅ Direct decoration works.** The `@for_all` decorator automatically detects unittest context and handles the `self` parameter correctly.
 
 ### Running Unittest Tests
 
@@ -44,7 +46,7 @@ class TestMathProperties(unittest.TestCase):
 # Run with unittest
 python -m unittest tests.test_unittest_integration -v
 
-# Run with pytest (also works!)
+# Run with pytest (also works)
 python -m pytest tests/test_unittest_integration.py -v
 ```
 
@@ -208,7 +210,7 @@ class TestMathProperties(unittest.TestCase):
         self.assertEqual(x + y, y + x)
 ```
 
-The `@for_all` decorator works identically in both frameworks - only the assertion style changes!
+The `@for_all` decorator works identically in both frameworks - only the assertion style changes.
 
 ## Examples
 
