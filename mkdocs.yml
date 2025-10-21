@@ -1,11 +1,11 @@
 site_name: 'python-proptest'
 site_description: 'Python Property-Based Testing Library'
 site_author: 'kindone'
-site_url: 'https://github.com/pages/kindone/python-proptest'
+site_url: 'https://kindone.github.io/python-proptest'
 
 repo_name: 'kindone/python-proptest'
 repo_url: 'https://github.com/kindone/python-proptest'
-edit_uri: 'edit/master/docs'
+edit_uri: 'edit/main/docs'
 
 theme:
   name: material
@@ -42,13 +42,14 @@ markdown_extensions:
       custom_fences:
         - name: mermaid
           class: mermaid
-          format: !!python/name:pymdownx.superfences.fence_code_format
+          format: !!python/name:pymdownx.superfences.fence_code_format ''
   - toc:
       permalink: true
 
 plugins:
   - search
   - git-revision-date-localized
+  - mermaid2
 
 nav:
   - 'Introduction': index.md

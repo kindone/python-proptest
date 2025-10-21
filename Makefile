@@ -1,6 +1,6 @@
 # Makefile for python-proptest development tasks
 
-.PHONY: help install test lint format type-check security clean quick-check pre-commit all-checks test-python38 test-all-python clean-whitespace build-package test-package upload-testpypi upload-pypi bump-version
+.PHONY: help install test lint format type-check security clean quick-check pre-commit all-checks test-python38 test-all-python clean-whitespace build-package test-package upload-testpypi upload-pypi bump-version docs docs-serve docs-build docs-deploy
 
 # Default target
 help:
@@ -11,6 +11,12 @@ help:
 	@echo "  make quick-check    - Run quick pre-commit checks (fast)"
 	@echo "  make pre-commit     - Run full pre-commit checks"
 	@echo "  make all-checks     - Run all CI checks"
+	@echo ""
+	@echo "Documentation:"
+	@echo "  make docs           - Build and serve documentation locally"
+	@echo "  make docs-build     - Build documentation (./site)"
+	@echo "  make docs-serve     - Serve documentation locally (http://127.0.0.1:8000)"
+	@echo "  make docs-deploy    - Deploy documentation to GitHub Pages"
 	@echo ""
 	@echo "Individual Checks:"
 	@echo "  make install        - Install dependencies"
@@ -133,5 +139,37 @@ clean:
 	rm -rf .mypy_cache
 	rm -rf __pycache__
 	rm -rf .venv-*-test
+	rm -rf site
 	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
 	find . -type f -name "*.pyc" -delete 2>/dev/null || true
+
+# Documentation commands
+docs: docs-serve
+
+docs-build:
+	@echo "📚 Building documentation..."
+	@if ! python3 -m mkdocs --version >/dev/null 2>&1; then \
+		echo "⚠️  MkDocs not found. Installing documentation dependencies..."; \
+		echo "💡 Tip: Activate your virtual environment first for cleaner installs"; \
+		pip3 install -e ".[docs]" 2>/dev/null || python3 -m pip install -e ".[docs]"; \
+	fi
+	python3 -m mkdocs build --strict
+
+docs-serve:
+	@echo "📚 Serving documentation locally..."
+	@echo "🌐 Open http://127.0.0.1:8000/python-proptest/ in your browser"
+	@if ! python3 -m mkdocs --version >/dev/null 2>&1; then \
+		echo "⚠️  MkDocs not found. Installing documentation dependencies..."; \
+		echo "💡 Tip: Activate your virtual environment first for cleaner installs"; \
+		pip3 install -e ".[docs]" 2>/dev/null || python3 -m pip install -e ".[docs]"; \
+	fi
+	python3 -m mkdocs serve
+
+docs-deploy:
+	@echo "🚀 Deploying documentation to GitHub Pages..."
+	@if ! python3 -m mkdocs --version >/dev/null 2>&1; then \
+		echo "⚠️  MkDocs not found. Installing documentation dependencies..."; \
+		echo "💡 Tip: Activate your virtual environment first for cleaner installs"; \
+		pip3 install -e ".[docs]" 2>/dev/null || python3 -m pip install -e ".[docs]"; \
+	fi
+	python3 -m mkdocs gh-deploy --force
