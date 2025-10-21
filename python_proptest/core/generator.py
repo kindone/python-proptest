@@ -205,6 +205,64 @@ class Generator(ABC, Generic[T]):
         """
         return ChainGenerator(self, gen_factory)
 
+    def aggregate(
+        self,
+        gen_factory: Callable[[T], "Generator[T]"],
+        min_size: int = 0,
+        max_size: int = 10,
+    ) -> "AggregateGenerator[T]":
+        """Create a list where each element depends on the previous one.
+
+        Fluent API version of Gen.aggregate(). Uses this generator as the
+        initial generator.
+
+        Args:
+            gen_factory: Function that takes a value and returns a Generator
+                        for the next value
+            min_size: Minimum number of elements (default: 0)
+            max_size: Maximum number of elements (default: 10)
+
+        Returns:
+            AggregateGenerator that produces List[T]
+
+        Examples:
+            # Fluent API style
+            increasing_gen = Gen.int(0, 10).aggregate(
+                lambda n: Gen.int(n, n + 5),
+                min_size=3, max_size=10
+            )
+        """
+        return AggregateGenerator(self, gen_factory, min_size, max_size)
+
+    def accumulate(
+        self,
+        gen_factory: Callable[[T], "Generator[T]"],
+        min_size: int = 0,
+        max_size: int = 10,
+    ) -> "AccumulateGenerator[T]":
+        """Generate a final value through successive dependent generations.
+
+        Fluent API version of Gen.accumulate(). Uses this generator as the
+        initial generator.
+
+        Args:
+            gen_factory: Function that takes a value and returns a Generator
+                        for the next value
+            min_size: Minimum number of accumulation steps (default: 0)
+            max_size: Maximum number of accumulation steps (default: 10)
+
+        Returns:
+            AccumulateGenerator that produces a single T
+
+        Examples:
+            # Fluent API style
+            final_pos_gen = Gen.int(0, 100).accumulate(
+                lambda pos: Gen.int(max(0, pos - 5), min(100, pos + 5)),
+                min_size=10, max_size=50
+            )
+        """
+        return AccumulateGenerator(self, gen_factory, min_size, max_size)
+
 
 class MappedGenerator(Generator[U]):
     """Generator that transforms values using a function."""
@@ -486,6 +544,90 @@ class Gen:
         Deprecated: Use Gen.chain() instead for unified API.
         """
         return ChainGenerator(tuple_gen, gen_factory)
+
+    @staticmethod
+    def aggregate(
+        initial_gen: "Generator[T]",
+        gen_factory: Callable[[T], "Generator[T]"],
+        min_size: int = 0,
+        max_size: int = 10,
+    ) -> "AggregateGenerator[T]":
+        """Generate a list where each element depends on the previous one.
+
+        Creates a list of dependent values starting with a value from initial_gen,
+        then repeatedly applying gen_factory to generate the next value based on
+        the previous one. The entire list is returned.
+
+        Args:
+            initial_gen: Generator for the first element
+            gen_factory: Function that takes a value and returns a Generator
+                        for the next value
+            min_size: Minimum number of elements (default: 0)
+            max_size: Maximum number of elements (default: 10)
+
+        Returns:
+            Generator that produces List[T] with dependent elements
+
+        Examples:
+            # Generate increasing sequence
+            increasing_gen = Gen.aggregate(
+                Gen.int(0, 10),
+                lambda n: Gen.int(n, n + 5),
+                min_size=3, max_size=10
+            )
+            # Result: [5, 8, 12, 15, ...] - each element >= previous
+
+            # Random walk with boundaries
+            walk_gen = Gen.aggregate(
+                Gen.int(50, 50),  # Start at 50
+                lambda pos: Gen.int(max(0, pos - 10), min(100, pos + 10)),
+                min_size=5, max_size=20
+            )
+            # Result: [50, 45, 52, 48, ...] - bounded random walk
+        """
+        return AggregateGenerator(initial_gen, gen_factory, min_size, max_size)
+
+    @staticmethod
+    def accumulate(
+        initial_gen: "Generator[T]",
+        gen_factory: Callable[[T], "Generator[T]"],
+        min_size: int = 0,
+        max_size: int = 10,
+    ) -> "AccumulateGenerator[T]":
+        """Generate a final value through successive dependent generations.
+
+        Like aggregate, but returns only the final value after all accumulation
+        steps instead of the entire list. Useful for simulating processes where
+        only the end result matters.
+
+        Args:
+            initial_gen: Generator for the initial value
+            gen_factory: Function that takes a value and returns a Generator
+                        for the next value
+            min_size: Minimum number of accumulation steps (default: 0)
+            max_size: Maximum number of accumulation steps (default: 10)
+
+        Returns:
+            Generator that produces a single T (final accumulated value)
+
+        Examples:
+            # Random walk - final position only
+            final_pos_gen = Gen.accumulate(
+                Gen.int(0, 100),
+                lambda pos: Gen.int(max(0, pos - 5), min(100, pos + 5)),
+                min_size=10, max_size=50
+            )
+            # Result: Single int (position after N steps)
+
+            # Compound growth - final amount only
+            final_amount_gen = Gen.accumulate(
+                Gen.float(100.0, 1000.0),
+                lambda amount: Gen.float(amount * 1.01, amount * 1.1),
+                min_size=5, max_size=20
+            )
+            # Result: Single float (final amount after compounding)
+        """
+        return AccumulateGenerator(initial_gen, gen_factory, min_size, max_size)
 
     @staticmethod
     def tuple(*generators):
@@ -1219,3 +1361,173 @@ class ChainGenerator(Generator[tuple]):
         from python_proptest.core.stream import Stream
 
         return Stream.empty()  # No further shrinks needed for this path
+
+
+class AggregateGenerator(Generator[List[T]]):
+    """Generator that creates a list where each element depends on the previous one.
+
+    This generator takes an initial generator and a function that produces a new
+    generator based on the previously generated value. The result is a list where
+    each element depends on its predecessor.
+
+    Examples:
+        # Generate increasing numbers
+        gen = Gen.aggregate(
+            Gen.int(0, 10),
+            lambda n: Gen.int(n, n + 5),
+            min_size=3, max_size=10
+        )
+        # Result: [5, 8, 12, 15, ...] - each element >= previous
+
+        # Generate random walk
+        gen = Gen.aggregate(
+            Gen.int(0, 100),
+            lambda pos: Gen.int(max(0, pos - 10), min(100, pos + 10)),
+            min_size=5, max_size=20
+        )
+    """
+
+    def __init__(
+        self,
+        initial_gen: Generator[T],
+        gen_factory: Callable[[T], Generator[T]],
+        min_size: int,
+        max_size: int,
+    ):
+        self.initial_gen = initial_gen
+        self.gen_factory = gen_factory
+        self.min_size = min_size
+        self.max_size = max_size
+
+    def generate(self, rng: Random) -> Shrinkable[List[T]]:
+        # Generate the size
+        size = rng.randint(self.min_size, self.max_size)
+
+        if size == 0:
+            return Shrinkable([], lambda: Stream.empty())
+
+        # Generate the sequence
+        shrinkables = []
+        current_shrinkable = self.initial_gen.generate(rng)
+        shrinkables.append(current_shrinkable)
+
+        for _ in range(1, size):
+            next_gen = self.gen_factory(current_shrinkable.value)
+            current_shrinkable = next_gen.generate(rng)
+            shrinkables.append(current_shrinkable)
+
+        values = [shr.value for shr in shrinkables]
+
+        def create_shrinks():
+            from python_proptest.core.stream import Stream
+
+            shrinks = []
+
+            # Shrink length towards min_size
+            if len(shrinkables) > self.min_size:
+                for new_size in range(self.min_size, len(shrinkables)):
+                    shrunk_shrinkables = shrinkables[:new_size]
+                    shrunk_values = [shr.value for shr in shrunk_shrinkables]
+                    shrinks.append(Shrinkable(shrunk_values))
+
+            # Shrink individual elements while maintaining dependencies
+            for i in range(len(shrinkables)):
+                for shrunk_elem in shrinkables[i].shrinks().to_list():
+                    try:
+                        # Regenerate subsequent elements based on shrunk value
+                        new_shrinkables = shrinkables[:i] + [shrunk_elem]
+                        current_value = shrunk_elem.value
+
+                        for j in range(i + 1, len(shrinkables)):
+                            next_gen = self.gen_factory(current_value)
+                            next_shrinkable = next_gen.generate(rng)
+                            new_shrinkables.append(next_shrinkable)
+                            current_value = next_shrinkable.value
+
+                        new_values = [shr.value for shr in new_shrinkables]
+                        shrinks.append(Shrinkable(new_values))
+                    except Exception:
+                        # Skip if regeneration fails
+                        continue  # nosec B112
+
+            return Stream.many(shrinks)
+
+        return Shrinkable(values, create_shrinks)
+
+
+class AccumulateGenerator(Generator[T]):
+    """Generator that produces a final value through successive dependent generations.
+
+    This generator starts with an initial value and repeatedly applies a generator
+    function that depends on the previous value. Only the final value after all
+    steps is returned.
+
+    Examples:
+        # Random walk - final position only
+        gen = Gen.accumulate(
+            Gen.int(0, 100),
+            lambda pos: Gen.int(max(0, pos - 5), min(100, pos + 5)),
+            min_size=10, max_size=50
+        )
+        # Result: Single int (final position after N steps)
+
+        # Compound growth
+        gen = Gen.accumulate(
+            Gen.float(100.0, 1000.0),
+            lambda amount: Gen.float(amount * 1.01, amount * 1.1),
+            min_size=5, max_size=20
+        )
+        # Result: Single float (final amount)
+    """
+
+    def __init__(
+        self,
+        initial_gen: Generator[T],
+        gen_factory: Callable[[T], Generator[T]],
+        min_size: int,
+        max_size: int,
+    ):
+        self.initial_gen = initial_gen
+        self.gen_factory = gen_factory
+        self.min_size = min_size
+        self.max_size = max_size
+
+    def generate(self, rng: Random) -> Shrinkable[T]:
+        # Generate the number of accumulation steps
+        size = rng.randint(self.min_size, self.max_size)
+
+        # Generate initial value
+        current_shrinkable = self.initial_gen.generate(rng)
+
+        # Accumulate through the steps
+        for _ in range(size):
+            next_gen = self.gen_factory(current_shrinkable.value)
+            current_shrinkable = next_gen.generate(rng)
+
+        final_value = current_shrinkable.value
+
+        def create_shrinks():
+            from python_proptest.core.stream import Stream
+
+            shrinks = []
+
+            # Shrink by reducing number of steps
+            if size > self.min_size:
+                for new_size in range(self.min_size, size):
+                    try:
+                        # Regenerate with fewer steps
+                        temp_shrinkable = self.initial_gen.generate(rng)
+                        for _ in range(new_size):
+                            temp_gen = self.gen_factory(temp_shrinkable.value)
+                            temp_shrinkable = temp_gen.generate(rng)
+                        shrinks.append(Shrinkable(temp_shrinkable.value))
+                    except Exception:
+                        continue  # nosec B112
+
+            # Shrink the final value itself
+            for shrunk in current_shrinkable.shrinks().to_list():
+                shrinks.append(Shrinkable(shrunk.value))
+
+            return Stream.many(shrinks)
+
+        return Shrinkable(final_value, create_shrinks)
