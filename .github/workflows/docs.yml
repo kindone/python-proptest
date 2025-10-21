@@ -25,13 +25,9 @@ jobs:
         python -m pip install --upgrade pip
         pip install -e ".[docs]"
 
-    - name: Build documentation
-      run: |
-        mkdocs build
-
     - name: Deploy to GitHub Pages
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./site
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        mkdocs gh-deploy --force

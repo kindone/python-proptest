@@ -148,28 +148,37 @@ docs: docs-serve
 
 docs-build:
 	@echo "📚 Building documentation..."
-	@if ! python3 -m mkdocs --version >/dev/null 2>&1; then \
-		echo "⚠️  MkDocs not found. Installing documentation dependencies..."; \
-		echo "💡 Tip: Activate your virtual environment first for cleaner installs"; \
-		pip3 install -e ".[docs]" 2>/dev/null || python3 -m pip install -e ".[docs]"; \
+	@if [ ! -d "venv" ]; then \
+		echo "🔧 Creating virtual environment..."; \
+		python3 -m venv venv; \
 	fi
-	python3 -m mkdocs build --strict
+	@if ! source venv/bin/activate && python -m mkdocs --version >/dev/null 2>&1; then \
+		echo "⚠️  MkDocs not found. Installing documentation dependencies..."; \
+		source venv/bin/activate && pip install -e ".[docs]"; \
+	fi
+	source venv/bin/activate && python -m mkdocs build --strict
 
 docs-serve:
 	@echo "📚 Serving documentation locally..."
 	@echo "🌐 Open http://127.0.0.1:8000/python-proptest/ in your browser"
-	@if ! python3 -m mkdocs --version >/dev/null 2>&1; then \
-		echo "⚠️  MkDocs not found. Installing documentation dependencies..."; \
-		echo "💡 Tip: Activate your virtual environment first for cleaner installs"; \
-		pip3 install -e ".[docs]" 2>/dev/null || python3 -m pip install -e ".[docs]"; \
+	@if [ ! -d "venv" ]; then \
+		echo "🔧 Creating virtual environment..."; \
+		python3 -m venv venv; \
 	fi
-	python3 -m mkdocs serve
+	@if ! source venv/bin/activate && python -m mkdocs --version >/dev/null 2>&1; then \
+		echo "⚠️  MkDocs not found. Installing documentation dependencies..."; \
+		source venv/bin/activate && pip install -e ".[docs]"; \
+	fi
+	source venv/bin/activate && python -m mkdocs serve
 
 docs-deploy:
 	@echo "🚀 Deploying documentation to GitHub Pages..."
-	@if ! python3 -m mkdocs --version >/dev/null 2>&1; then \
-		echo "⚠️  MkDocs not found. Installing documentation dependencies..."; \
-		echo "💡 Tip: Activate your virtual environment first for cleaner installs"; \
-		pip3 install -e ".[docs]" 2>/dev/null || python3 -m pip install -e ".[docs]"; \
+	@if [ ! -d "venv" ]; then \
+		echo "🔧 Creating virtual environment..."; \
+		python3 -m venv venv; \
 	fi
-	python3 -m mkdocs gh-deploy --force
+	@if ! source venv/bin/activate && python -m mkdocs --version >/dev/null 2>&1; then \
+		echo "⚠️  MkDocs not found. Installing documentation dependencies..."; \
+		source venv/bin/activate && pip install -e ".[docs]"; \
+	fi
+	source venv/bin/activate && python -m mkdocs gh-deploy --force

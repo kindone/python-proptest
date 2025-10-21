@@ -350,6 +350,9 @@ make docs-build     # Build documentation to ./site
 make docs-serve     # Serve documentation at http://127.0.0.1:8000
 make docs-deploy    # Deploy documentation to GitHub Pages
 
+# Quick documentation setup
+./scripts/setup-docs.sh  # Set up documentation environment
+
 # Python version testing
 make test-python38  # Test Python 3.8 compatibility
 make test-all-python # Test all available Python versions
