@@ -7,7 +7,7 @@ property-based testing with complex functions.
 
 import inspect
 import itertools
-from typing import Any, Callable, Dict, Iterable, List, Tuple, Union
+from typing import Any, Callable, Dict, Iterable, List, Union
 
 from .generator import Generator
 from .property import Property, PropertyTestError
@@ -55,7 +55,8 @@ def for_all(
     """
 
     def decorator(func: Callable) -> Callable:
-        # Preserve any existing _proptest_examples / _proptest_settings / _proptest_matrix
+        # Preserve any existing _proptest_examples / _proptest_settings /
+        # _proptest_matrix
         existing_examples = getattr(func, "_proptest_examples", [])
         existing_settings = getattr(func, "_proptest_settings", {})
         existing_matrix = getattr(func, "_proptest_matrix", None)

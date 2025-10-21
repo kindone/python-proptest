@@ -6,14 +6,7 @@ for common Python types.
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, Generic, List, Set, Tuple, TypeVar
-
-try:
-    from typing import Protocol
-except ImportError:
-    # Python < 3.8 compatibility - create a fallback Protocol
-    class Protocol:
-        pass
+from typing import Any, Callable, Dict, Generic, List, Protocol, Set, Tuple, TypeVar
 
 from .shrinker import Shrinkable
 from .stream import Stream
@@ -188,24 +181,24 @@ class Generator(ABC, Generic[T]):
 
     def chain(self, gen_factory: Callable[[T], "Generator[U]"]) -> "ChainGenerator":
         """Chain this generator with a dependent generator to create tuples.
-        
+
         This method allows fluent chaining where the next generator depends on
         the value from this generator. The result is a tuple with both values.
-        
+
         Args:
             gen_factory: Function that takes this generator's value and returns
                         a new Generator for the dependent value
-                        
+
         Returns:
             ChainGenerator that produces tuples with dependent values
-            
+
         Examples:
             # Fluent API style
             date_gen = Gen.int(1, 12).chain(
                 lambda month: Gen.int(1, days_in_month(month))
             )
-            
-            # Can be chained multiple times  
+
+            # Can be chained multiple times
             datetime_gen = date_gen.chain(
                 lambda date_tuple: Gen.int(0, 23)
             )
@@ -447,20 +440,22 @@ class Gen:
         return ConstructGenerator(Type, list(generators))
 
     @staticmethod
-    def chain(base_gen: "Generator", gen_factory: Callable[[Any], "Generator[Any]"]) -> "ChainGenerator":
+    def chain(
+        base_gen: "Generator", gen_factory: Callable[[Any], "Generator[Any]"]
+    ) -> "ChainGenerator":
         """Chain generators to create dependent tuple generation.
-        
+
         Takes a generator and a function that produces a new generator based on the
         generated value. The result is a tuple with the original value(s) plus
         the dependent value.
-        
+
         Args:
             base_gen: Generator for the base value(s) - can be single value or tuple
             gen_factory: Function that takes the base value and returns a Generator
-            
+
         Returns:
             Generator that produces tuples with dependent values
-            
+
         Examples:
             # Simple dependency: month -> valid day
             date_gen = Gen.chain(
@@ -468,14 +463,14 @@ class Gen:
                 lambda month: Gen.int(1, days_in_month(month))  # valid day for month
             )
             # Result: Generator[Tuple[int, int]] for (month, day)
-            
+
             # Chain multiple dependencies
             datetime_gen = Gen.chain(
-                date_gen, 
+                date_gen,
                 lambda date_tuple: Gen.int(0, 23)  # hour
             )
             # Result: Generator[Tuple[int, int, int]] for (month, day, hour)
-            
+
             # Complex dependency with validation
             rect_gen = Gen.chain(
                 Gen.int(1, 100),  # width
@@ -487,7 +482,7 @@ class Gen:
     @staticmethod
     def chain_tuple(tuple_gen, gen_factory):
         """Chain tuple generation with dependent value generation.
-        
+
         Deprecated: Use Gen.chain() instead for unified API.
         """
         return ChainGenerator(tuple_gen, gen_factory)
@@ -1112,17 +1107,19 @@ class ChainTupleGenerator(Generator[tuple]):
 
 class ChainGenerator(Generator[tuple]):
     """Generator that chains tuple generation with dependent value generation.
-    
+
     This generator takes a generator and a function that produces a new generator
     based on the generated value(s). The result is a tuple with the original value(s)
     plus one additional element that depends on the previous elements.
-    
+
     Examples:
         # Chain a single generator
-        date_gen = Gen.chain(Gen.int(1, 12), lambda month: Gen.int(1, days_in_month(month)))
+        date_gen = Gen.chain(
+            Gen.int(1, 12), lambda month: Gen.int(1, days_in_month(month))
+        )
         # Result: Generator[Tuple[int, int]] for (month, day)
-        
-        # Chain a tuple generator  
+
+        # Chain a tuple generator
         datetime_gen = Gen.chain(date_gen, lambda date: Gen.int(0, 23))
         # Result: Generator[Tuple[int, int, int]] for (month, day, hour)
     """
@@ -1139,7 +1136,7 @@ class ChainGenerator(Generator[tuple]):
         # Generate the base value(s)
         base_shrinkable = self.base_gen.generate(rng)
         base_value = base_shrinkable.value
-        
+
         # Normalize to tuple if it's not already
         if isinstance(base_value, tuple):
             base_tuple = base_value
@@ -1155,6 +1152,7 @@ class ChainGenerator(Generator[tuple]):
 
         def create_shrinks():
             from python_proptest.core.stream import Stream
+
             shrinks = []
 
             # Shrinks from base generation (keeping dependent value consistent)
@@ -1165,31 +1163,37 @@ class ChainGenerator(Generator[tuple]):
                     shrunk_base_tuple = shrunk_base_value
                 else:
                     shrunk_base_tuple = (shrunk_base_value,)
-                    
+
                 try:
                     # Generate new dependent value for the shrunk base
                     new_dependent_gen = self.gen_factory(shrunk_base_value)
                     new_dependent_shrinkable = new_dependent_gen.generate(rng)
                     new_combined = shrunk_base_tuple + (new_dependent_shrinkable.value,)
-                    
+
                     # Recursively create shrinkable with proper shrinks
-                    shrinks.append(Shrinkable(
-                        new_combined,
-                        lambda: self._create_dependent_shrinks(
-                            shrunk_base, new_dependent_shrinkable, rng
+                    shrinks.append(
+                        Shrinkable(
+                            new_combined,
+                            lambda: self._create_dependent_shrinks(
+                                shrunk_base, new_dependent_shrinkable, rng
+                            ),
                         )
-                    ))
+                    )
                 except Exception:
                     # Skip if dependent generation fails for shrunk value
-                    continue
+                    continue  # nosec B112
 
             # Shrinks from dependent value generation (keeping base value fixed)
             for shrunk_dependent in dependent_shrinkable.shrinks().to_list():
                 new_combined = base_tuple + (shrunk_dependent.value,)
-                shrinks.append(Shrinkable(
-                    new_combined,
-                    lambda: self._create_base_shrinks(base_shrinkable, shrunk_dependent, rng)
-                ))
+                shrinks.append(
+                    Shrinkable(
+                        new_combined,
+                        lambda: self._create_base_shrinks(
+                            base_shrinkable, shrunk_dependent, rng
+                        ),
+                    )
+                )
 
             return Stream.many(shrinks)
 
@@ -1198,18 +1202,20 @@ class ChainGenerator(Generator[tuple]):
     def _create_dependent_shrinks(self, base_shrinkable, dependent_shrinkable, rng):
         """Create shrinks for when we've shrunk the base and regenerated dependent."""
         from python_proptest.core.stream import Stream
+
         shrinks = []
-        
+
         base_value = base_shrinkable.value
         base_tuple = base_value if isinstance(base_value, tuple) else (base_value,)
-        
+
         # Only shrink the dependent part further
         for shrunk_dependent in dependent_shrinkable.shrinks().to_list():
             shrinks.append(Shrinkable(base_tuple + (shrunk_dependent.value,)))
-            
+
         return Stream.many(shrinks)
-        
+
     def _create_base_shrinks(self, base_shrinkable, dependent_shrinkable, rng):
         """Create shrinks for when we've kept base and shrunk dependent."""
         from python_proptest.core.stream import Stream
+
         return Stream.empty()  # No further shrinks needed for this path

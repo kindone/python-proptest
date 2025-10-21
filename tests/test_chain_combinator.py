@@ -5,9 +5,10 @@ Tests cover basic usage, shrinking behavior, edge cases, and integration
 with other combinators.
 """
 
-import unittest
-from python_proptest import Gen, run_for_all, for_all
 import random
+import unittest
+
+from python_proptest import Gen, for_all, run_for_all
 
 
 class TestChainCombinator(unittest.TestCase):
@@ -19,6 +20,7 @@ class TestChainCombinator(unittest.TestCase):
 
     def test_simple_chain_static_api(self):
         """Test basic chain functionality with static API."""
+
         # Chain month -> valid day
         def days_in_month(month):
             days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
@@ -26,7 +28,7 @@ class TestChainCombinator(unittest.TestCase):
 
         date_gen = Gen.chain(
             Gen.int(1, 12),  # month
-            lambda month: Gen.int(1, days_in_month(month))  # valid day
+            lambda month: Gen.int(1, days_in_month(month)),  # valid day
         )
 
         # Test multiple generations
@@ -44,9 +46,7 @@ class TestChainCombinator(unittest.TestCase):
     def test_fluent_chain_api(self):
         """Test chain functionality with fluent API."""
         # Chain base value -> dependent value
-        chained_gen = Gen.int(1, 10).chain(
-            lambda x: Gen.int(x, x + 10)
-        )
+        chained_gen = Gen.int(1, 10).chain(lambda x: Gen.int(x, x + 10))
 
         for _ in range(15):
             shrinkable = chained_gen.generate(self.rng)
@@ -63,10 +63,9 @@ class TestChainCombinator(unittest.TestCase):
         # Create a 3-tuple with dependencies
         triple_gen = Gen.chain(
             Gen.chain(
-                Gen.int(1, 5),  # width
-                lambda w: Gen.int(w, w + 5)  # height >= width
+                Gen.int(1, 5), lambda w: Gen.int(w, w + 5)  # width  # height >= width
             ),
-            lambda wh: Gen.int(1, wh[0] * wh[1])  # area <= width * height
+            lambda wh: Gen.int(1, wh[0] * wh[1]),  # area <= width * height
         )
 
         for _ in range(10):
@@ -75,7 +74,7 @@ class TestChainCombinator(unittest.TestCase):
 
             self.assertIsInstance(shrinkable.value, tuple)
             self.assertEqual(len(shrinkable.value), 3)
-            
+
             # Test dependencies
             self.assertGreaterEqual(width, 1)
             self.assertLessEqual(width, 5)
@@ -89,7 +88,7 @@ class TestChainCombinator(unittest.TestCase):
         # Chain string length -> string of that length
         string_gen = Gen.chain(
             Gen.int(3, 10),  # length
-            lambda length: Gen.str(min_length=length, max_length=length)
+            lambda length: Gen.str(min_length=length, max_length=length),
         )
 
         for _ in range(10):
@@ -106,7 +105,7 @@ class TestChainCombinator(unittest.TestCase):
         # Generate a list size, then a list of that exact size
         list_gen = Gen.chain(
             Gen.int(2, 5),  # size
-            lambda size: Gen.list(Gen.int(0, 100), min_length=size, max_length=size)
+            lambda size: Gen.list(Gen.int(0, 100), min_length=size, max_length=size),
         )
 
         for _ in range(10):
@@ -117,7 +116,7 @@ class TestChainCombinator(unittest.TestCase):
             self.assertEqual(len(lst), size)
             self.assertGreaterEqual(size, 2)
             self.assertLessEqual(size, 5)
-            
+
             # Verify all elements are in range
             for element in lst:
                 self.assertGreaterEqual(element, 0)
@@ -125,13 +124,13 @@ class TestChainCombinator(unittest.TestCase):
 
     def test_shrinking_maintains_dependencies(self):
         """Test that shrinking preserves dependency relationships."""
+
         def days_in_month(month):
             days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
             return days[month - 1]
 
         date_gen = Gen.chain(
-            Gen.int(1, 12),
-            lambda month: Gen.int(1, days_in_month(month))
+            Gen.int(1, 12), lambda month: Gen.int(1, days_in_month(month))
         )
 
         # Generate and check shrinks
@@ -142,7 +141,7 @@ class TestChainCombinator(unittest.TestCase):
         shrink_count = 0
         for shrunk in shrinkable.shrinks().to_list()[:10]:  # Check first 10 shrinks
             shrunk_month, shrunk_day = shrunk.value
-            
+
             # Verify dependency is maintained in shrinks
             self.assertGreaterEqual(shrunk_month, 1)
             self.assertLessEqual(shrunk_month, 12)
@@ -156,10 +155,7 @@ class TestChainCombinator(unittest.TestCase):
     def test_chain_preserves_single_value_generators(self):
         """Test that single value generators work correctly in chains."""
         # Chain with a constant generator
-        constant_chain = Gen.chain(
-            Gen.just(42),
-            lambda x: Gen.int(x, x + 10)
-        )
+        constant_chain = Gen.chain(Gen.just(42), lambda x: Gen.int(x, x + 10))
 
         for _ in range(5):
             shrinkable = constant_chain.generate(self.rng)
@@ -175,7 +171,7 @@ class TestChainCombinator(unittest.TestCase):
         base_tuple_gen = Gen.tuple(Gen.int(1, 5), Gen.int(1, 5))
         extended_gen = Gen.chain(
             base_tuple_gen,
-            lambda pair: Gen.int(pair[0] + pair[1], pair[0] + pair[1] + 10)
+            lambda pair: Gen.int(pair[0] + pair[1], pair[0] + pair[1] + 10),
         )
 
         for _ in range(10):
@@ -184,7 +180,7 @@ class TestChainCombinator(unittest.TestCase):
 
             self.assertIsInstance(shrinkable.value, tuple)
             self.assertEqual(len(shrinkable.value), 3)
-            
+
             # Check the dependency
             expected_min = first + second
             expected_max = first + second + 10
@@ -193,6 +189,7 @@ class TestChainCombinator(unittest.TestCase):
 
     def test_property_based_chain_validation(self):
         """Use run_for_all to validate chain properties."""
+
         def validate_chain_dependency(pair):
             x, y = pair
             # y should always be >= x (our dependency)
@@ -201,17 +198,14 @@ class TestChainCombinator(unittest.TestCase):
         # Test with run_for_all
         result = run_for_all(
             validate_chain_dependency,
-            Gen.chain(
-                Gen.int(1, 50),
-                lambda x: Gen.int(x, x + 20)
-            ),
-            num_runs=50
+            Gen.chain(Gen.int(1, 50), lambda x: Gen.int(x, x + 20)),
+            num_runs=50,
         )
         self.assertTrue(result)
 
     def test_chain_with_for_all_decorator(self):
         """Test chain combinator with @for_all decorator."""
-        
+
         @for_all(Gen.chain(Gen.int(1, 10), lambda x: Gen.int(x * 2, x * 3)))
         def test_multiplication_dependency(self, pair):
             x, y = pair
@@ -228,7 +222,7 @@ class TestChainCombinator(unittest.TestCase):
         with self.assertRaises(Exception):
             invalid_gen = Gen.chain(
                 Gen.int(1, 10),
-                lambda x: Gen.int(x + 100, x)  # Invalid range: min > max
+                lambda x: Gen.int(x + 100, x),  # Invalid range: min > max
             )
             invalid_gen.generate(self.rng)
 
@@ -236,8 +230,7 @@ class TestChainCombinator(unittest.TestCase):
         """Test that chained generators maintain type consistency."""
         # Chain different types
         mixed_chain = Gen.chain(
-            Gen.bool(),
-            lambda b: Gen.int(0, 1) if b else Gen.int(10, 20)
+            Gen.bool(), lambda b: Gen.int(0, 1) if b else Gen.int(10, 20)
         )
 
         for _ in range(10):
@@ -246,7 +239,7 @@ class TestChainCombinator(unittest.TestCase):
 
             self.assertIsInstance(boolean, bool)
             self.assertIsInstance(integer, int)
-            
+
             if boolean:
                 self.assertIn(integer, [0, 1])
             else:
@@ -255,26 +248,29 @@ class TestChainCombinator(unittest.TestCase):
 
     def test_long_chain_sequence(self):
         """Test chaining many generators in sequence."""
+
         # Create a 5-element tuple through repeated chaining
         def build_long_chain():
             gen = Gen.int(1, 3)  # Start with single value
-            
+
             # Chain 4 more times
-            gen = gen.chain(lambda x: Gen.int(x, x + 2))      # (a, b)
-            gen = gen.chain(lambda xy: Gen.int(xy[1], xy[1] + 2))  # (a, b, c)  
+            gen = gen.chain(lambda x: Gen.int(x, x + 2))  # (a, b)
+            gen = gen.chain(lambda xy: Gen.int(xy[1], xy[1] + 2))  # (a, b, c)
             gen = gen.chain(lambda xyz: Gen.int(xyz[2], xyz[2] + 2))  # (a, b, c, d)
-            gen = gen.chain(lambda xyzw: Gen.int(xyzw[3], xyzw[3] + 2))  # (a, b, c, d, e)
-            
+            gen = gen.chain(
+                lambda xyzw: Gen.int(xyzw[3], xyzw[3] + 2)
+            )  # (a, b, c, d, e)
+
             return gen
 
         long_gen = build_long_chain()
-        
+
         for _ in range(5):
             shrinkable = long_gen.generate(self.rng)
             a, b, c, d, e = shrinkable.value
-            
+
             self.assertEqual(len(shrinkable.value), 5)
-            
+
             # Check dependency chain
             self.assertGreaterEqual(b, a)
             self.assertLessEqual(b, a + 2)
