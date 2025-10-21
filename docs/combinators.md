@@ -15,6 +15,10 @@ Combinators are higher-order functions that manipulate or combine existing gener
 | `generator.map(f)`                           | Applies function `f` to each generated value.                            | `(value: T) -> U`                    | `Gen.int(min_value=1, max_value=100).map(lambda n: str(n))` (Stringified numbers within [1,100])                             |
 | `generator.filter(predicate)`                | Only keeps values where `predicate(value)` is true.                      | `(value: T) -> bool`              | `Gen.int().filter(lambda n: n % 2 == 0)` (Even numbers)                       |
 | `generator.flat_map(f)` / `generator.chain(f)` | Creates a dependent generator using `f(value)` which returns a new Gen. | `(value: T) -> Generator[U]`         | `Gen.int(min_value=1, max_value=5).flat_map(lambda n: Gen.str(min_length=n))` (String of random length within [1,5))   |
+| **Dependent Generation**                     |                                                                          |                                      |                                                                               |
+| `Gen.chain(base_gen, gen_factory)`           | Creates dependent tuple where next value depends on previous.            | `base_gen`, `(value) -> Generator`   | `Gen.chain(Gen.int(1, 12), lambda m: Gen.int(1, days_in_month(m)))` (Valid month/day)         |
+| `Gen.aggregate(initial_gen, gen_factory, min_size, max_size)` | Generates list where each element depends on previous. | `initial_gen`, `(value) -> Generator`, `min/max_size` | `Gen.aggregate(Gen.int(0, 10), lambda n: Gen.int(n, n+5), min_size=3)` (Increasing list)     |
+| `Gen.accumulate(initial_gen, gen_factory, min_size, max_size)` | Generates final value after N dependent steps. | `initial_gen`, `(value) -> Generator`, `min/max_size` | `Gen.accumulate(Gen.int(50, 50), lambda p: Gen.int(max(0,p-10), min(100,p+10)), min_size=10)` (Random walk endpoint) |
 | **Class Construction**                       |                                                                          |                                      |                                                                               |
 | `Gen.construct(Class, ...arg_gens)`           | Creates class instances using `Class(...args)` from `arg_gens`.       | `Constructor`, `...argument_generators` | `Gen.construct(Point, Gen.int(), Gen.int())` (Construct Point object)       |
 
@@ -268,6 +272,230 @@ Gen.int(min_value=1, max_value=3).flat_map(
 - Generating related values
 - Building complex nested structures
 - Implementing conditional generation
+
+## Dependent Generation Combinators
+
+Dependent generation combinators allow you to create generators where subsequent values depend on previously generated values. These are essential for testing stateful systems, sequences with constraints, or data with complex interdependencies.
+
+### `Gen.chain(base_gen, gen_factory)` / `generator.chain(gen_factory)`
+
+Creates a tuple generator where the next value depends on the previously generated value(s). The result is always a tuple containing all generated values.
+
+**Parameters:**
+- `base_gen` (Generator): Generator for the initial value(s) - can produce single value or tuple
+- `gen_factory` (Callable[[T], Generator[U]]): Function that takes the base value and returns a generator
+
+**Static API Examples:**
+```python
+# Simple dependency: month -> valid day
+def days_in_month(month):
+    days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+    return days[month - 1]
+
+date_gen = Gen.chain(
+    Gen.int(1, 12),  # Generate month
+    lambda month: Gen.int(1, days_in_month(month))  # Generate valid day for that month
+)
+# Result: Generator[Tuple[int, int]] producing (month, day) pairs like (2, 28), (12, 31)
+
+# Multiple chaining: month -> day -> hour
+datetime_gen = Gen.chain(
+    date_gen,  # Base is already a tuple (month, day)
+    lambda date_tuple: Gen.int(0, 23)  # Generate hour
+)
+# Result: Generator[Tuple[int, int, int]] producing (month, day, hour) like (3, 15, 14)
+
+# Width constrains height
+rect_gen = Gen.chain(
+    Gen.int(1, 100),  # Generate width
+    lambda width: Gen.int(1, 200 // width)  # Height constrained by width
+)
+# Result: Generator[Tuple[int, int]] ensuring width * height <= 200
+```
+
+**Fluent API Examples:**
+```python
+# Fluent API style (more concise)
+date_gen = Gen.int(1, 12).chain(
+    lambda month: Gen.int(1, days_in_month(month))
+)
+
+# Can chain multiple times
+datetime_gen = Gen.int(1, 12)\
+    .chain(lambda month: Gen.int(1, days_in_month(month)))\
+    .chain(lambda date: Gen.int(0, 23))
+```
+
+**Use Cases:**
+- Generating valid date combinations (month/day, hour/minute)
+- Creating dependent geometric properties (width/height with area constraint)
+- Testing APIs with dependent parameters
+- Generating valid state transitions
+- Creating dependent tuple data
+
+### `Gen.aggregate(initial_gen, gen_factory, min_size, max_size)` / `generator.aggregate(...)`
+
+Generates a **list** where each element depends on the previous element. Returns the entire sequence of generated values.
+
+**Parameters:**
+- `initial_gen` (Generator[T]): Generator for the first element
+- `gen_factory` (Callable[[T], Generator[T]]): Function that takes a value and returns a generator for the next value
+- `min_size` (int): Minimum number of elements (default: 0)
+- `max_size` (int): Maximum number of elements (default: 10)
+
+**Static API Examples:**
+```python
+# Increasing sequence: each element >= previous
+increasing_gen = Gen.aggregate(
+    Gen.int(0, 10),  # Start with 0-10
+    lambda n: Gen.int(n, n + 5),  # Each next value is n to n+5
+    min_size=3,
+    max_size=10
+)
+# Result: [5, 8, 12, 15, 18] - entire sequence of increasing numbers
+
+# Strictly increasing sequence
+strictly_increasing_gen = Gen.aggregate(
+    Gen.int(0, 5),
+    lambda n: Gen.int(n + 1, n + 10),  # Each next value is > previous
+    min_size=4,
+    max_size=7
+)
+# Result: [2, 5, 8, 15] - each element strictly > previous
+
+# Bounded random walk
+walk_gen = Gen.aggregate(
+    Gen.int(50, 50),  # Start at position 50
+    lambda pos: Gen.int(max(0, pos - 10), min(100, pos + 10)),  # Move ±10
+    min_size=5,
+    max_size=20
+)
+# Result: [50, 45, 52, 48, 38, ...] - random walk staying in [0, 100]
+
+# Growing strings
+string_growth_gen = Gen.aggregate(
+    Gen.ascii_string(min_length=1, max_length=3),
+    lambda s: Gen.ascii_string(min_length=len(s), max_length=len(s) + 2),
+    min_size=3,
+    max_size=8
+)
+# Result: ['ab', 'abc', 'abcde', 'abcdefg'] - strings growing in length
+```
+
+**Fluent API Examples:**
+```python
+# Fluent style
+increasing_gen = Gen.int(0, 10).aggregate(
+    lambda n: Gen.int(n, n + 5),
+    min_size=3,
+    max_size=10
+)
+
+# Chain with other combinators
+filtered_walk = Gen.int(50, 50).aggregate(
+    lambda pos: Gen.int(max(0, pos - 10), min(100, pos + 10)),
+    min_size=10,
+    max_size=20
+).filter(lambda path: path[-1] > 30)  # Only paths ending above 30
+```
+
+**Use Cases:**
+- Simulating sequences with constraints (increasing values, bounded movements)
+- Testing stateful systems where each state depends on previous
+- Generating time series data
+- Creating dependency chains
+- Testing algorithms that process sequences
+- Simulating random walks or stochastic processes
+
+### `Gen.accumulate(initial_gen, gen_factory, min_size, max_size)` / `generator.accumulate(...)`
+
+Generates a **single final value** after N dependent generation steps. Like `aggregate`, but returns only the end result, not the intermediate values.
+
+**Parameters:**
+- `initial_gen` (Generator[T]): Generator for the initial value
+- `gen_factory` (Callable[[T], Generator[T]]): Function that takes a value and returns a generator for the next value
+- `min_size` (int): Minimum number of accumulation steps (default: 0)
+- `max_size` (int): Maximum number of accumulation steps (default: 10)
+
+**Static API Examples:**
+```python
+# Random walk - final position only
+final_position_gen = Gen.accumulate(
+    Gen.int(0, 100),  # Start position
+    lambda pos: Gen.int(max(0, pos - 5), min(100, pos + 5)),  # Move ±5
+    min_size=10,
+    max_size=50
+)
+# Result: 67 - single int (final position after 10-50 steps)
+
+# Compound growth - final amount only
+final_amount_gen = Gen.accumulate(
+    Gen.float(100.0, 100.0),  # Start with $100
+    lambda amount: Gen.float(amount * 1.01, amount * 1.1),  # Grow 1-10%
+    min_size=5,
+    max_size=20
+)
+# Result: 156.34 - single float (final amount after compounding)
+
+# Strictly increasing - final value
+final_value_gen = Gen.accumulate(
+    Gen.int(0, 10),
+    lambda n: Gen.int(n + 1, n + 5),
+    min_size=10,
+    max_size=15
+)
+# Result: 47 - single int (final value after 10-15 increasing steps)
+```
+
+**Fluent API Examples:**
+```python
+# Fluent style
+final_position = Gen.int(50, 50).accumulate(
+    lambda pos: Gen.int(max(0, pos - 10), min(100, pos + 10)),
+    min_size=20,
+    max_size=30
+)
+
+# Use with map
+final_state = Gen.int(0, 0).accumulate(
+    lambda state: Gen.int(state, state + 10),
+    min_size=5,
+    max_size=10
+).map(lambda final: f"Final state: {final}")
+```
+
+**Use Cases:**
+- Testing end states of stochastic processes
+- Simulating compound growth/decay
+- Testing final outcomes without intermediate steps
+- Generating complex derived values
+- Simulating iterative algorithms (final result only)
+- Testing convergence properties
+
+### Comparison: `chain` vs `aggregate` vs `accumulate`
+
+| Feature | `chain` | `aggregate` | `accumulate` |
+|---------|---------|-------------|--------------|
+| **Returns** | Tuple of all values | List of all values | Single final value |
+| **Dependency** | Each depends on all previous | Each depends on immediate previous | Each depends on immediate previous |
+| **Result Size** | Fixed (base + 1) | Variable (min_size to max_size) | Single value |
+| **Use When** | Need all related values | Need full sequence history | Only care about end result |
+| **Example** | (month, day, hour) | [1, 3, 5, 8, 12] | 47 |
+
+**Example Comparison:**
+```python
+# Chain: Get tuple of related values
+date = Gen.chain(Gen.int(1, 12), lambda m: Gen.int(1, days_in_month(m)))
+# Result: (3, 15) - tuple of (month, day)
+
+# Aggregate: Get list showing full progression
+path = Gen.aggregate(Gen.int(0, 0), lambda n: Gen.int(n, n+5), min_size=5, max_size=5)
+# Result: [0, 3, 6, 10, 14] - full path shown
+
+# Accumulate: Get only final position
+final = Gen.accumulate(Gen.int(0, 0), lambda n: Gen.int(n, n+5), min_size=5, max_size=5)
+# Result: 14 - only final value
+```
 
 ## Class Construction Combinators
 

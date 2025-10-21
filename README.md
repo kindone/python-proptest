@@ -270,7 +270,11 @@ def test_stack_operations():
 - `Gen.just(value)` - Always generates the same value
 - `Gen.lazy(func)` - Defers evaluation until generation
 - `Gen.construct(Type, *generators)` - Creates class instances
-- `Gen.chain_tuple(tuple_gen, gen_factory)` - Chains tuple generation with dependent values
+
+**Dependent Generation Combinators:**
+- `Gen.chain(base_gen, gen_factory)` / `generator.chain(gen_factory)` - Creates dependent tuples
+- `Gen.aggregate(initial_gen, gen_factory, min_size, max_size)` / `generator.aggregate(...)` - Generates list with dependent elements
+- `Gen.accumulate(initial_gen, gen_factory, min_size, max_size)` / `generator.accumulate(...)` - Generates final value after dependent steps
 
 **Selection Combinators:**
 - `Gen.one_of(*generators)` - Randomly chooses from multiple generators

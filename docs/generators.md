@@ -536,27 +536,21 @@ Gen.construct(Person, Gen.str(min_length=1, max_length=10), Gen.int(min_value=0,
 - Generating domain objects
 - Creating structured test data
 
-### `Gen.chain_tuple(tuple_gen, gen_factory)`
+## Dependent Generation
 
-Chains tuple generation with dependent value generation.
+For generators where values depend on each other, `python-proptest` provides powerful combinators like `chain`, `aggregate`, and `accumulate`. These are covered in detail in the [Combinators](./combinators.md) documentation under "Dependent Generation Combinators".
 
-**Parameters:**
-- `tuple_gen` (Generator): Generator that produces tuples
-- `gen_factory` (Callable): Function that takes tuple values and returns a generator
-
-**Examples:**
+**Quick Examples:**
 ```python
-# Generate (x, y) pairs, then generate z based on x and y
-def create_z_gen(x, y):
-    return Gen.int(min_value=x, max_value=y)
+# Chain: Create dependent tuple (month, day)
+Gen.chain(Gen.int(1, 12), lambda month: Gen.int(1, days_in_month(month)))
 
-Gen.chain_tuple(Gen.tuple(Gen.int(), Gen.int()), create_z_gen)
+# Aggregate: Create list where each element depends on previous
+Gen.aggregate(Gen.int(0, 10), lambda n: Gen.int(n, n + 5), min_size=3, max_size=10)
+
+# Accumulate: Get final value after dependent steps
+Gen.accumulate(Gen.int(50, 50), lambda p: Gen.int(max(0, p-10), min(100, p+10)), min_size=10)
 ```
-
-**Use Cases:**
-- Creating dependent test data
-- Generating related values
-- Building complex data structures
 
 Beyond the built-in generators, `python-proptest` provides **combinators**: functions that transform or combine existing generators to create new, more complex ones. This is how you build generators for your specific data types and constraints.
 
