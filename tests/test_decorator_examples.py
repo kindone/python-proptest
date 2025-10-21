@@ -4,8 +4,12 @@ Tests demonstrating the decorator-based API.
 This file shows how to use the Hypothesis-style decorator API for
 more ergonomic property-based testing.
 """
-
-import pytest
+try:
+    import pytest
+except ImportError:
+    raise ImportError(
+        "pytest is required to run the decorator API tests. "
+    )
 
 from python_proptest import (
     Gen,
