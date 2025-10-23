@@ -3,6 +3,7 @@
 import random
 import unittest
 
+from python_proptest import run_for_all
 from python_proptest.core.generator import Gen
 
 
@@ -15,8 +16,8 @@ class TestAggregate(unittest.TestCase):
             Gen.int(0, 10), lambda n: Gen.int(n, n + 5), min_size=3, max_size=5
         )
 
-        for _ in range(20):
-            values = gen.generate(random.Random()).value
+        # Test using run_for_all
+        def check_aggregate(values):
             # Check size constraints
             self.assertGreaterEqual(len(values), 3)
             self.assertLessEqual(len(values), 5)
@@ -28,6 +29,9 @@ class TestAggregate(unittest.TestCase):
                     values[i - 1],
                     f"Element {i} ({values[i]}) should be >= previous ({values[i-1]})",
                 )
+            return True
+
+        run_for_all(check_aggregate, gen, num_runs=20, seed=42)
 
     def test_aggregate_empty_list(self):
         """Test aggregate with min_size=0 can generate empty lists."""
@@ -66,8 +70,9 @@ class TestAggregate(unittest.TestCase):
             max_size=10,
         )
 
-        for _ in range(20):
-            values = gen.generate(random.Random()).value
+        # Test using run_for_all decorator - auto-executes!
+        @run_for_all(gen, num_runs=20, seed=42)
+        def check_random_walk(values):
             self.assertEqual(values[0], 50, "Should start at 50")
 
             # Check all values are within bounds
@@ -88,15 +93,18 @@ class TestAggregate(unittest.TestCase):
             Gen.int(0, 5), lambda n: Gen.int(n + 1, n + 10), min_size=3, max_size=7
         )
 
-        for _ in range(20):
-            values = gen.generate(random.Random()).value
+        # Test using run_for_all
+        def check_strict_increasing(values):
             # Check strictly increasing
             for i in range(1, len(values)):
                 self.assertGreater(
                     values[i],
                     values[i - 1],
-                    f"Element {i} ({values[i]}) should be > previous ({values[i-1]})",
+                    f"Element {i} should be strictly greater than previous",
                 )
+            return True
+
+        run_for_all(check_strict_increasing, gen, num_runs=20, seed=42)
 
     def test_aggregate_fluent_api(self):
         """Test fluent API version of aggregate."""

@@ -18,8 +18,8 @@ class TestChainCombinator(unittest.TestCase):
         """Set up test fixtures."""
         self.rng = random.Random(42)  # Fixed seed for reproducible tests
 
-    def test_simple_chain_static_api(self):
-        """Test basic chain functionality with static API."""
+    def test_simple_chain_static_api_function_style(self):
+        """Test basic chain functionality with static API - function style."""
 
         # Chain month -> valid day
         def days_in_month(month):
@@ -31,32 +31,56 @@ class TestChainCombinator(unittest.TestCase):
             lambda month: Gen.int(1, days_in_month(month)),  # valid day
         )
 
-        # Test multiple generations
-        for _ in range(20):
-            shrinkable = date_gen.generate(self.rng)
-            month, day = shrinkable.value
-
-            self.assertIsInstance(shrinkable.value, tuple)
-            self.assertEqual(len(shrinkable.value), 2)
+        # Test using run_for_all as function
+        def check_valid_date(date_tuple):
+            self.assertIsInstance(date_tuple, tuple)
+            self.assertEqual(len(date_tuple), 2)
+            month, day = date_tuple
             self.assertGreaterEqual(month, 1)
             self.assertLessEqual(month, 12)
             self.assertGreaterEqual(day, 1)
             self.assertLessEqual(day, days_in_month(month))
+            return True
+
+        run_for_all(check_valid_date, date_gen, num_runs=20, seed=42)
+
+    @run_for_all(
+        Gen.chain(
+            Gen.int(1, 12),
+            lambda month: Gen.int(
+                1, [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month - 1]
+            ),
+        ),
+        num_runs=20,
+        seed=42,
+    )
+    def test_simple_chain_static_api(self, date_tuple):
+        """Test basic chain functionality with static API - decorator style."""
+        self.assertIsInstance(date_tuple, tuple)
+        self.assertEqual(len(date_tuple), 2)
+        month, day = date_tuple
+        self.assertGreaterEqual(month, 1)
+        self.assertLessEqual(month, 12)
+        self.assertGreaterEqual(day, 1)
+        days_in_month = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+        self.assertLessEqual(day, days_in_month[month - 1])
 
     def test_fluent_chain_api(self):
         """Test chain functionality with fluent API."""
         # Chain base value -> dependent value
         chained_gen = Gen.int(1, 10).chain(lambda x: Gen.int(x, x + 10))
 
-        for _ in range(15):
-            shrinkable = chained_gen.generate(self.rng)
-            base, dependent = shrinkable.value
-
-            self.assertIsInstance(shrinkable.value, tuple)
+        # Test using run_for_all
+        def check_chain_dependency(pair):
+            self.assertIsInstance(pair, tuple)
+            base, dependent = pair
             self.assertGreaterEqual(base, 1)
             self.assertLessEqual(base, 10)
             self.assertGreaterEqual(dependent, base)
             self.assertLessEqual(dependent, base + 10)
+            return True
+
+        run_for_all(check_chain_dependency, chained_gen, num_runs=15, seed=42)
 
     def test_multiple_chaining(self):
         """Test chaining multiple times to create longer tuples."""
@@ -68,12 +92,11 @@ class TestChainCombinator(unittest.TestCase):
             lambda wh: Gen.int(1, wh[0] * wh[1]),  # area <= width * height
         )
 
-        for _ in range(10):
-            shrinkable = triple_gen.generate(self.rng)
-            width, height, area = shrinkable.value
-
-            self.assertIsInstance(shrinkable.value, tuple)
-            self.assertEqual(len(shrinkable.value), 3)
+        # Test using run_for_all
+        def check_triple_dependency(triple):
+            self.assertIsInstance(triple, tuple)
+            self.assertEqual(len(triple), 3)
+            width, height, area = triple
 
             # Test dependencies
             self.assertGreaterEqual(width, 1)
@@ -82,6 +105,9 @@ class TestChainCombinator(unittest.TestCase):
             self.assertLessEqual(height, width + 5)
             self.assertGreaterEqual(area, 1)
             self.assertLessEqual(area, width * height)
+            return True
+
+        run_for_all(check_triple_dependency, triple_gen, num_runs=10, seed=42)
 
     def test_chain_with_other_generators(self):
         """Test chaining with different generator types."""
@@ -91,14 +117,16 @@ class TestChainCombinator(unittest.TestCase):
             lambda length: Gen.str(min_length=length, max_length=length),
         )
 
-        for _ in range(10):
-            shrinkable = string_gen.generate(self.rng)
-            length, string = shrinkable.value
-
-            self.assertIsInstance(shrinkable.value, tuple)
+        # Test using run_for_all
+        def check_string_length(pair):
+            self.assertIsInstance(pair, tuple)
+            length, string = pair
             self.assertEqual(len(string), length)
             self.assertGreaterEqual(length, 3)
             self.assertLessEqual(length, 10)
+            return True
+
+        run_for_all(check_string_length, string_gen, num_runs=10, seed=42)
 
     def test_chain_with_complex_dependencies(self):
         """Test chain with complex dependency logic."""
@@ -108,11 +136,10 @@ class TestChainCombinator(unittest.TestCase):
             lambda size: Gen.list(Gen.int(0, 100), min_length=size, max_length=size),
         )
 
-        for _ in range(10):
-            shrinkable = list_gen.generate(self.rng)
-            size, lst = shrinkable.value
-
-            self.assertIsInstance(shrinkable.value, tuple)
+        # Test using run_for_all
+        def check_list_size(pair):
+            self.assertIsInstance(pair, tuple)
+            size, lst = pair
             self.assertEqual(len(lst), size)
             self.assertGreaterEqual(size, 2)
             self.assertLessEqual(size, 5)
@@ -121,6 +148,9 @@ class TestChainCombinator(unittest.TestCase):
             for element in lst:
                 self.assertGreaterEqual(element, 0)
                 self.assertLessEqual(element, 100)
+            return True
+
+        run_for_all(check_list_size, list_gen, num_runs=10, seed=42)
 
     def test_shrinking_maintains_dependencies(self):
         """Test that shrinking preserves dependency relationships."""
@@ -174,18 +204,20 @@ class TestChainCombinator(unittest.TestCase):
             lambda pair: Gen.int(pair[0] + pair[1], pair[0] + pair[1] + 10),
         )
 
-        for _ in range(10):
-            shrinkable = extended_gen.generate(self.rng)
-            first, second, third = shrinkable.value
-
-            self.assertIsInstance(shrinkable.value, tuple)
-            self.assertEqual(len(shrinkable.value), 3)
+        # Test using run_for_all
+        def check_nested_tuple(triple):
+            self.assertIsInstance(triple, tuple)
+            self.assertEqual(len(triple), 3)
+            first, second, third = triple
 
             # Check the dependency
             expected_min = first + second
             expected_max = first + second + 10
             self.assertGreaterEqual(third, expected_min)
             self.assertLessEqual(third, expected_max)
+            return True
+
+        run_for_all(check_nested_tuple, extended_gen, num_runs=10, seed=42)
 
     def test_property_based_chain_validation(self):
         """Use run_for_all to validate chain properties."""

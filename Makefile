@@ -63,9 +63,9 @@ lint:
 # Format code
 format:
 	@echo "🎨 Formatting code with black..."
-	black python_proptest/ tests/
+	black python_proptest/ tests/ *.py
 	@echo "📋 Sorting imports with isort..."
-	isort python_proptest/ tests/
+	isort python_proptest/ tests/ *.py
 
 # Type checking
 type-check:

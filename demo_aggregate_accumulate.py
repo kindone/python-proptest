@@ -6,6 +6,7 @@ ported from cppproptest2.
 """
 
 import random
+
 from python_proptest import Gen
 
 
