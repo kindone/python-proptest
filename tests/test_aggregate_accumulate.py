@@ -17,6 +17,8 @@ class TestAggregate(unittest.TestCase):
         )
 
         # Test using run_for_all
+        # Test using run_for_all as decorator
+        @run_for_all(gen, num_runs=20, seed=42)
         def check_aggregate(values):
             # Check size constraints
             self.assertGreaterEqual(len(values), 3)
@@ -29,9 +31,6 @@ class TestAggregate(unittest.TestCase):
                     values[i - 1],
                     f"Element {i} ({values[i]}) should be >= previous ({values[i-1]})",
                 )
-            return True
-
-        run_for_all(check_aggregate, gen, num_runs=20, seed=42)
 
     def test_aggregate_empty_list(self):
         """Test aggregate with min_size=0 can generate empty lists."""
@@ -93,7 +92,8 @@ class TestAggregate(unittest.TestCase):
             Gen.int(0, 5), lambda n: Gen.int(n + 1, n + 10), min_size=3, max_size=7
         )
 
-        # Test using run_for_all
+        # Test using run_for_all as decorator
+        @run_for_all(gen, num_runs=20, seed=42)
         def check_strict_increasing(values):
             # Check strictly increasing
             for i in range(1, len(values)):
@@ -102,9 +102,6 @@ class TestAggregate(unittest.TestCase):
                     values[i - 1],
                     f"Element {i} should be strictly greater than previous",
                 )
-            return True
-
-        run_for_all(check_strict_increasing, gen, num_runs=20, seed=42)
 
     def test_aggregate_fluent_api(self):
         """Test fluent API version of aggregate."""
