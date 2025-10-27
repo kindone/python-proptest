@@ -14,6 +14,6 @@ exclude_dirs:
 # Set confidence level (High, Medium, Low)
 confidence: Medium
 
-# Set severity level (High, Medium, Low)  
+# Set severity level (High, Medium, Low)
 severity: Medium
 

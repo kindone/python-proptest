@@ -57,19 +57,19 @@ if [ -d "dist" ] && [ "$(ls -A dist)" ]; then
     echo "Build artifacts:"
     ls -la dist/
     echo ""
-    
+
     # Show package info
     print_status "Package information:"
     python -m build --wheel --sdist --outdir dist/ >/dev/null 2>&1 || true
-    
+
     if [ -f "dist/python-proptest-*.whl" ]; then
         echo "Wheel: $(ls dist/*.whl)"
     fi
-    
+
     if [ -f "dist/python-proptest-*.tar.gz" ]; then
         echo "Source: $(ls dist/*.tar.gz)"
     fi
-    
+
     echo ""
     print_success "Package is ready for upload to PyPI! 🎉"
     echo ""
@@ -77,7 +77,7 @@ if [ -d "dist" ] && [ "$(ls -A dist)" ]; then
     echo "  1. Test the package: ./scripts/test-package.sh"
     echo "  2. Upload to TestPyPI: ./scripts/upload-testpypi.sh"
     echo "  3. Upload to PyPI: ./scripts/upload-pypi.sh"
-    
+
 else
     print_error "Build failed - no artifacts found in dist/"
     exit 1

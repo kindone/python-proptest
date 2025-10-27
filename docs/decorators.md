@@ -60,6 +60,155 @@ class TestMathProperties(unittest.TestCase):
 - `num_runs`: Number of test runs (default: 100)
 - `seed`: Random seed for reproducibility (default: None)
 
+## @run_for_all
+
+A versatile decorator that works in three different modes, combining the power of property-based testing with flexible syntax. Unlike `@for_all`, it doesn't unpack generator values, making it ideal for working with complex generators like `chain`, `aggregate`, and `accumulate`.
+
+### Mode 1: Function Call (Traditional)
+
+Use `run_for_all` as a function to explicitly run property tests:
+
+```python
+from python_proptest import run_for_all, Gen
+
+def test_addition():
+    def check(x, y):
+        return x + y == y + x
+
+    result = run_for_all(check, Gen.int(0, 100), Gen.int(0, 100), num_runs=100)
+    assert result is True
+```
+
+### Mode 2: Test Method Decorator
+
+Decorate test methods to have property tests executed by the test framework:
+
+```python
+import unittest
+from python_proptest import run_for_all, Gen
+
+class TestProperties(unittest.TestCase):
+    @run_for_all(Gen.int(0, 100), Gen.int(0, 100), num_runs=50)
+    def test_addition_commutative(self, x, y):
+        self.assertEqual(x + y, y + x)
+```
+
+### Mode 3: Nested Function Decorator (Auto-Execute)
+
+The most powerful mode - decorate nested functions inside test methods and they **execute immediately**:
+
+```python
+import unittest
+from python_proptest import run_for_all, Gen
+
+class TestChain(unittest.TestCase):
+    def test_chain_dependency(self):
+        gen = Gen.chain(Gen.int(1, 10), lambda x: Gen.int(x, x + 10))
+
+        @run_for_all(gen, num_runs=20, seed=42)
+        def check_dependency(pair):
+            base, dependent = pair
+            self.assertGreaterEqual(dependent, base)
+            self.assertLessEqual(dependent, base + 10)
+
+        # No explicit call needed - the property test already ran!
+```
+
+### Working with Complex Generators
+
+`@run_for_all` is perfect for generators that return tuples or complex structures:
+
+#### With chain
+
+```python
+def test_dependent_generation(self):
+    # chain returns (base_value, dependent_value) tuple
+    gen = Gen.chain(
+        Gen.int(1, 100),
+        lambda x: Gen.int(x, x + 50)
+    )
+
+    @run_for_all(gen, num_runs=50)
+    def check_range(pair):
+        start, end = pair
+        self.assertGreaterEqual(end, start)
+        self.assertLessEqual(end, start + 50)
+```
+
+#### With aggregate
+
+```python
+def test_increasing_sequence(self):
+    # aggregate returns a list of dependent values
+    gen = Gen.aggregate(
+        Gen.int(0, 10),
+        lambda n: Gen.int(n, n + 5),
+        min_size=5,
+        max_size=10
+    )
+
+    @run_for_all(gen, num_runs=30)
+    def check_sequence(values):
+        self.assertGreaterEqual(len(values), 5)
+        # Check each value >= previous
+        for i in range(1, len(values)):
+            self.assertGreaterEqual(values[i], values[i - 1])
+```
+
+#### With accumulate
+
+```python
+def test_final_value(self):
+    # accumulate returns only the final value after N steps
+    gen = Gen.accumulate(
+        Gen.int(10, 20),
+        lambda n: Gen.int(n + 1, n + 5),
+        min_size=10,
+        max_size=10
+    )
+
+    @run_for_all(gen, num_runs=25)
+    def check_final(final_value):
+        # After 10 steps of +1 to +5, should be >= initial + 10
+        self.assertGreaterEqual(final_value, 20)
+```
+
+### Comparison: @for_all vs @run_for_all
+
+```python
+# @for_all unpacks the tuple arguments
+@for_all(Gen.int(1, 10), Gen.int(1, 10))
+def test_with_for_all(self, x, y):
+    # Gets two separate arguments: x and y
+    assert x <= y
+
+# @run_for_all with chain - receives tuple as-is
+@run_for_all(Gen.chain(Gen.int(1, 10), lambda x: Gen.int(x, x + 10)))
+def test_with_run_for_all(self, pair):
+    # Gets tuple: (base, dependent)
+    base, dependent = pair
+    assert base <= dependent
+```
+
+### Parameters
+
+- `*generators`: One or more generators (when used as decorator, generators come first)
+- `num_runs`: Number of test runs (default: 100)
+- `seed`: Random seed for reproducibility (default: None)
+
+### When to Use @run_for_all
+
+Use `@run_for_all` when:
+- Working with `chain`, `aggregate`, or `accumulate` combinators
+- You want auto-execution in nested function contexts
+- You prefer explicit control over value unpacking
+- Testing properties that operate on tuples or complex structures
+
+Use `@for_all` when:
+- You want automatic argument unpacking
+- Working with simple, independent generators
+- Following traditional property testing patterns
+
 ## @example
 
 Provides specific example values that are tested before random generation. Examples are useful for testing edge cases, known good values, or debugging specific scenarios.

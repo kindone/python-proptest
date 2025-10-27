@@ -193,9 +193,9 @@ class TestMathProperties(unittest.TestCase):
 
 ## Choosing the Right Approach
 
-python-proptest provides two main approaches for defining property tests. Choose based on your needs:
+python-proptest provides multiple approaches for defining property tests. Choose based on your needs:
 
-### Use `run_for_all` for Simple Lambda-Based Tests
+### Use `run_for_all` Function for Simple Lambda-Based Tests
 
 Suitable for simple property checks that can be expressed as lambdas:
 
@@ -222,9 +222,41 @@ def test_simple_properties():
     )
 ```
 
-### Use `@for_all` for Complex Function-Based Tests
+### Use `@run_for_all` Decorator for Complex Generators
 
-Suitable for complex assertions that benefit from explicit parameter signatures:
+Perfect for working with `chain`, `aggregate`, and `accumulate` combinators:
+
+```python
+from python_proptest import run_for_all, Gen
+import unittest
+
+class TestDependencies(unittest.TestCase):
+    def test_chain_dependency(self):
+        gen = Gen.chain(Gen.int(1, 10), lambda x: Gen.int(x, x + 10))
+
+        @run_for_all(gen, num_runs=50)
+        def check_dependency(pair):
+            base, dependent = pair
+            self.assertGreaterEqual(dependent, base)
+            self.assertLessEqual(dependent, base + 10)
+        # Auto-executes when decorated!
+
+    def test_aggregate_sequence(self):
+        gen = Gen.aggregate(
+            Gen.int(0, 10),
+            lambda n: Gen.int(n, n + 5),
+            min_size=5, max_size=10
+        )
+
+        @run_for_all(gen, num_runs=30)
+        def check_increasing(values):
+            for i in range(1, len(values)):
+                self.assertGreaterEqual(values[i], values[i - 1])
+```
+
+### Use `@for_all` for Independent Generators
+
+Suitable for complex assertions with multiple independent parameters:
 
 ```python
 from python_proptest import for_all, Gen
@@ -248,9 +280,10 @@ def test_string_operations(s1: str, s2: str):
 
 ### Guidelines
 
-- **Use `run_for_all`** for simple property checks that can be expressed as lambdas
-- **Use `@for_all`** for complex assertions that benefit from explicit function signatures
+- **Use `run_for_all` function** for simple property checks with lambdas
+- **Use `@run_for_all` decorator** for complex generators (`chain`, `aggregate`, `accumulate`) with auto-execution
+- **Use `@for_all`** for complex assertions with multiple independent parameters
 - **Use `run_for_all`** for seed-based reproducibility testing
-- **Use `@for_all`** for tests with complex generator transformations
+- **Use `@run_for_all`** when you want the property test to execute immediately in nested contexts
 
-All approaches provide the same functionality - choose based on your testing framework and preferences. For more details on framework integration, see [Pytest Integration](pytest-integration.md), [Unittest Integration](unittest-integration.md), and [Pytest Best Practices](pytest-best-practices.md).
+All approaches provide the same functionality - choose based on your testing framework and preferences. For more details on decorators, see [Decorators](decorators.md). For framework integration, see [Pytest Integration](pytest-integration.md), [Unittest Integration](unittest-integration.md), and [Pytest Best Practices](pytest-best-practices.md).

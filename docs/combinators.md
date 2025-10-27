@@ -584,7 +584,7 @@ Use `flat_map` for conditional generation:
 ```python
 # Conditional based on value
 Gen.int().flat_map(
-    lambda x: Gen.str(min_length=1, max_length=5) if x > 0 
+    lambda x: Gen.str(min_length=1, max_length=5) if x > 0
               else Gen.just("negative")
 )
 

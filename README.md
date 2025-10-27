@@ -175,6 +175,41 @@ def test_string_concatenation(s1: str, s2: str):
     assert result.endswith(s2)
 ```
 
+### Testing with Dependent Generators
+
+```python
+import unittest
+from python_proptest import run_for_all, Gen
+
+class TestDependencies(unittest.TestCase):
+    def test_chain_dependency(self):
+        """Test dependent generation with chain combinator."""
+        # chain generates (base, dependent) tuples
+        gen = Gen.chain(Gen.int(1, 100), lambda x: Gen.int(x, x + 50))
+
+        @run_for_all(gen, num_runs=50)
+        def check_dependency(pair):
+            start, end = pair
+            self.assertGreaterEqual(end, start)
+            self.assertLessEqual(end, start + 50)
+        # Decorator auto-executes the property test!
+
+    def test_aggregate_sequence(self):
+        """Test dependent sequence generation with aggregate."""
+        # aggregate generates lists with dependent elements
+        gen = Gen.aggregate(
+            Gen.int(0, 10),
+            lambda n: Gen.int(n, n + 5),
+            min_size=5, max_size=10
+        )
+
+        @run_for_all(gen, num_runs=30)
+        def check_increasing(values):
+            # Each element should be >= previous
+            for i in range(1, len(values)):
+                self.assertGreaterEqual(values[i], values[i - 1])
+```
+
 ### Testing Complex Data Structures
 
 ```python
@@ -288,7 +323,8 @@ def test_stack_operations():
 - `generator.flat_map(func)` - Creates dependent generators
 
 **Decorators:**
-- `@for_all(*generators, num_runs, seed)` - Core property-based testing decorator
+- `@for_all(*generators, num_runs, seed)` - Core property-based testing decorator (unpacks arguments)
+- `@run_for_all(*generators, num_runs, seed)` - Versatile decorator for complex generators (chain, aggregate, accumulate)
 - `@example(*values)` - Provides specific example values to test
 - `@settings(num_runs, seed)` - Configures test parameters
 - `@matrix(**kwargs)` - Provides exhaustive Cartesian product testing
@@ -296,7 +332,7 @@ def test_stack_operations():
 ### Property Testing Approaches
 
 - **Function-based**: `run_for_all(property_func, *generators)`
-- **Decorator-based**: `@for_all(*generators)`
+- **Decorator-based**: `@for_all(*generators)` for independent generators, `@run_for_all(*generators)` for complex generators
 - **Class-based**: `Property(property_func).for_all(*generators)`
 
 ## Documentation

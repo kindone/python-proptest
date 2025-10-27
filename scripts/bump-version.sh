@@ -31,13 +31,13 @@ update_version() {
 bump_version() {
     local current_version=$1
     local bump_type=$2
-    
+
     # Split version into parts
     IFS='.' read -ra VERSION_PARTS <<< "$current_version"
     local major=${VERSION_PARTS[0]}
     local minor=${VERSION_PARTS[1]}
     local patch=${VERSION_PARTS[2]}
-    
+
     case $bump_type in
         major)
             major=$((major + 1))
@@ -56,7 +56,7 @@ bump_version() {
             exit 1
             ;;
     esac
-    
+
     echo "$major.$minor.$patch"
 }
 
@@ -127,12 +127,12 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     git add pyproject.toml
     git commit -m "Bump version to $new_version"
     print_success "Git commit created"
-    
+
     # Create tag
     print_status "Creating git tag..."
     git tag -a "v$new_version" -m "Release version $new_version"
     print_success "Git tag v$new_version created"
-    
+
     echo ""
     print_success "Version bump complete! 🎉"
     echo ""
