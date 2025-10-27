@@ -1,10 +1,10 @@
 # Properties
 
-Properties define the expected behavior of your code over a range of inputs.
+Properties define the expected behavior of your code over a range of inputs. For decorator-based approaches, see the [Decorators](decorators.md) documentation.
 
 ## Defining Properties with `Property(...)`
 
-*   **`Property(predicate: Callable[..., bool | None])`**: Creates a property object explicitly. The `predicate` function receives arguments generated according to the generators passed to `for_all`.
+*   **`Property(predicate: Callable[..., bool | None])`**: Creates a property object explicitly. The `predicate` function receives arguments generated according to the [generators](generators.md) passed to `for_all`.
     *   If the predicate returns `False` or throws an error, the property fails.
     *   If the predicate returns `True` or `None` (implicitly returns `None`), the property passes for that input.
 
@@ -33,6 +33,8 @@ Properties define the expected behavior of your code over a range of inputs.
     prop.example(5, 3)  # Runs the predicate with a=5, b=3
     prop.example(3, 5)  # returns False
     ```
+
+**See Also:** [`run_for_all()`](#defining-and-running-properties-with-run_for_all-lambda-based), [`@for_all` decorator](decorators.md#for_all)
 
 ## Defining and Running Properties with `run_for_all(...)` (Lambda-Based)
 
@@ -78,9 +80,11 @@ Properties define the expected behavior of your code over a range of inputs.
         run_for_all(property_func, Gen.tuple(Gen.int(min_value=0, max_value=10), Gen.bool()))
     ```
 
+**See Also:** [`Property()`](#defining-properties-with-property), [`@run_for_all` decorator](decorators.md#run_for_all), [Generators](generators.md)
+
 ## Decorator-based Properties
 
-python-proptest also supports a decorator-based approach for defining properties, similar to Hypothesis. This is suitable for complex assertions that benefit from explicit parameter signatures:
+python-proptest also supports a decorator-based approach for defining properties, similar to Hypothesis. This is suitable for complex assertions that benefit from explicit parameter signatures. For full documentation, see [Decorators](decorators.md).
 
 ```python
 from python_proptest import for_all, integers, text
@@ -163,9 +167,10 @@ def test_string_operations(s1: str, s2: str):
 ### Guidelines
 
 - **Use `run_for_all`** for simple property checks that can be expressed as lambdas
-- **Use `@for_all`** for complex assertions that benefit from explicit function signatures
+- **Use [`@for_all`](decorators.md#for_all)** for complex assertions that benefit from explicit function signatures
 - **Use `run_for_all`** for seed-based reproducibility testing
-- **Use `@for_all`** for tests with complex generator transformations
+- **Use [`@for_all`](decorators.md#for_all)** for tests with complex generator transformations
+- **Use [`@run_for_all`](decorators.md#run_for_all)** for dependent generators ([`chain`](combinators.md#genchainbase_gen-gen_factory-generatorchaingen_factory), [`aggregate`](combinators.md#genaggregateinitial_gen-gen_factory-min_size-max_size-generatoraggregate), [`accumulate`](combinators.md#genaccumulateinitial_gen-gen_factory-min_size-max_size-generatoraccumulate))
 
 ## Configuration Options
 
@@ -225,9 +230,10 @@ except PropertyTestError as e:
 
 1. **Keep properties simple**: Each property should test one specific invariant
 2. **Use meaningful names**: Name your properties clearly to understand what they test
-3. **Handle edge cases**: Consider what happens with empty lists, zero values, etc.
-4. **Use appropriate generators**: Choose generators that match your function's expected input domain
+3. **Handle edge cases**: Consider what happens with empty lists, zero values, etc. See [`@example`](decorators.md#example) for testing specific edge cases.
+4. **Use appropriate generators**: Choose [generators](generators.md) that match your function's expected input domain
 5. **Test both positive and negative cases**: Verify that your function behaves correctly in both success and failure scenarios
+6. **Use reproducible seeds**: Use [`@settings(seed=...)`](decorators.md#settings) for reproducibility
 
 ```python
 # Good: Simple, focused property
@@ -256,3 +262,10 @@ def test_division_by_zero():
 
     run_for_all(property_func, Gen.float(), Gen.float())
 ```
+
+## Related Documentation
+
+- [Decorators](decorators.md) - Using `@for_all`, `@run_for_all`, `@example`, `@settings`, and `@matrix`
+- [Generators](generators.md) - Available generators for creating test data
+- [Combinators](combinators.md) - Combining and transforming generators
+- [Shrinking](shrinking.md) - How python-proptest finds minimal counterexamples

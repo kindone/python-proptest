@@ -7,26 +7,26 @@ Generators are the foundation of property-based testing in `python-proptest`. Th
 | Generator                 | Description                                                     | Key Parameters                                     | Example Usage                                         |
 | :------------------------ | :-------------------------------------------------------------- | :------------------------------------------------- | :---------------------------------------------------- |
 | **Primitives**            |                                                                 |                                                    |                                                       |
-| `Gen.bool()`             | Generates `True` or `False` with configurable probability.     | `true_prob` (def: 0.5)                              | `Gen.bool(true_prob=0.8)`                                       |
-| `Gen.float()`             | Generates floating-point numbers (incl. `inf`, `-inf`, `nan`).     | `min_value`, `max_value`                              | `Gen.float(min_value=0.0, max_value=1.0)`                                         |
-| `Gen.int()`  | Generates integers in the range `[min_value, max_value]`.                   | `min_value`, `max_value`                                       | `Gen.int(min_value=0, max_value=10)`                                 |
-| `Gen.str()`  | Generates strings (defaults to ASCII).                          | `min_length` (def: 0), `max_length` (def: 10)        | `Gen.str(min_length=0, max_length=5)`                                    |
-| `Gen.ascii_string(...)`    | Generates strings containing only ASCII chars (0-127).          | `min_length` (def: 0), `max_length` (def: 10)        | `Gen.ascii_string(min_length=1, max_length=8)`                               |
-| `Gen.unicode_string(...)`  | Generates strings containing Unicode chars.                     | `min_length` (def: 0), `max_length` (def: 10)        | `Gen.unicode_string(min_length=1, max_length=8)`                             |
-| `Gen.printable_ascii_string(...)` | Generates strings containing only printable ASCII chars.  | `min_length` (def: 0), `max_length` (def: 10)        | `Gen.printable_ascii_string(min_length=5, max_length=5)`                      |
-| `Gen.ascii_char()`        | Generates ASCII character codes (0-127).                  | None                                                | `Gen.ascii_char()`                                                             |
-| `Gen.unicode_char()`      | Generates Unicode character codes (avoiding surrogate pairs). | None                                                | `Gen.unicode_char()`                                                           |
-| `Gen.printable_ascii_char()` | Generates printable ASCII character codes (32-126).    | None                                                | `Gen.printable_ascii_char()`                                                   |
-| `Gen.in_range(min, max)`  | Generates integers in range [min, max) (exclusive).      | `min_value`, `max_value`                            | `Gen.in_range(0, 10)`                                                         |
-| `Gen.unique_list(elem, min_length, max_length)` | Generates lists with unique elements, sorted. | `element_gen`, `min_length` (def: 0), `max_length` (def: 10) | `Gen.unique_list(Gen.int(min_value=1, max_value=5), min_length=1, max_length=3)` |
+| [`Gen.bool()`](#genbooltrue_prob)             | Generates `True` or `False` with configurable probability.     | `true_prob` (def: 0.5)                              | `Gen.bool(true_prob=0.8)`                                       |
+| [`Gen.float()`](#genfloatmin_value-max_value)             | Generates floating-point numbers (incl. `inf`, `-inf`, `nan`).     | `min_value`, `max_value`                              | `Gen.float(min_value=0.0, max_value=1.0)`                                         |
+| [`Gen.int()`](#genintmin_value-max_value)  | Generates integers in the range `[min_value, max_value]`.                   | `min_value`, `max_value`                                       | `Gen.int(min_value=0, max_value=10)`                                 |
+| [`Gen.str()`](#genstrmin_length-max_length)  | Generates strings (defaults to ASCII).                          | `min_length` (def: 0), `max_length` (def: 10)        | `Gen.str(min_length=0, max_length=5)`                                    |
+| [`Gen.ascii_string(...)`](#genascii_stringmin_length-max_length)    | Generates strings containing only ASCII chars (0-127).          | `min_length` (def: 0), `max_length` (def: 10)        | `Gen.ascii_string(min_length=1, max_length=8)`                               |
+| [`Gen.unicode_string(...)`](#genunicode_stringmin_length-max_length)  | Generates strings containing Unicode chars.                     | `min_length` (def: 0), `max_length` (def: 10)        | `Gen.unicode_string(min_length=1, max_length=8)`                             |
+| [`Gen.printable_ascii_string(...)`](#genprintable_ascii_stringmin_length-max_length) | Generates strings containing only printable ASCII chars.  | `min_length` (def: 0), `max_length` (def: 10)        | `Gen.printable_ascii_string(min_length=5, max_length=5)`                      |
+| [`Gen.ascii_char()`](#genascii_char)        | Generates ASCII character codes (0-127).                  | None                                                | `Gen.ascii_char()`                                                             |
+| [`Gen.unicode_char()`](#genunicode_char)      | Generates Unicode character codes (avoiding surrogate pairs). | None                                                | `Gen.unicode_char()`                                                           |
+| [`Gen.printable_ascii_char()`](#genprintable_ascii_char) | Generates printable ASCII character codes (32-126).    | None                                                | `Gen.printable_ascii_char()`                                                   |
+| [`Gen.in_range(min, max)`](#genin_rangemin_value-max_value)  | Generates integers in range [min, max) (exclusive).      | `min_value`, `max_value`                            | `Gen.in_range(0, 10)`                                                         |
+| [`Gen.unique_list(elem, ...)`](#genunique_listelement_gen-min_length-max_length) | Generates lists with unique elements, sorted. | `element_gen`, `min_length` (def: 0), `max_length` (def: 10) | `Gen.unique_list(Gen.int(min_value=1, max_value=5), min_length=1, max_length=3)` |
 | **Containers**            |                                                                 |                                                    |                                                       |
-| `Gen.list(elem, min_length, max_length)` | Generates lists with elements from `elem`.                   | `element_gen`, `min_length` (def: 0), `max_length` (def: 10) | `Gen.list(Gen.bool(), min_length=2, max_length=4)`                      |
-| `Gen.set(elem, min_size, max_size)`   | Generates `set` objects with elements from `elem`.            | `element_gen`, `min_size` (def: 0), `max_size` (def: 10)   | `Gen.set(Gen.int(min_value=1, max_value=3), min_size=1, max_size=3)`                   |
-| `Gen.dict(key_gen, val_gen, min_size, max_size)` | Generates dictionaries with keys from `key_gen` and values from `val_gen`. | `key_gen`, `value_gen`, `min_size` (def: 0), `max_size` (def: 10)   | `Gen.dict(Gen.str(min_length=1, max_length=2), Gen.int(min_value=0, max_value=5), min_size=2, max_size=5)` |
-| `Gen.tuple(...gens)`      | Generates fixed-size tuples from `gens`.             | `...element_gens`                                   | `Gen.tuple(Gen.float(), Gen.str())`             |
+| [`Gen.list(elem, ...)`](#genlistelement_gen-min_length-max_length) | Generates lists with elements from `elem`.                   | `element_gen`, `min_length` (def: 0), `max_length` (def: 10) | `Gen.list(Gen.bool(), min_length=2, max_length=4)`                      |
+| [`Gen.set(elem, ...)`](#gensetelement_gen-min_size-max_size)   | Generates `set` objects with elements from `elem`.            | `element_gen`, `min_size` (def: 0), `max_size` (def: 10)   | `Gen.set(Gen.int(min_value=1, max_value=3), min_size=1, max_size=3)`                   |
+| [`Gen.dict(key_gen, val_gen, ...)`](#gendictkey_gen-value_gen-min_size-max_size) | Generates dictionaries with keys from `key_gen` and values from `val_gen`. | `key_gen`, `value_gen`, `min_size` (def: 0), `max_size` (def: 10)   | `Gen.dict(Gen.str(min_length=1, max_length=2), Gen.int(min_value=0, max_value=5), min_size=2, max_size=5)` |
+| [`Gen.tuple(...gens)`](#gentuplegenerators)      | Generates fixed-size tuples from `gens`.             | `...element_gens`                                   | `Gen.tuple(Gen.float(), Gen.str())`             |
 | **Special**               |                                                                 |                                                    |                                                       |
-| `Gen.just(value)`         | Always generates the provided `value`.                          | `value`                                            | `Gen.just(None)`                                      |
-| `Gen.lazy(value_factory)`   | Defers execution of a function to produce `value` until needed. | `value_factory: Callable[[], T]`                            | `Gen.lazy(lambda: expensive_calculation())`              |
+| [`Gen.just(value)`](#genjustvalue)         | Always generates the provided `value`.                          | `value`                                            | `Gen.just(None)`                                      |
+| [`Gen.lazy(value_factory)`](#genlazyfunc)   | Defers execution of a function to produce `value` until needed. | `value_factory: Callable[[], T]`                            | `Gen.lazy(lambda: expensive_calculation())`              |
 
 *(Defaults for length/size are typically 0 and 10, but check implementation for specifics)*
 
@@ -57,6 +57,8 @@ Gen.int(min_value=42, max_value=42)
 - Generating array indices
 - Creating test IDs or counts
 
+**See Also:** [`Gen.in_range()`](#genin_rangemin_value-max_value), [`Gen.interval()`](#genintervalmin_value-max_value), [`Gen.float()`](#genfloatmin_value-max_value)
+
 ### `Gen.float(min_value, max_value)`
 
 Generates random floating-point numbers within the specified range.
@@ -81,6 +83,8 @@ Gen.float(min_value=0.0, max_value=0.001)
 - Testing floating-point arithmetic
 - Generating probabilities or percentages
 - Creating test measurements or coordinates
+
+**See Also:** [`Gen.int()`](#genintmin_value-max_value), [`Gen.bool()`](#genbooltrue_prob)
 
 ### `Gen.bool(true_prob)`
 
@@ -120,6 +124,8 @@ Gen.list(Gen.bool(true_prob=0.3), min_length=1, max_length=5)
 - Testing boolean operations with edge cases
 - Simulating real-world boolean distributions
 
+**See Also:** [`Gen.just()`](#genjustvalue) for constant values, [`Gen.list()`](#genlistelement_gen-min_length-max_length) for lists of booleans
+
 ### `Gen.str(min_length, max_length)`
 
 Generates random strings with ASCII characters.
@@ -145,6 +151,8 @@ Gen.str(min_length=0, max_length=0)
 - Generating usernames or identifiers
 - Creating test data for text processing
 
+**See Also:** [`Gen.ascii_string()`](#genascii_stringmin_length-max_length), [`Gen.unicode_string()`](#genunicode_stringmin_length-max_length), [`Gen.printable_ascii_string()`](#genprintable_ascii_stringmin_length-max_length)
+
 ### `Gen.ascii_string(min_length, max_length)`
 
 Generates random strings containing only ASCII characters (0-127).
@@ -166,6 +174,8 @@ Gen.ascii_string(min_length=5, max_length=5)
 - Testing ASCII-only systems
 - Generating legacy-compatible strings
 - Creating test data for systems with ASCII restrictions
+
+**See Also:** [`Gen.str()`](#genstrmin_length-max_length), [`Gen.printable_ascii_string()`](#genprintable_ascii_stringmin_length-max_length), [`Gen.ascii_char()`](#genascii_char)
 
 ### `Gen.printable_ascii_string(min_length, max_length)`
 
@@ -189,6 +199,8 @@ Gen.printable_ascii_string(min_length=5, max_length=5)
 - Generating displayable text
 - Creating test data for human-readable strings
 
+**See Also:** [`Gen.ascii_string()`](#genascii_stringmin_length-max_length), [`Gen.printable_ascii_char()`](#genprintable_ascii_char)
+
 ### `Gen.unicode_string(min_length, max_length)`
 
 Generates random strings containing Unicode characters.
@@ -211,6 +223,8 @@ Gen.unicode_string(min_length=1, max_length=3)
 - Generating multi-language text
 - Creating test data for Unicode-aware systems
 
+**See Also:** [`Gen.str()`](#genstrmin_length-max_length), [`Gen.unicode_char()`](#genunicode_char)
+
 ### `Gen.ascii_char()`
 
 Generates single ASCII character codes (0-127).
@@ -231,6 +245,8 @@ Gen.ascii_char().map(chr)
 - Testing character processing
 - Generating single character inputs
 - Creating test data for character-based operations
+
+**See Also:** [`Gen.ascii_string()`](#genascii_stringmin_length-max_length), [`Gen.unicode_char()`](#genunicode_char), [`Gen.printable_ascii_char()`](#genprintable_ascii_char), [`generator.map()`](combinators.md#generatormapfunc)
 
 ### `Gen.unicode_char()`
 
@@ -253,6 +269,8 @@ Gen.unicode_char().map(chr)
 - Generating international characters
 - Creating test data for Unicode-aware systems
 
+**See Also:** [`Gen.unicode_string()`](#genunicode_stringmin_length-max_length), [`Gen.ascii_char()`](#genascii_char), [`generator.map()`](combinators.md#generatormapfunc)
+
 ### `Gen.printable_ascii_char()`
 
 Generates single printable ASCII character codes (32-126).
@@ -273,6 +291,8 @@ Gen.printable_ascii_char().map(chr)
 - Testing printable character processing
 - Generating displayable characters
 - Creating test data for user-visible text
+
+**See Also:** [`Gen.printable_ascii_string()`](#genprintable_ascii_stringmin_length-max_length), [`Gen.ascii_char()`](#genascii_char), [`generator.map()`](combinators.md#generatormapfunc)
 
 ### `Gen.in_range(min_value, max_value)`
 
@@ -296,6 +316,8 @@ Gen.in_range(0, len(my_array))
 - Creating ranges for iteration
 - Testing boundary conditions
 
+**See Also:** [`Gen.int()`](#genintmin_value-max_value), [`Gen.interval()`](#genintervalmin_value-max_value)
+
 ### `Gen.interval(min_value, max_value)`
 
 Generates random integers in range [min_value, max_value] (inclusive of both bounds).
@@ -317,6 +339,8 @@ Gen.interval(1, 6)
 - Testing inclusive ranges
 - Generating dice rolls or random selections
 - Creating bounded integer values
+
+**See Also:** [`Gen.int()`](#genintmin_value-max_value), [`Gen.in_range()`](#genin_rangemin_value-max_value), [`Gen.integers()`](#genintegersmin_value-max_value)
 
 ### `Gen.integers(min_value, max_value)`
 
@@ -360,6 +384,8 @@ Gen.list(Gen.str(min_length=1, max_length=5), min_length=1, max_length=3)
 - Generating test data collections
 - Creating sequences for processing
 
+**See Also:** [`Gen.unique_list()`](#genunique_listelement_gen-min_length-max_length), [`Gen.set()`](#gensetelement_gen-min_size-max_size), [`Gen.tuple()`](#gentuplegenerators), [`generator.map()`](combinators.md#generatormapfunc)
+
 ### `Gen.unique_list(element_gen, min_length, max_length)`
 
 Generates random lists with unique elements, sorted.
@@ -383,6 +409,8 @@ Gen.unique_list(Gen.str(min_length=1, max_length=3), min_length=2, max_length=4)
 - Generating sorted test data
 - Creating sets represented as lists
 
+**See Also:** [`Gen.list()`](#genlistelement_gen-min_length-max_length), [`Gen.set()`](#gensetelement_gen-min_size-max_size)
+
 ### `Gen.set(element_gen, min_size, max_size)`
 
 Generates random sets with elements from the specified generator.
@@ -405,6 +433,8 @@ Gen.set(Gen.str(min_length=1, max_length=3), min_size=2, max_size=4)
 - Testing set operations
 - Generating unique collections
 - Creating test data for set-based algorithms
+
+**See Also:** [`Gen.list()`](#genlistelement_gen-min_length-max_length), [`Gen.unique_list()`](#genunique_listelement_gen-min_length-max_length)
 
 ### `Gen.dict(key_gen, value_gen, min_size, max_size)`
 
@@ -430,6 +460,8 @@ Gen.dict(Gen.int(min_value=1, max_value=10), Gen.str(min_length=1, max_length=5)
 - Generating configuration data
 - Creating test data for key-value processing
 
+**See Also:** [`Gen.list()`](#genlistelement_gen-min_length-max_length), [`Gen.set()`](#gensetelement_gen-min_size-max_size), [`Gen.tuple()`](#gentuplegenerators)
+
 ### `Gen.tuple(*generators)`
 
 Generates fixed-size tuples with elements from the specified generators.
@@ -453,6 +485,8 @@ Gen.tuple(Gen.str())
 - Testing tuple operations
 - Generating coordinate pairs
 - Creating structured test data
+
+**See Also:** [`Gen.list()`](#genlistelement_gen-min_length-max_length), [`Gen.construct()`](#genconstructtype-generators), [`Gen.chain()`](combinators.md#genchainbase_gen-gen_factory-generatorchaingen_factory)
 
 ## Special Generators
 
@@ -480,6 +514,8 @@ Gen.just("hello")
 - Creating constants in test data
 - Combining with `Gen.one_of()` for mixed generation
 
+**See Also:** [`Gen.one_of()`](combinators.md#genone_ofgenerators), [`Gen.element_of()`](combinators.md#genelement_ofvalues)
+
 ### `Gen.lazy(func)`
 
 Defers execution of a function until generation time.
@@ -503,6 +539,8 @@ Gen.lazy(lambda: datetime.now())
 - Delaying expensive computations
 - Breaking circular dependencies
 - Generating time-sensitive values
+
+**See Also:** [`Gen.construct()`](#genconstructtype-generators), recursive generation patterns in [Combinators](combinators.md#recursive-generation)
 
 ### `Gen.construct(Type, *generators)`
 
@@ -536,9 +574,11 @@ Gen.construct(Person, Gen.str(min_length=1, max_length=10), Gen.int(min_value=0,
 - Generating domain objects
 - Creating structured test data
 
+**See Also:** [`Gen.tuple()`](#gentuplegenerators), [`Gen.lazy()`](#genlazyfunc), [`Gen.construct()` in Combinators](combinators.md#genconstructtype-generators)
+
 ## Dependent Generation
 
-For generators where values depend on each other, `python-proptest` provides powerful combinators like `chain`, `aggregate`, and `accumulate`. These are covered in detail in the [Combinators](./combinators.md) documentation under "Dependent Generation Combinators".
+For generators where values depend on each other, `python-proptest` provides powerful combinators like [`chain`](combinators.md#genchainbase_gen-gen_factory-generatorchaingen_factory), [`aggregate`](combinators.md#genaggregateinitial_gen-gen_factory-min_size-max_size-generatoraggregate), and [`accumulate`](combinators.md#genaccumulateinitial_gen-gen_factory-min_size-max_size-generatoraccumulate). These are covered in detail in the [Combinators](./combinators.md) documentation under "Dependent Generation Combinators".
 
 **Quick Examples:**
 ```python
@@ -551,6 +591,8 @@ Gen.aggregate(Gen.int(0, 10), lambda n: Gen.int(n, n + 5), min_size=3, max_size=
 # Accumulate: Get final value after dependent steps
 Gen.accumulate(Gen.int(50, 50), lambda p: Gen.int(max(0, p-10), min(100, p+10)), min_size=10)
 ```
+
+**See Also:** [Combinators documentation](combinators.md) for transformation combinators ([`map`](combinators.md#generatormapfunc), [`filter`](combinators.md#generatorfilterpredicate), [`flat_map`](combinators.md#generatorflat_mapfunc)) and [Decorators documentation](decorators.md) for using generators in tests with [`@for_all`](decorators.md#for_all) and [`@run_for_all`](decorators.md#run_for_all).
 
 Beyond the built-in generators, `python-proptest` provides **combinators**: functions that transform or combine existing generators to create new, more complex ones. This is how you build generators for your specific data types and constraints.
 
