@@ -34,17 +34,17 @@ class TestDecoratorAPIExamples:
     def test_basic_arithmetic_properties(self):
         """Test basic arithmetic properties using decorators."""
 
-        @for_all(integers(), integers())
+        @for_all(Gen.int(), Gen.int())
         def test_addition_commutativity(x: int, y: int):
             """Addition is commutative: x + y = y + x"""
             assert x + y == y + x
 
-        @for_all(integers(), integers(), integers())
+        @for_all(Gen.int(), Gen.int(), Gen.int())
         def test_addition_associativity(x: int, y: int, z: int):
             """Addition is associative: (x + y) + z = x + (y + z)"""
             assert (x + y) + z == x + (y + z)
 
-        @for_all(integers())
+        @for_all(Gen.int())
         def test_multiplication_by_zero(x: int):
             """Multiplying by zero gives zero: x * 0 = 0"""
             assert x * 0 == 0
@@ -57,13 +57,13 @@ class TestDecoratorAPIExamples:
     def test_string_properties(self):
         """Test string properties using decorators."""
 
-        @given(text(min_size=1, max_size=20))
+        @given(Gen.str(min_size=1, max_size=20))
         def test_string_length(s: str):
             """String length is non-negative"""
             assert len(s) >= 0
             assert isinstance(s, str)
 
-        @for_all(text(), text())
+        @for_all(Gen.str(), Gen.str())
         def test_string_concatenation(s1: str, s2: str):
             """String concatenation properties"""
             result = s1 + s2
@@ -78,7 +78,7 @@ class TestDecoratorAPIExamples:
     def test_list_properties(self):
         """Test list properties using decorators."""
 
-        @for_all(lists(integers(min_value=0, max_value=100)))
+        @for_all(Gen.list(Gen.int(min_value=0, max_value=100)))
         def test_list_sorting(lst: list):
             """List sorting properties"""
             if len(lst) <= 1:
@@ -91,7 +91,7 @@ class TestDecoratorAPIExamples:
             )
             assert set(sorted_lst) == set(lst)  # Same elements
 
-        @for_all(lists(integers()))
+        @for_all(Gen.list(Gen.int()))
         def test_list_reversal(lst: list):
             """List reversal properties"""
             reversed_lst = list(reversed(lst))
@@ -106,8 +106,8 @@ class TestDecoratorAPIExamples:
         """Test dictionary properties using decorators."""
 
         @for_all(
-            dictionaries(
-                text(min_size=1, max_size=5), integers(min_value=0, max_value=100)
+            Gen.dict(
+                Gen.str(min_size=1, max_size=5), Gen.int(min_value=0, max_value=100)
             )
         )
         def test_dictionary_keys_values(d: dict):
@@ -119,8 +119,8 @@ class TestDecoratorAPIExamples:
                 assert value >= 0
 
         @for_all(
-            dictionaries(
-                text(min_size=1, max_size=3), integers(), min_size=0, max_size=10
+            Gen.dict(
+                Gen.str(min_size=1, max_size=3), Gen.int(), min_size=0, max_size=10
             )
         )
         def test_dictionary_size(d: dict):
@@ -136,7 +136,7 @@ class TestDecoratorAPIExamples:
     def test_mixed_type_properties(self):
         """Test mixed type properties using decorators."""
 
-        @for_all(one_of(integers(), floats(), text()))
+        @for_all(Gen.one_of(Gen.int(), Gen.float(), Gen.str()))
         def test_mixed_type_property(value):
             """Test properties that work with multiple types"""
             if isinstance(value, (int, float)):
@@ -153,7 +153,7 @@ class TestDecoratorAPIExamples:
 
         cases = []
 
-        @for_all(integers())
+        @for_all(Gen.int())
         @example(42)
         @example(-1)
         @example(0)
@@ -173,7 +173,7 @@ class TestDecoratorAPIExamples:
 
         num_cases = 0
 
-        @for_all(integers())
+        @for_all(Gen.int())
         @settings(num_runs=50)
         def test_with_custom_settings(x: int):
             """Test with custom settings"""
@@ -188,7 +188,7 @@ class TestDecoratorAPIExamples:
     def test_assume_function(self):
         """Test the assume() function for conditional testing."""
 
-        @for_all(integers(min_value=-1000, max_value=1000), integers(min_value=-1000, max_value=1000))
+        @for_all(Gen.int(min_value=-1000, max_value=1000), Gen.int(min_value=-1000, max_value=1000))
         def test_division_property(x: int, y: int):
             """Test division property with assumption"""
             assume(y != 0)  # Skip test cases where y is 0
@@ -205,7 +205,7 @@ class TestDecoratorAPIExamples:
     def test_note_function(self):
         """Test the note() function for debugging."""
 
-        @for_all(lists(integers(min_value=1, max_value=10)))
+        @for_all(Gen.list(Gen.int(min_value=1, max_value=10)))
         def test_nested_structures(data: list):
             """Test nested data structures with note()"""
             if len(data) > 0:
@@ -221,7 +221,7 @@ class TestDecoratorAPIExamples:
         """Test chaining strategies with map and filter."""
 
         @for_all(
-            integers(min_value=1, max_value=100)
+            Gen.int(min_value=1, max_value=100)
             .filter(lambda x: x % 2 == 0)  # Only even numbers
             .map(lambda x: x * 2)
         )  # Double them
@@ -237,7 +237,7 @@ class TestDecoratorAPIExamples:
     def test_failing_property_demonstration(self):
         """Demonstrate a failing property (this should fail)."""
 
-        @for_all(integers())
+        @for_all(Gen.int())
         def test_failing_property(x: int):
             """This property will fail for negative numbers"""
             assert x >= 0  # This will fail for negative integers
