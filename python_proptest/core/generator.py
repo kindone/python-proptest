@@ -8,7 +8,7 @@ for common Python types.
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, Generic, List, Protocol, Set, Tuple, TypeVar
 
-from .shrinker import Shrinkable
+from .shrinker import Shrinkable, binary_search_shrinkable, shrinkable_array
 from .stream import Stream
 
 T = TypeVar("T")
@@ -677,44 +677,213 @@ class IntGenerator(Generator[int]):
         return Shrinkable(value, lambda: Stream.many(shrinks))
 
     def _generate_shrinks(self, value: int) -> List[Shrinkable[int]]:
-        """Generate shrinking candidates for an integer."""
+        """Generate shrinking candidates for an integer with recursive shrinking."""
+        from python_proptest.core.stream import Stream
+
+        if value == self.min_value:
+            return []
+
+        # Use binary search approach similar to dartproptest
+        if self.min_value >= 0:
+            # Range is entirely non-negative: shrink towards min_value
+            return self._binary_search_towards_min(value - self.min_value, self.min_value)
+        elif self.max_value <= 0:
+            # Range is entirely non-positive: shrink towards max_value
+            return self._binary_search_towards_max(value - self.max_value, self.max_value)
+        else:
+            # Range crosses zero: shrink towards 0
+            return self._binary_search_towards_zero(value)
+
+    def _binary_search_towards_zero(self, value: int) -> List[Shrinkable[int]]:
+        """Generate shrinks for an integer using binary search towards 0."""
+        from python_proptest.core.stream import Stream
+
+        if value == 0:
+            return []
+
+        if value > 0:
+            # For positive numbers, prioritize 0, then use binary search for (0, value)
+            shrinks = [Shrinkable(0)]
+            # Only recurse if value > 1 (so range [0, value) has room to shrink)
+            if value > 1:
+                shrinks.extend(self._gen_pos(0, value, 0))
+            return shrinks
+        else:
+            # For negative numbers, prioritize 0, then use binary search for (value, 0)
+            shrinks = [Shrinkable(0)]
+            # Only recurse if value < -1 (so range (value, 0] has room to shrink)
+            if value < -1:
+                shrinks.extend(self._gen_neg(value, 0, 0))
+            return shrinks
+
+    def _binary_search_towards_min(self, value: int, offset: int) -> List[Shrinkable[int]]:
+        """Generate shrinks for an integer using binary search towards min_value."""
+        if value == 0:
+            return []
+
+        if value > 0:
+            # For positive values, shrink towards 0, then add offset
+            # We need to exclude the original value, so end at value (exclusive)
+            shrinks = [Shrinkable(self.min_value)]
+            # _gen_pos(0, value, offset) generates range [0, value) with offset
+            # This excludes value itself, which is correct
+            if value > 0:
+                shrinks.extend(self._gen_pos(0, value, self.min_value))
+            return shrinks
+        else:
+            shrinks = [Shrinkable(self.min_value)]
+            # For negative values, shrink from value+1 to 0 (exclusive of value)
+            # Only recurse if value+1 < 0 and there's room to shrink
+            if value + 1 < 0 and (0 - (value + 1)) > 1:
+                shrinks.extend(self._gen_neg(value + 1, 0, self.min_value))
+            return shrinks
+
+    def _binary_search_towards_max(self, value: int, offset: int) -> List[Shrinkable[int]]:
+        """Generate shrinks for an integer using binary search towards max_value."""
+        if value == 0:
+            return []
+
+        if value < 0:
+            # For negative values, shrink towards 0, then add offset
+            # We need to exclude the original value, so start from value+1
+            shrinks = [Shrinkable(self.max_value)]
+            # _gen_neg(value+1, 0, offset) generates range (value+1, 0] with offset
+            # This excludes value itself (which maps to the original value)
+            # Only recurse if value+1 < 0 and there's room to shrink
+            if value + 1 < 0 and (0 - (value + 1)) > 1:
+                shrinks.extend(self._gen_neg(value + 1, 0, self.max_value))
+            return shrinks
+        else:
+            shrinks = [Shrinkable(self.max_value)]
+            # For positive values, shrink from 0 to value (exclusive of value)
+            if value > 0:
+                shrinks.extend(self._gen_pos(0, value, self.max_value))
+            return shrinks
+
+    def _gen_pos(self, min_val: int, max_val: int, offset: int) -> List[Shrinkable[int]]:
+        """
+        Generate shrinks for a positive integer range using binary search.
+        Works on half-open range [min_val, max_val) to avoid duplicates.
+        """
+        from python_proptest.core.stream import Stream
+
+        # Range is [min_val, max_val) - half-open, max_val is exclusive
+        if min_val + 1 >= max_val:
+            return []  # No more shrinking possible
+
+        # Calculate midpoint, ensuring it rounds towards min correctly
+        mid = (
+            ((min_val - 1) // 2 if min_val < 0 else min_val // 2)
+            + ((max_val - 1) // 2 if max_val < 0 else max_val // 2)
+            + (1 if min_val % 2 != 0 and max_val % 2 != 0 else 0)
+        )
+        
+        # Ensure mid is strictly between min_val and max_val
+        if mid <= min_val:
+            mid = min_val + 1
+        if mid >= max_val:
+            mid = max_val - 1
+        if mid <= min_val:  # Range too small
+            return []
+
+        if min_val + 2 >= max_val:
+            # Only midpoint left in range [min_val, max_val)
+            # Since max_val is exclusive, we only have min_val and mid (if mid != min_val)
+            if mid != min_val:
+                final_value = mid + offset
+                if self.min_value <= final_value <= self.max_value:
+                    return [Shrinkable(final_value)]
+            return []
+
+        # Recursively generate shrinks: prioritize midpoint, then lower half, then upper half
+        # Ranges are disjoint: [min_val, mid) and [mid, max_val)
+        mid_value = mid + offset
         shrinks = []
+        if self.min_value <= mid_value <= self.max_value:
+            # Create recursive shrinkable for midpoint
+            # Range [min_val, mid) is disjoint from [mid, max_val), so no duplicates
+            # Only recurse if the range will actually shrink (mid > min_val + 1)
+            if min_val < mid < max_val and (mid - min_val) > 1:
+                def make_mid_shrinks():
+                    mid_shrinks = self._gen_pos(min_val, mid, offset)
+                    return Stream.many(mid_shrinks) if mid_shrinks else Stream.empty()
+                shrinks.append(Shrinkable(mid_value, make_mid_shrinks))
+            elif min_val < mid < max_val:
+                # Mid is min_val + 1, just add it without recursion
+                shrinks.append(Shrinkable(mid_value))
+        
+        # Add shrinks from upper half [mid, max_val) - disjoint from [min_val, mid)
+        # Only recurse if the range will actually shrink (max_val > mid + 1)
+        if mid < max_val:
+            if (max_val - mid) > 1:
+                upper_shrinks = self._gen_pos(mid, max_val, offset)
+                shrinks.extend(upper_shrinks)
+            # If max_val == mid + 1, the range [mid, max_val) is empty, so nothing to add
+        
+        return shrinks
 
-        # Shrink towards min_value (or zero if min_value <= 0)
-        target = max(self.min_value, 0)
-        if value > target:
-            if target >= self.min_value and target <= self.max_value:
-                shrinks.append(Shrinkable(target))
-            if (
-                value > target + 1
-                and target + 1 >= self.min_value
-                and target + 1 <= self.max_value
-            ):
-                shrinks.append(Shrinkable(target + 1))
-        elif value < target:
-            if target <= self.max_value and target >= self.min_value:
-                shrinks.append(Shrinkable(target))
-            if (
-                value < target - 1
-                and target - 1 <= self.max_value
-                and target - 1 >= self.min_value
-            ):
-                shrinks.append(Shrinkable(target - 1))
+    def _gen_neg(self, min_val: int, max_val: int, offset: int) -> List[Shrinkable[int]]:
+        """
+        Generate shrinks for a negative integer range using binary search.
+        Works on half-open range (min_val, max_val] to avoid duplicates.
+        Note: Uses _gen_pos for both halves (as per dartproptest implementation).
+        """
+        from python_proptest.core.stream import Stream
 
-        # Binary search shrinking towards min_value
-        if value != self.min_value:
-            # Try shrinking towards min_value
-            if value > self.min_value:
-                mid = (value + self.min_value) // 2
-                if mid >= self.min_value and mid <= self.max_value and mid != value:
-                    shrinks.append(Shrinkable(mid))
+        # Range is (min_val, max_val] - half-open on left, min_val is exclusive
+        if min_val + 1 >= max_val:
+            return []  # No more shrinking possible
 
-            # Try shrinking towards max_value (for negative values)
-            if value < self.max_value:
-                mid = (value + self.max_value) // 2
-                if mid >= self.min_value and mid <= self.max_value and mid != value:
-                    shrinks.append(Shrinkable(mid))
+        # Calculate midpoint, ensuring it rounds towards max correctly
+        mid = (
+            ((min_val - 1) // 2 if min_val < 0 else min_val // 2)
+            + ((max_val - 1) // 2 if max_val < 0 else max_val // 2)
+            + (-1 if min_val % 2 != 0 and max_val % 2 != 0 else 0)
+        )
+        
+        # Ensure mid is strictly between min_val and max_val
+        if mid <= min_val:
+            mid = min_val + 1
+        if mid >= max_val:
+            mid = max_val - 1
+        if mid <= min_val:  # Range too small
+            return []
 
+        if min_val + 2 >= max_val:
+            # Only midpoint left in range (min_val, max_val]
+            # Since min_val is exclusive, we only have mid and max_val (if mid != max_val)
+            if mid != max_val:
+                final_value = mid + offset
+                if self.min_value <= final_value <= self.max_value:
+                    return [Shrinkable(final_value)]
+            return []
+
+        # Recursively generate shrinks: prioritize midpoint, then lower half, then upper half
+        # Note: _gen_neg uses _gen_pos for both halves (as per dartproptest implementation)
+        # Ranges are disjoint: (min_val, mid] and (mid, max_val] when using _gen_pos semantics
+        mid_value = mid + offset
+        shrinks = []
+        if self.min_value <= mid_value <= self.max_value:
+            # Create recursive shrinkable for midpoint
+            # Range [min_val, mid) is disjoint from [mid, max_val), so no duplicates
+            # Only recurse if the range will actually shrink (mid > min_val + 1)
+            if min_val < mid < max_val and (mid - min_val) > 1:
+                def make_mid_shrinks():
+                    mid_shrinks = self._gen_pos(min_val, mid, offset)
+                    return Stream.many(mid_shrinks) if mid_shrinks else Stream.empty()
+                shrinks.append(Shrinkable(mid_value, make_mid_shrinks))
+            elif min_val < mid < max_val:
+                # Mid is min_val + 1, just add it without recursion
+                shrinks.append(Shrinkable(mid_value))
+        
+        # Add shrinks from upper half [mid, max_val) - disjoint from [min_val, mid)
+        # Only recurse if the range will actually shrink (max_val > mid + 1)
+        if mid < max_val:
+            if (max_val - mid) > 1:
+                upper_shrinks = self._gen_pos(mid, max_val, offset)
+                shrinks.extend(upper_shrinks)
+            # If max_val == mid + 1, the range [mid, max_val) is empty, so nothing to add
+        
         return shrinks
 
 
@@ -795,6 +964,11 @@ class StringGenerator(Generator[str]):
         self.min_length = min_length
         self.max_length = max_length
         self.charset = self._get_charset(charset)
+        if not self.charset:
+            raise ValueError("Charset must contain at least one character")
+        # Preserve order but ensure uniqueness for deterministic shrinking
+        self._charset_list = list(dict.fromkeys(self.charset))
+        self._charset_len = len(self._charset_list)
 
     def _get_charset(self, charset: str) -> str:
         """Convert charset specification to actual character set."""
@@ -808,35 +982,25 @@ class StringGenerator(Generator[str]):
             # Use the provided charset as-is
             return charset
 
+    def _build_indices(self, rng: Random, length: int) -> List[int]:
+        return [rng.randrange(self._charset_len) for _ in range(length)]
+
+    def _indices_to_string(self, indices: List[int]) -> str:
+        return "".join(self._charset_list[idx] for idx in indices)
+
     def generate(self, rng: Random) -> Shrinkable[str]:
         length = rng.randint(self.min_length, self.max_length)
-        chars = [rng.choice(list(self.charset)) for _ in range(length)]
-        value = "".join(chars)
-        shrinks = self._generate_shrinks(value)
-        from python_proptest.core.stream import Stream
+        indices = self._build_indices(rng, length)
 
-        return Shrinkable(value, lambda: Stream.many(shrinks))
+        char_shrinkables = [binary_search_shrinkable(idx) for idx in indices]
+        array_shrinkable = shrinkable_array(
+            char_shrinkables,
+            min_size=self.min_length,
+            membership_wise=True,
+            element_wise=True,
+        )
 
-    def _generate_shrinks(self, value: str) -> List[Shrinkable[str]]:
-        """Generate shrinking candidates for a string."""
-        shrinks = []
-
-        # Empty string
-        if len(value) > 0:
-            shrinks.append(Shrinkable(""))
-
-        # Shorter strings
-        if len(value) > 1:
-            shrinks.append(Shrinkable(value[:-1]))  # Remove last character
-            shrinks.append(Shrinkable(value[1:]))  # Remove first character
-
-        # Single character strings
-        if len(value) > 0:
-            shrinks.append(Shrinkable(value[0]))  # First character only
-            if len(value) > 1:
-                shrinks.append(Shrinkable(value[-1]))  # Last character only
-
-        return shrinks
+        return array_shrinkable.map(self._indices_to_string)
 
 
 class BoolGenerator(Generator[bool]):
@@ -1118,43 +1282,31 @@ class UnicodeStringGenerator(Generator[str]):
 
     def generate(self, rng: Random) -> Shrinkable[str]:
         length = rng.randint(self.min_length, self.max_length)
-        chars = []
+        codepoints: List[int] = []
+        char_shrinkables: List[Shrinkable[int]] = []
 
         for _ in range(length):
-            # Generate random Unicode codepoint (basic multilingual plane)
             codepoint = rng.randint(0, 0xFFFF)
-            try:
-                chars.append(chr(codepoint))
-            except ValueError:
-                # Skip invalid codepoints
-                chars.append("?")
+            codepoints.append(codepoint)
+            char_shrinkables.append(binary_search_shrinkable(codepoint))
 
-        value = "".join(chars)
-        shrinks = self._generate_shrinks(value)
-        from python_proptest.core.stream import Stream
+        array_shrinkable = shrinkable_array(
+            char_shrinkables,
+            min_size=self.min_length,
+            membership_wise=True,
+            element_wise=True,
+        )
 
-        return Shrinkable(value, lambda: Stream.many(shrinks))
+        def to_string(points: List[int]) -> str:
+            result_chars = []
+            for point in points:
+                try:
+                    result_chars.append(chr(point))
+                except ValueError:
+                    result_chars.append("?")
+            return "".join(result_chars)
 
-    def _generate_shrinks(self, value: str) -> List[Shrinkable[str]]:
-        """Generate shrinking candidates for a Unicode string."""
-        shrinks = []
-
-        # Empty string
-        if len(value) > 0:
-            shrinks.append(Shrinkable(""))
-
-        # Shorter strings
-        if len(value) > 1:
-            shrinks.append(Shrinkable(value[:-1]))  # Remove last character
-            shrinks.append(Shrinkable(value[1:]))  # Remove first character
-
-        # Single character strings
-        if len(value) > 0:
-            shrinks.append(Shrinkable(value[0]))  # First character only
-            if len(value) > 1:
-                shrinks.append(Shrinkable(value[-1]))  # Last character only
-
-        return shrinks
+        return array_shrinkable.map(to_string)
 
 
 class LazyGenerator(Generator[T]):

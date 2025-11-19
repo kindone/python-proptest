@@ -84,8 +84,10 @@ class TestPrimitive(unittest.TestCase):
             seen_values = set()
 
             def assert_positive_and_unique(shr: Shrinkable):
-                # Note: Shrinks may have duplicate values as they explore different shrinking paths
-                # This is expected behavior in property-based testing
+                # Check for uniqueness
+                assert (
+                    shr.value not in seen_values
+                ), f"Duplicate value {shr.value} found"
                 seen_values.add(shr.value)
 
             exhaustive_traversal(shrinkable, 5, assert_positive_and_unique)
@@ -165,8 +167,10 @@ class TestPrimitive(unittest.TestCase):
             seen_values = set()
 
             def assert_length_and_unique(shr: Shrinkable):
-                # Note: Shrinks may have duplicate values as they explore different shrinking paths
-                # This is expected behavior in property-based testing
+                # Check for uniqueness
+                assert (
+                    shr.value not in seen_values
+                ), f"Duplicate value {shr.value!r} found"
                 seen_values.add(shr.value)
 
             exhaustive_traversal(shrinkable, 5, assert_length_and_unique)
@@ -254,9 +258,12 @@ class TestPrimitive(unittest.TestCase):
             seen_values = set()
 
             def assert_list_size_and_unique(shr: Shrinkable):
-                # Note: Shrinks may have duplicate values as they explore different shrinking paths
-                # This is expected behavior in property-based testing
-                seen_values.add(tuple(shr.value))
+                # Check for uniqueness
+                list_tuple = tuple(shr.value)
+                assert (
+                    list_tuple not in seen_values
+                ), f"Duplicate list value {list_tuple} found"
+                seen_values.add(list_tuple)
 
             exhaustive_traversal(shrinkable, 3, assert_list_size_and_unique)
 
@@ -285,8 +292,10 @@ class TestPrimitive(unittest.TestCase):
             def assert_dict_size_and_unique(shr: Shrinkable):
                 # Convert dict to sorted tuple for hashing
                 dict_tuple = tuple(sorted(shr.value.items()))
-                # Note: Shrinks may have duplicate values as they explore different shrinking paths
-                # This is expected behavior in property-based testing
+                # Check for uniqueness
+                assert (
+                    dict_tuple not in seen_values
+                ), f"Duplicate dict value {dict_tuple} found"
                 seen_values.add(dict_tuple)
 
             exhaustive_traversal(shrinkable, 3, assert_dict_size_and_unique)

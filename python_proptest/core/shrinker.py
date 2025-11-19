@@ -146,6 +146,12 @@ class Shrinkable(Generic[T]):
             current = current.get_nth_child(index)
         return current
 
+    def take(self, n: int) -> "Shrinkable[T]":
+        """Limit the number of shrinking candidates to n."""
+        def limited_shrinks() -> Stream["Shrinkable[T]"]:
+            return self.shrinks().take(n)
+        return Shrinkable(self.value, limited_shrinks)
+
 
 class Shrinker(ABC, Generic[T]):
     """Abstract base class for shrinking algorithms."""
@@ -182,28 +188,26 @@ class IntegerShrinker(Shrinker[int]):
 
 
 class StringShrinker(Shrinker[str]):
-    """Shrinker for strings."""
+    """Shrinker for strings that mirrors dartproptest behavior."""
 
     def shrink(self, value: str) -> List[str]:
         """Generate shrinking candidates for a string."""
-        candidates = []
+        if not value:
+            return []
 
-        # Empty string
-        if len(value) > 0:
-            candidates.append("")
+        char_shrinkables = [binary_search_shrinkable(ord(ch)) for ch in value]
 
-        # Shorter strings
-        if len(value) > 1:
-            candidates.append(value[:-1])  # Remove last character
-            candidates.append(value[1:])  # Remove first character
+        shrinkable = shrinkable_array(
+            char_shrinkables,
+            min_size=0,
+            membership_wise=True,
+            element_wise=True,
+        )
 
-        # Single character strings
-        if len(value) > 0:
-            candidates.append(value[0])  # First character only
-            if len(value) > 1:
-                candidates.append(value[-1])  # Last character only
-
-        return candidates
+        return [
+            "".join(chr(code) for code in child.value)
+            for child in shrinkable.shrinks().to_list()
+        ]
 
 
 class ListShrinker(Shrinker[List[T]]):
@@ -410,6 +414,62 @@ def shrink_element_wise(
         lambda parent: Stream.many(shrink_bulk(parent, power, offset))
     )
     return new_shrinkable_elems_shr.shrinks()
+
+
+def shrink_array_length(
+    shrinkable_elems: List[Shrinkable[T]], min_size: int
+) -> Shrinkable[List[T]]:
+    """
+    Shrinks an array by reducing its length from the rear.
+    It attempts to produce arrays with lengths ranging from the original size down to `minSize`.
+    Uses binary search internally for efficiency, but ensures we eventually reach `minSize`.
+
+    Args:
+        shrinkable_elems: The array of Shrinkable elements
+        min_size: The minimum allowed size for the shrunken array
+
+    Returns:
+        A Shrinkable representing arrays of potentially smaller lengths
+    """
+    size = len(shrinkable_elems)
+    if size <= min_size:
+        # Already at minimum size, no shrinking possible
+        return Shrinkable([shr.value for shr in shrinkable_elems[:size]])
+
+    range_val = size - min_size
+    range_shrinkable_original = binary_search_shrinkable(range_val)
+
+    # Check if 0 (which maps to minSize) is already in the shrink tree
+    has_zero = False
+
+    def check_for_zero(shr: Shrinkable[int]) -> None:
+        nonlocal has_zero
+        if shr.value == 0:
+            has_zero = True
+            return
+        for shrink in shr.shrinks().to_list():
+            check_for_zero(shrink)
+
+    check_for_zero(range_shrinkable_original)
+
+    # Map range values to actual sizes
+    range_shrinkable = range_shrinkable_original.map(lambda s: s + min_size)
+
+    # If 0 is not in the tree, add it as a final shrink (which maps to minSize)
+    if not has_zero:
+        return range_shrinkable.concat_static(
+            lambda: Stream.one(Shrinkable(min_size))
+        ).map(
+            lambda new_size: []
+            if new_size == 0
+            else [shr.value for shr in shrinkable_elems[:new_size]]
+        )
+    else:
+        return range_shrinkable.map(
+            lambda new_size: []
+            if new_size == 0
+            else [shr.value for shr in shrinkable_elems[:new_size]]
+        )
 
 
 def shrink_membership_wise(
