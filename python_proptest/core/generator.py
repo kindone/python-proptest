@@ -5,8 +5,9 @@ This module provides the fundamental Generator interface and basic generators
 for common Python types.
 """
 
+import sys
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, Generic, List, Protocol, Set, Tuple, TypeVar
+from typing import Any, Callable, Dict, Generic, List, Optional, Protocol, Set, Tuple, TypeVar
 
 from .shrinker import Shrinkable, binary_search_shrinkable, shrinkable_array
 from .stream import Stream
@@ -345,8 +346,16 @@ class Gen:
     """Namespace for built-in generators."""
 
     @staticmethod
-    def int(min_value: int = -1000, max_value: int = 1000):
-        """Generate random integers in the specified range."""
+    def int(min_value: Optional[int] = None, max_value: Optional[int] = None):
+        """Generate random integers in the specified range.
+        
+        If min_value or max_value are not specified, uses the full integer range
+        (from -sys.maxsize - 1 to sys.maxsize).
+        """
+        if min_value is None:
+            min_value = -sys.maxsize - 1
+        if max_value is None:
+            max_value = sys.maxsize
         return IntGenerator(min_value, max_value)
 
     @staticmethod
@@ -371,9 +380,17 @@ class Gen:
 
     @staticmethod
     def float(
-        min_value: float = -1000.0, max_value: float = 1000.0
+        min_value: Optional[float] = None, max_value: Optional[float] = None
     ) -> "FloatGenerator":
-        """Generate random floats in the specified range."""
+        """Generate random floats in the specified range.
+        
+        If min_value or max_value are not specified, uses the full float range
+        (from -sys.float_info.max to sys.float_info.max).
+        """
+        if min_value is None:
+            min_value = -sys.float_info.max
+        if max_value is None:
+            max_value = sys.float_info.max
         return FloatGenerator(min_value, max_value)
 
     @staticmethod

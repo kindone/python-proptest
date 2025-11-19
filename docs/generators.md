@@ -37,8 +37,8 @@ Generators are the foundation of property-based testing in `python-proptest`. Th
 Generates random integers within the specified range (inclusive).
 
 **Parameters:**
-- `min_value` (int, default: -1000): Minimum integer value to generate
-- `max_value` (int, default: 1000): Maximum integer value to generate
+- `min_value` (int, optional): Minimum integer value to generate. If not specified, uses `-sys.maxsize - 1` (full integer range)
+- `max_value` (int, optional): Maximum integer value to generate. If not specified, uses `sys.maxsize` (full integer range)
 
 **Examples:**
 ```python
@@ -64,8 +64,8 @@ Gen.int(min_value=42, max_value=42)
 Generates random floating-point numbers within the specified range.
 
 **Parameters:**
-- `min_value` (float, default: -1000.0): Minimum float value to generate
-- `max_value` (float, default: 1000.0): Maximum float value to generate
+- `min_value` (float, optional): Minimum float value to generate. If not specified, uses `-sys.float_info.max` (full float range)
+- `max_value` (float, optional): Maximum float value to generate. If not specified, uses `sys.float_info.max` (full float range)
 
 **Examples:**
 ```python

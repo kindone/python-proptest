@@ -36,16 +36,23 @@ def run_pytest_tests():
 
 
 def run_custom_tests():
-    """Run tests using our custom test runner."""
+    """Run tests using unittest discovery as fallback."""
     try:
-        # Add current directory to Python path
-        sys.path.insert(0, str(Path(__file__).parent))
+        result = subprocess.run(
+            [sys.executable, "-m", "unittest", "discover", "-s", "tests", "-v"],
+            capture_output=True,
+            text=True,
+            cwd=Path(__file__).parent,
+        )
 
-        # Import and run our comprehensive test
-        from tests.test_final_demo import run_all_tests
-
-        run_all_tests()
-        return True
+        if result.returncode == 0:
+            print("✅ All unittest tests passed!")
+            return True
+        else:
+            print("❌ Some unittest tests failed:")
+            print(result.stdout)
+            print(result.stderr)
+            return False
     except Exception as e:
         print(f"❌ Custom test runner failed: {e}")
         return False
@@ -66,8 +73,8 @@ def main():
     print("\n🎉 All tests completed successfully!")
     print("\nTo run tests manually:")
     print("1. With pytest: python -m pytest tests/ -v")
-    print("2. Custom runner: python tests/test_final_demo.py")
-    print("3. Individual tests: python tests/test_<name>.py")
+    print("2. With unittest: python -m unittest discover -s tests -v")
+    print("3. Individual tests: python -m pytest tests/<category>/test_<name>.py")
 
 
 if __name__ == "__main__":

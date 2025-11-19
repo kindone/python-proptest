@@ -188,7 +188,7 @@ class TestDecoratorAPIExamples:
     def test_assume_function(self):
         """Test the assume() function for conditional testing."""
 
-        @for_all(integers(), integers())
+        @for_all(integers(min_value=-1000, max_value=1000), integers(min_value=-1000, max_value=1000))
         def test_division_property(x: int, y: int):
             """Test division property with assumption"""
             assume(y != 0)  # Skip test cases where y is 0

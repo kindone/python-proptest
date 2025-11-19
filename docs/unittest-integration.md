@@ -44,10 +44,10 @@ class TestMathProperties(unittest.TestCase):
 
 ```bash
 # Run with unittest
-python -m unittest tests.test_unittest_integration -v
+python -m unittest tests.integration.test_unittest_integration -v
 
 # Run with pytest (also works)
-python -m pytest tests/test_unittest_integration.py -v
+python -m pytest tests/integration/test_unittest_integration.py -v
 ```
 
 ## Advanced Features
@@ -216,4 +216,4 @@ The `@for_all` decorator works identically in both frameworks - only the asserti
 
 See the complete examples in:
 - `examples/unittest_pytest_comparison.py` - Side-by-side comparison
-- `tests/test_unittest_integration.py` - Comprehensive test suite
+- `tests/integration/test_unittest_integration.py` - Comprehensive test suite

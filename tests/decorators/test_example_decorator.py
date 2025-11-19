@@ -2,7 +2,7 @@
 
 import unittest
 
-from python_proptest import Gen, example, for_all, run_for_all, settings
+from python_proptest import Gen, Property, example, for_all, run_for_all, settings
 
 
 class TestExampleDecorator(unittest.TestCase):
@@ -186,6 +186,115 @@ class TestExampleDecorator(unittest.TestCase):
         self.assertIn((0, ""), test_property._proptest_examples)
         self.assertIn((-1, " "), test_property._proptest_examples)
         self.assertIn((1, "a"), test_property._proptest_examples)
+
+    # ------------------------------------------------------------------
+    # Tests merged from test_example_simple.py
+    # ------------------------------------------------------------------
+    def test_example_execution_direct_property(self):
+        """Examples should execute when using Property directly."""
+
+        executions = []
+
+        def property_func(x: int, s: str):
+            executions.append((x, s))
+            return True
+
+        prop = Property(property_func, examples=[(42, "hello"), (100, "world")])
+        prop.for_all(Gen.int(), Gen.str())
+
+        self.assertIn((42, "hello"), executions)
+        self.assertIn((100, "world"), executions)
+        self.assertGreater(len(executions), 2)
+
+    def test_example_failure_direct_property(self):
+        """Failing examples should surface immediately with Property."""
+
+        executions = []
+
+        def property_func(x: int, s: str):
+            executions.append((x, s))
+            return x > 0
+
+        prop = Property(property_func, examples=[(0, "hello")])
+
+        with self.assertRaises(Exception) as cm:
+            prop.for_all(Gen.int(), Gen.str())
+
+        self.assertIn("Property failed on example", str(cm.exception))
+        self.assertIn("(0, 'hello')", str(cm.exception))
+        self.assertEqual(len(executions), 1)
+        self.assertEqual(executions[0], (0, "hello"))
+
+    def test_example_execution_with_decorator(self):
+        """Examples should execute when using @for_all decorator."""
+
+        executions = []
+
+        @for_all(Gen.int(), Gen.str())
+        @example(42, "hello")
+        @example(100, "world")
+        def test_property(x: int, s: str):
+            executions.append((x, s))
+            return isinstance(x, int) and isinstance(s, str)
+
+        test_property()
+
+        self.assertIn((42, "hello"), executions)
+        self.assertIn((100, "world"), executions)
+        self.assertGreater(len(executions), 2)
+
+    def test_example_failure_with_decorator(self):
+        """Failing examples with decorators should halt immediately."""
+
+        executions = []
+
+        @for_all(Gen.int(), Gen.str())
+        @example(0, "hello")
+        def test_property(x: int, s: str):
+            executions.append((x, s))
+            assert x > 0
+
+        with self.assertRaises(AssertionError) as cm:
+            test_property()
+
+        self.assertIn("Property failed on example", str(cm.exception))
+        self.assertIn("(0, 'hello')", str(cm.exception))
+        self.assertEqual(len(executions), 1)
+        self.assertEqual(executions[0], (0, "hello"))
+
+    # ------------------------------------------------------------------
+    # Tests merged from test_example_working.py
+    # ------------------------------------------------------------------
+    def test_example_success_with_restrictive_generators(self):
+        """Examples should work with restrictive generators."""
+
+        @for_all(Gen.int(min_value=1), Gen.str(min_length=1))
+        @example(1, "hello")
+        def test_property(x: int, s: str):
+            assert x > 0
+            assert len(s) > 0
+
+        test_property()
+
+    def test_example_with_bool_generator(self):
+        """Examples should work with boolean generators."""
+
+        @for_all(Gen.bool())
+        @example(True)
+        def test_property(b: bool):
+            assert isinstance(b, bool)
+
+        test_property()
+
+    def test_example_with_float_generator(self):
+        """Examples should work with float generators."""
+
+        @for_all(Gen.float())
+        @example(3.14)
+        def test_property(f: float):
+            assert isinstance(f, float)
+
+        test_property()
 
 
 if __name__ == "__main__":
