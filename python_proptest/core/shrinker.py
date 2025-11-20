@@ -148,8 +148,10 @@ class Shrinkable(Generic[T]):
 
     def take(self, n: int) -> "Shrinkable[T]":
         """Limit the number of shrinking candidates to n."""
+
         def limited_shrinks() -> Stream["Shrinkable[T]"]:
             return self.shrinks().take(n)
+
         return Shrinkable(self.value, limited_shrinks)
 
 
@@ -460,15 +462,19 @@ def shrink_array_length(
         return range_shrinkable.concat_static(
             lambda: Stream.one(Shrinkable(min_size))
         ).map(
-            lambda new_size: []
-            if new_size == 0
-            else [shr.value for shr in shrinkable_elems[:new_size]]
+            lambda new_size: (
+                []
+                if new_size == 0
+                else [shr.value for shr in shrinkable_elems[:new_size]]
+            )
         )
     else:
         return range_shrinkable.map(
-            lambda new_size: []
-            if new_size == 0
-            else [shr.value for shr in shrinkable_elems[:new_size]]
+            lambda new_size: (
+                []
+                if new_size == 0
+                else [shr.value for shr in shrinkable_elems[:new_size]]
+            )
         )
 
 

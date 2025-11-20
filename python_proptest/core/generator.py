@@ -7,7 +7,18 @@ for common Python types.
 
 import sys
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, Generic, List, Optional, Protocol, Set, Tuple, TypeVar
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Generic,
+    List,
+    Optional,
+    Protocol,
+    Set,
+    Tuple,
+    TypeVar,
+)
 
 from .shrinker import Shrinkable, binary_search_shrinkable, shrinkable_array
 from .stream import Stream
@@ -57,6 +68,10 @@ class Random(Protocol):
 
     def randint(self, a: int, b: int) -> int:
         """Generate a random integer in [a, b]."""
+        ...
+
+    def randrange(self, start: int, stop: Optional[int] = None, step: int = 1) -> int:
+        """Generate a random integer in the range."""
         ...
 
     def choice(self, seq: List[T]) -> T:
@@ -348,7 +363,7 @@ class Gen:
     @staticmethod
     def int(min_value: Optional[int] = None, max_value: Optional[int] = None):
         """Generate random integers in the specified range.
-        
+
         If min_value or max_value are not specified, uses the full integer range
         (from -sys.maxsize - 1 to sys.maxsize).
         """
@@ -383,7 +398,7 @@ class Gen:
         min_value: Optional[float] = None, max_value: Optional[float] = None
     ) -> "FloatGenerator":
         """Generate random floats in the specified range.
-        
+
         If min_value or max_value are not specified, uses the full float range
         (from -sys.float_info.max to sys.float_info.max).
         """
@@ -703,10 +718,14 @@ class IntGenerator(Generator[int]):
         # Use binary search approach similar to dartproptest
         if self.min_value >= 0:
             # Range is entirely non-negative: shrink towards min_value
-            return self._binary_search_towards_min(value - self.min_value, self.min_value)
+            return self._binary_search_towards_min(
+                value - self.min_value, self.min_value
+            )
         elif self.max_value <= 0:
             # Range is entirely non-positive: shrink towards max_value
-            return self._binary_search_towards_max(value - self.max_value, self.max_value)
+            return self._binary_search_towards_max(
+                value - self.max_value, self.max_value
+            )
         else:
             # Range crosses zero: shrink towards 0
             return self._binary_search_towards_zero(value)
@@ -733,7 +752,9 @@ class IntGenerator(Generator[int]):
                 shrinks.extend(self._gen_neg(value, 0, 0))
             return shrinks
 
-    def _binary_search_towards_min(self, value: int, offset: int) -> List[Shrinkable[int]]:
+    def _binary_search_towards_min(
+        self, value: int, offset: int
+    ) -> List[Shrinkable[int]]:
         """Generate shrinks for an integer using binary search towards min_value."""
         if value == 0:
             return []
@@ -755,7 +776,9 @@ class IntGenerator(Generator[int]):
                 shrinks.extend(self._gen_neg(value + 1, 0, self.min_value))
             return shrinks
 
-    def _binary_search_towards_max(self, value: int, offset: int) -> List[Shrinkable[int]]:
+    def _binary_search_towards_max(
+        self, value: int, offset: int
+    ) -> List[Shrinkable[int]]:
         """Generate shrinks for an integer using binary search towards max_value."""
         if value == 0:
             return []
@@ -777,7 +800,9 @@ class IntGenerator(Generator[int]):
                 shrinks.extend(self._gen_pos(0, value, self.max_value))
             return shrinks
 
-    def _gen_pos(self, min_val: int, max_val: int, offset: int) -> List[Shrinkable[int]]:
+    def _gen_pos(
+        self, min_val: int, max_val: int, offset: int
+    ) -> List[Shrinkable[int]]:
         """
         Generate shrinks for a positive integer range using binary search.
         Works on half-open range [min_val, max_val) to avoid duplicates.
@@ -794,7 +819,7 @@ class IntGenerator(Generator[int]):
             + ((max_val - 1) // 2 if max_val < 0 else max_val // 2)
             + (1 if min_val % 2 != 0 and max_val % 2 != 0 else 0)
         )
-        
+
         # Ensure mid is strictly between min_val and max_val
         if mid <= min_val:
             mid = min_val + 1
@@ -821,14 +846,16 @@ class IntGenerator(Generator[int]):
             # Range [min_val, mid) is disjoint from [mid, max_val), so no duplicates
             # Only recurse if the range will actually shrink (mid > min_val + 1)
             if min_val < mid < max_val and (mid - min_val) > 1:
+
                 def make_mid_shrinks():
                     mid_shrinks = self._gen_pos(min_val, mid, offset)
                     return Stream.many(mid_shrinks) if mid_shrinks else Stream.empty()
+
                 shrinks.append(Shrinkable(mid_value, make_mid_shrinks))
             elif min_val < mid < max_val:
                 # Mid is min_val + 1, just add it without recursion
                 shrinks.append(Shrinkable(mid_value))
-        
+
         # Add shrinks from upper half [mid, max_val) - disjoint from [min_val, mid)
         # Only recurse if the range will actually shrink (max_val > mid + 1)
         if mid < max_val:
@@ -836,10 +863,12 @@ class IntGenerator(Generator[int]):
                 upper_shrinks = self._gen_pos(mid, max_val, offset)
                 shrinks.extend(upper_shrinks)
             # If max_val == mid + 1, the range [mid, max_val) is empty, so nothing to add
-        
+
         return shrinks
 
-    def _gen_neg(self, min_val: int, max_val: int, offset: int) -> List[Shrinkable[int]]:
+    def _gen_neg(
+        self, min_val: int, max_val: int, offset: int
+    ) -> List[Shrinkable[int]]:
         """
         Generate shrinks for a negative integer range using binary search.
         Works on half-open range (min_val, max_val] to avoid duplicates.
@@ -857,7 +886,7 @@ class IntGenerator(Generator[int]):
             + ((max_val - 1) // 2 if max_val < 0 else max_val // 2)
             + (-1 if min_val % 2 != 0 and max_val % 2 != 0 else 0)
         )
-        
+
         # Ensure mid is strictly between min_val and max_val
         if mid <= min_val:
             mid = min_val + 1
@@ -885,14 +914,16 @@ class IntGenerator(Generator[int]):
             # Range [min_val, mid) is disjoint from [mid, max_val), so no duplicates
             # Only recurse if the range will actually shrink (mid > min_val + 1)
             if min_val < mid < max_val and (mid - min_val) > 1:
+
                 def make_mid_shrinks():
                     mid_shrinks = self._gen_pos(min_val, mid, offset)
                     return Stream.many(mid_shrinks) if mid_shrinks else Stream.empty()
+
                 shrinks.append(Shrinkable(mid_value, make_mid_shrinks))
             elif min_val < mid < max_val:
                 # Mid is min_val + 1, just add it without recursion
                 shrinks.append(Shrinkable(mid_value))
-        
+
         # Add shrinks from upper half [mid, max_val) - disjoint from [min_val, mid)
         # Only recurse if the range will actually shrink (max_val > mid + 1)
         if mid < max_val:
@@ -900,7 +931,7 @@ class IntGenerator(Generator[int]):
                 upper_shrinks = self._gen_pos(mid, max_val, offset)
                 shrinks.extend(upper_shrinks)
             # If max_val == mid + 1, the range [mid, max_val) is empty, so nothing to add
-        
+
         return shrinks
 
 

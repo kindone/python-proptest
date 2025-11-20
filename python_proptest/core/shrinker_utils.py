@@ -21,23 +21,23 @@ def collect_tree_compact(
 ) -> List[Any]:
     """
     Collect a shrink tree into a compact nested array format.
-    
+
     The format is [value, [children]], where children is always a list
     (empty [] if no children). This ensures:
     - Each value appears exactly once in the tree
     - The structure is hierarchical and easy to parse
     - No duplicates are implied
-    
+
     Args:
         node: The root Shrinkable node
         depth: Current depth in the tree (used internally)
         max_depth: Maximum depth to traverse
         breadth: Maximum number of children to explore at each level
-        
+
     Returns:
         A nested list structure: [value, [child1, child2, ...]]
         where each child is also [value, [children]]
-        
+
     Example:
         For Gen.int(0, 8) with value 8:
         [8, [
@@ -61,7 +61,7 @@ def collect_tree_compact(
             children.append(collect_tree_compact(head, depth + 1, max_depth, breadth))
             current = current.tail()
             count += 1
-    
+
     return [node.value, children]
 
 
@@ -73,23 +73,23 @@ def collect_tree_structured(
 ) -> dict[str, Any]:
     """
     Collect a shrink tree into a structured dictionary format.
-    
+
     The format is {"value": v, "shrinks": [children]}, where shrinks
     is only included if there are children. This provides:
     - Clear labeling of values and shrinks
     - Self-documenting structure
     - Easy to parse and understand
-    
+
     Args:
         node: The root Shrinkable node
         depth: Current depth in the tree (used internally)
         max_depth: Maximum depth to traverse
         breadth: Maximum number of children to explore at each level
-        
+
     Returns:
         A dictionary structure: {"value": v, "shrinks": [child1, child2, ...]}
         where each child is also {"value": v, "shrinks": [...]}
-        
+
     Example:
         For Gen.int(0, 8) with value 8:
         {
@@ -109,7 +109,7 @@ def collect_tree_structured(
         }
     """
     result: dict[str, Any] = {"value": node.value}
-    
+
     if depth < max_depth:
         children = []
         current = node.shrinks()
@@ -118,13 +118,15 @@ def collect_tree_structured(
             head = current.head()
             if head is None:
                 break
-            children.append(collect_tree_structured(head, depth + 1, max_depth, breadth))
+            children.append(
+                collect_tree_structured(head, depth + 1, max_depth, breadth)
+            )
             current = current.tail()
             count += 1
-        
+
         if children:
             result["shrinks"] = children
-    
+
     return result
 
 
@@ -136,13 +138,13 @@ def tree_to_json(
 ) -> str:
     """
     Convert a shrink tree to a JSON string representation (compact format).
-    
+
     Args:
         node: The root Shrinkable node
         max_depth: Maximum depth to traverse
         breadth: Maximum number of children to explore at each level
         indent: JSON indentation level
-        
+
     Returns:
         A JSON string representing the shrink tree in compact format
     """
@@ -158,15 +160,15 @@ def tree_to_json_structured(
 ) -> str:
     """
     Convert a shrink tree to a JSON string representation (structured format).
-    
+
     Uses {"value": v, "shrinks": [...]} format for better readability.
-    
+
     Args:
         node: The root Shrinkable node
         max_depth: Maximum depth to traverse
         breadth: Maximum number of children to explore at each level
         indent: JSON indentation level
-        
+
     Returns:
         A JSON string representing the shrink tree in structured format
     """
@@ -181,27 +183,27 @@ def check_duplicates(
 ) -> dict[str, List[int]]:
     """
     Check for duplicate values in a shrink tree.
-    
+
     Returns a dictionary mapping value strings to lists of depths
     where they appear. If a value appears multiple times, it will
     be in the result with multiple depth entries.
-    
+
     Args:
         node: The root Shrinkable node
         max_depth: Maximum depth to traverse
         breadth: Maximum number of children to explore at each level
-        
+
     Returns:
         Dictionary mapping value strings to lists of depths
     """
     seen: dict[str, List[int]] = {}
-    
+
     def traverse(n: Shrinkable[T], d: int = 0):
         value_key = json.dumps(n.value, sort_keys=True)
         if value_key not in seen:
             seen[value_key] = []
         seen[value_key].append(d)
-        
+
         if d < max_depth:
             current = n.shrinks()
             count = 0
@@ -212,7 +214,6 @@ def check_duplicates(
                 traverse(head, d + 1)
                 current = current.tail()
                 count += 1
-    
+
     traverse(node)
     return {k: v for k, v in seen.items() if len(v) > 1}
-

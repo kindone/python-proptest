@@ -92,24 +92,33 @@ class TestUnicodeStringGenerator(unittest.TestCase):
         if len(shrinkable.value) > 0:
             current_len = len(shrinkable.value)
             min_len = 1  # From gen.unicode_string(1, 5)
-            
+
             if current_len > min_len:
                 # Should be able to shrink to shorter strings (but not empty if min_length > 0)
-                shorter_shrinks = [s for s in shrinks_list if len(s.value) < current_len]
-                assert len(shorter_shrinks) > 0, "Should be able to shrink to shorter strings when length > min_length"
+                shorter_shrinks = [
+                    s for s in shrinks_list if len(s.value) < current_len
+                ]
+                assert (
+                    len(shorter_shrinks) > 0
+                ), "Should be able to shrink to shorter strings when length > min_length"
             else:
                 # When length == min_length, we can only shrink elements, not length
                 # So all shrinks should have the same length
-                assert all(len(s.value) == current_len for s in shrinks_list), \
-                    "When length == min_length, shrinks should only modify elements, not length"
-            
+                assert all(
+                    len(s.value) == current_len for s in shrinks_list
+                ), "When length == min_length, shrinks should only modify elements, not length"
+
             # Test with min_length=0 to verify empty string is reachable
             gen_empty = Gen.unicode_string(0, 5)
             shrinkable_empty = gen_empty.generate(rng)
             if len(shrinkable_empty.value) > 0:
                 empty_shrinks_list = shrinkable_empty.shrinks().to_list()
-                empty_shrink = next((s for s in empty_shrinks_list if len(s.value) == 0), None)
-                assert empty_shrink is not None, "Empty string should be reachable when min_length=0"
+                empty_shrink = next(
+                    (s for s in empty_shrinks_list if len(s.value) == 0), None
+                )
+                assert (
+                    empty_shrink is not None
+                ), "Empty string should be reachable when min_length=0"
 
     def test_unicode_string_generator_unicode_chars(self):
         """Test that Unicode string generator can produce Unicode characters."""
