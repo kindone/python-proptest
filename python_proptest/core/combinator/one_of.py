@@ -6,8 +6,8 @@ Randomly chooses from multiple generators with optional weights.
 
 from typing import List, TypeVar
 
-from ...shrinker import Shrinkable
-from ..base import Generator, Random, normalize_weighted_generators
+from ..shrinker import Shrinkable
+from ..generator.base import Generator, Random, normalize_weighted_generators
 
 T = TypeVar("T")
 

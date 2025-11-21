@@ -6,9 +6,9 @@ Constructs objects from generators.
 
 from typing import Any, Callable
 
-from ...shrinker import Shrinkable
-from ...stream import Stream
-from ..base import Generator, Random
+from ..shrinker import Shrinkable
+from ..stream import Stream
+from ..generator.base import Generator, Random
 
 
 class ConstructGenerator(Generator[Any]):

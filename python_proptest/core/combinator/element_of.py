@@ -6,9 +6,9 @@ Randomly chooses from multiple values with optional weights.
 
 from typing import Any, List, TypeVar
 
-from ...shrinker import Shrinkable
-from ...stream import Stream
-from ..base import Generator, Random, normalize_weighted_values
+from ..shrinker import Shrinkable
+from ..stream import Stream
+from ..generator.base import Generator, Random, normalize_weighted_values
 
 T = TypeVar("T")
 

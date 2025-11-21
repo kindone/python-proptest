@@ -8,7 +8,7 @@ from typing import Any, Callable, Optional, TypeVar
 from .base import Generator, Random, Weighted, WeightedValue
 from .bool import BoolGenerator
 from .chain import ChainGenerator
-from .combinator import (
+from ..combinator import (
     ConstructGenerator,
     ElementOfGenerator,
     JustGenerator,
