@@ -7,6 +7,12 @@ This file shows how to test systems with internal state using action sequences.
 import unittest
 from typing import Any, Dict, List
 
+try:
+    import pytest
+    HAS_PYTEST = True
+except ImportError:
+    HAS_PYTEST = False
+
 from python_proptest import (
     Action,
     Gen,
@@ -134,4 +140,7 @@ class TestStatefulExamples(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    pytest.main([__file__])
+    if HAS_PYTEST:
+        pytest.main([__file__])
+    else:
+        unittest.main()

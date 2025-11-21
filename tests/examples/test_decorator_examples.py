@@ -5,10 +5,13 @@ This file shows how to use the Hypothesis-style decorator API for
 more ergonomic property-based testing.
 """
 
+import unittest
+
 try:
     import pytest
+    HAS_PYTEST = True
 except ImportError:
-    raise ImportError("pytest is required to run the decorator API tests. ")
+    HAS_PYTEST = False
 
 from python_proptest import (
     Gen,
@@ -28,6 +31,7 @@ from python_proptest import (
 )
 
 
+@unittest.skipIf(not HAS_PYTEST, "pytest is required for decorator API tests")
 class TestDecoratorAPIExamples:
     """Examples demonstrating the decorator-based API."""
 
@@ -239,6 +243,7 @@ class TestDecoratorAPIExamples:
 
     def test_failing_property_demonstration(self):
         """Demonstrate a failing property (this should fail)."""
+        # Note: 'self' parameter is kept for pytest compatibility
 
         @for_all(Gen.int())
         def test_failing_property(x: int):
@@ -246,9 +251,25 @@ class TestDecoratorAPIExamples:
             assert x >= 0  # This will fail for negative integers
 
         # This test should fail, demonstrating shrinking
-        with pytest.raises(AssertionError):
-            test_failing_property()
+        if HAS_PYTEST:
+            with pytest.raises(AssertionError):
+                test_failing_property()
+        else:
+            # If pytest is not available, just run the test and expect it to fail
+            try:
+                test_failing_property()
+                # If we get here, the test didn't fail as expected
+                raise AssertionError("Expected AssertionError but test passed")
+            except AssertionError as e:
+                # Check if this is the expected failure or our own assertion
+                if "Expected AssertionError but test passed" in str(e):
+                    raise  # Re-raise our own assertion
+                # Otherwise, this is the expected failure from the property test
+                pass
 
 
 if __name__ == "__main__":
-    pytest.main([__file__])
+    if HAS_PYTEST:
+        pytest.main([__file__])
+    else:
+        unittest.main()

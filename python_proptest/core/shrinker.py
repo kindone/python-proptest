@@ -1,158 +1,35 @@
 """
 Shrinking functionality for finding minimal failing cases.
 
-This module provides the Shrinkable class and shrinking algorithms
-for reducing failing test cases to minimal counterexamples.
+This module provides backward compatibility by re-exporting Shrinkable
+and other utilities from the shrinker package.
 """
 
 import math
 import sys
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Generic, List, Optional, TypeVar
+from typing import Any, Callable, Generic, List, TypeVar
 
-from .stream import Stream
+# Import Shrinkable and Stream
+# Note: When loaded via importlib, these may already be set in the module namespace
+# Check if they're already set (by importlib), otherwise import normally
+if 'Shrinkable' not in globals() or Shrinkable is None:
+    try:
+        # Try importing from the shrinker package (this will work when imported normally)
+        from .shrinker import Shrinkable
+    except (ImportError, ValueError):
+        # If that fails, it should have been set by importlib
+        pass
+
+if 'Stream' not in globals() or Stream is None:
+    try:
+        from .stream import Stream
+    except (ImportError, ValueError):
+        # If that fails, it should have been set by importlib
+        pass
 
 T = TypeVar("T")
 U = TypeVar("U")
-
-
-class Shrinkable(Generic[T]):
-    """A value with its shrinking candidates."""
-
-    def __init__(
-        self,
-        value: T,
-        shrinks_gen: Optional[Callable[[], Stream["Shrinkable[T]"]]] = None,
-    ):
-        self.value = value
-        self.shrinks_gen = shrinks_gen or (lambda: Stream.empty())
-
-    def __repr__(self) -> str:
-        return f"Shrinkable({self.value!r})"
-
-    def __eq__(self, other: Any) -> bool:
-        if not isinstance(other, Shrinkable):
-            return False
-        return self.value == other.value
-
-    def __hash__(self) -> int:
-        return hash(self.value)
-
-    def shrinks(self) -> Stream["Shrinkable[T]"]:
-        """Get the shrinking candidates as a stream."""
-        return self.shrinks_gen()
-
-    def with_shrinks(
-        self, shrink_func: Callable[[], Stream["Shrinkable[T]"]]
-    ) -> "Shrinkable[T]":
-        """Add shrinking candidates using a function that returns a stream."""
-        return Shrinkable(self.value, shrink_func)
-
-    def concat_static(
-        self, shrink_func: Callable[[], Stream["Shrinkable[T]"]]
-    ) -> "Shrinkable[T]":
-        """Add static shrinking candidates."""
-
-        def combined_shrinks() -> Stream["Shrinkable[T]"]:
-            return self.shrinks().concat(shrink_func())
-
-        return Shrinkable(self.value, combined_shrinks)
-
-    def concat(
-        self, shrink_func: Callable[["Shrinkable[T]"], Stream["Shrinkable[T]"]]
-    ) -> "Shrinkable[T]":
-        """Add shrinking candidates that depend on the current value."""
-
-        def combined_shrinks() -> Stream["Shrinkable[T]"]:
-            return self.shrinks().concat(shrink_func(self))
-
-        return Shrinkable(self.value, combined_shrinks)
-
-    def and_then_static(
-        self, shrink_func: Callable[[], Stream["Shrinkable[T]"]]
-    ) -> "Shrinkable[T]":
-        """Replace shrinking candidates with new ones."""
-        return Shrinkable(self.value, shrink_func)
-
-    def and_then(
-        self, shrink_func: Callable[["Shrinkable[T]"], Stream["Shrinkable[T]"]]
-    ) -> "Shrinkable[T]":
-        """Replace shrinking candidates with new ones that depend on the current
-        value."""
-        return Shrinkable(self.value, lambda: shrink_func(self))
-
-    def map(self, func: Callable[[T], U]) -> "Shrinkable[U]":
-        """Transform the value and all shrinking candidates."""
-
-        def mapped_shrinks() -> Stream["Shrinkable[U]"]:
-            return self.shrinks().map(lambda shrink: shrink.map(func))
-
-        return Shrinkable(func(self.value), mapped_shrinks)
-
-    def filter(self, predicate: Callable[[T], bool]) -> "Shrinkable[T]":
-        """Filter shrinking candidates based on a predicate."""
-        if not predicate(self.value):
-            raise ValueError("Cannot filter out the root value")
-
-        def filtered_shrinks() -> Stream["Shrinkable[T]"]:
-            return (
-                self.shrinks()
-                .filter(lambda shrink: predicate(shrink.value))
-                .map(lambda shrink: shrink.filter(predicate))
-            )
-
-        return Shrinkable(self.value, filtered_shrinks)
-
-    def flat_map(self, func: Callable[[T], "Shrinkable[U]"]) -> "Shrinkable[U]":
-        """Transform the value and flatten the result."""
-        result = func(self.value)
-
-        def flat_mapped_shrinks() -> Stream["Shrinkable[U]"]:
-            return (
-                self.shrinks()
-                .map(lambda shrink: shrink.flat_map(func))
-                .concat(result.shrinks())
-            )
-
-        return Shrinkable(result.value, flat_mapped_shrinks)
-
-    def get_nth_child(self, index: int) -> "Shrinkable[T]":
-        """Get the nth shrinking candidate."""
-        if index < 0:
-            raise IndexError(f"Index {index} out of range for shrinks")
-
-        shrinks_stream = self.shrinks()
-        current = shrinks_stream
-        for i in range(index):
-            if current.is_empty():
-                raise IndexError(f"Index {index} out of range for shrinks")
-            current = current.tail()
-
-        if current.is_empty():
-            raise IndexError(f"Index {index} out of range for shrinks")
-
-        head_val = current.head()
-        if head_val is None:
-            raise IndexError(f"Index {index} out of range for shrinks")
-        return head_val
-
-    def retrieve(self, path: List[int]) -> "Shrinkable[T]":
-        """Retrieve a shrinkable by following a path of indices."""
-        if not path:
-            return self
-
-        current = self
-        for index in path:
-            current = current.get_nth_child(index)
-        return current
-
-    def take(self, n: int) -> "Shrinkable[T]":
-        """Limit the number of shrinking candidates to n."""
-
-        def limited_shrinks() -> Stream["Shrinkable[T]"]:
-            return self.shrinks().take(n)
-
-        return Shrinkable(self.value, limited_shrinks)
 
 
 class Shrinker(ABC, Generic[T]):
@@ -196,6 +73,10 @@ class StringShrinker(Shrinker[str]):
         """Generate shrinking candidates for a string."""
         if not value:
             return []
+
+        # Import from the shrinker package to avoid circular imports
+        from .shrinker.integral import binary_search_shrinkable
+        from .shrinker.list import shrinkable_array
 
         char_shrinkables = [binary_search_shrinkable(ord(ch)) for ch in value]
 

@@ -7,6 +7,12 @@ function-based run_for_all approaches.
 
 import unittest
 
+try:
+    import pytest
+    HAS_PYTEST = True
+except ImportError:
+    HAS_PYTEST = False
+
 from python_proptest import Gen, for_all, integers, run_for_all
 
 
@@ -109,4 +115,7 @@ class TestNamingComparison(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    pytest.main([__file__])
+    if HAS_PYTEST:
+        pytest.main([__file__])
+    else:
+        unittest.main()
