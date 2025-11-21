@@ -20,6 +20,7 @@ from typing import (
 )
 
 from .generator import Generator, Random
+from .shrinker import Shrinkable
 
 T = TypeVar("T")
 
@@ -119,12 +120,14 @@ class Property:
 
         # Then run random tests
         for run in range(self.num_runs):
+            saved_rng_state = self._rng.getstate()
             try:
                 # Generate test inputs
                 inputs = []
                 for generator in generators:
                     shrinkable = generator.generate(self._rng)
-                    inputs.append(shrinkable.value)
+                    input_val = shrinkable.value
+                    inputs.append(input_val)
 
                 # Run the property
                 result = self.property_func(*inputs)
@@ -132,7 +135,7 @@ class Property:
                 if not result:
                     # Property failed, try to shrink
                     minimal_inputs = self._shrink_failing_inputs(
-                        inputs, list(generators)
+                        inputs, list(generators), saved_rng_state
                     )
                     raise PropertyTestError(
                         f"Property failed on run {run + 1}",
@@ -144,7 +147,9 @@ class Property:
                 if isinstance(e, PropertyTestError):
                     raise
                 # Other exceptions are treated as property failures
-                minimal_inputs = self._shrink_failing_inputs(inputs, list(generators))
+                minimal_inputs = self._shrink_failing_inputs(
+                    inputs, list(generators), saved_rng_state
+                )
                 raise PropertyTestError(
                     f"Property failed with exception on run {run + 1}: {e}",
                     failing_inputs=inputs,
@@ -154,7 +159,10 @@ class Property:
         return True
 
     def _shrink_failing_inputs(
-        self, inputs: List[Any], generators: List[Generator[Any]]
+        self,
+        inputs: List[Any],
+        generators: List[Generator[Any]],
+        rng_state: Optional[Any] = None,
     ) -> List[Any]:
         """Attempt to shrink failing inputs to find minimal counterexamples."""
         if len(inputs) != len(generators):
@@ -167,13 +175,37 @@ class Property:
             except Exception:
                 return False
 
+        # Regenerate the shrinkables for this run using the saved RNG state
+        regenerated_shrinkables: List[Shrinkable[Any]] = []
+        if rng_state is not None:
+            original_state = self._rng.getstate()
+            self._rng.setstate(rng_state)
+        else:
+            original_state = None
+        try:
+            for i, generator in enumerate(generators):
+                regenerated = generator.generate(self._rng)
+                regenerated_shrinkables.append(regenerated)
+                if regenerated.value != inputs[i]:
+                    raise RuntimeError(
+                        f"Regenerated value {regenerated.value} != expected {inputs[i]}. "
+                        "RNG state cloning may be incorrect."
+                    )
+        finally:
+            if original_state is not None:
+                self._rng.setstate(original_state)
+
         # Shrink each input individually using the shrinkable candidates
         shrunk_inputs: List[Any] = []
-        for i, (input_val, generator) in enumerate(zip(inputs, generators)):
-            # Generate a shrinkable for this input to get shrinking candidates
-            shrinkable = generator.generate(self._rng)
-            # Override the value with our failing input
-            shrinkable.value = input_val
+        for i, (input_val, shrinkable) in enumerate(
+            zip(inputs, regenerated_shrinkables)
+        ):
+            # Ensure the regenerated shrinkable matches the failing input
+            if shrinkable.value != input_val:
+                raise RuntimeError(
+                    "Regenerated shrinkable does not match failing input. "
+                    "RNG state cloning may be incorrect."
+                )
 
             # Try to find a smaller failing value using the shrinkable's candidates
             current_val = input_val
@@ -181,8 +213,18 @@ class Property:
 
             while improved:
                 improved = False
-                for candidate_shrinkable in shrinkable.shrinks().to_list():
+                # Get shrinks as a stream (lazy evaluation, like cppproptest)
+                shrinks_stream = shrinkable.shrinks()
+                
+                # Iterate through shrinks using the stream iterator
+                current_stream = shrinks_stream
+                while not current_stream.is_empty():
+                    candidate_shrinkable = current_stream.head()
+                    if candidate_shrinkable is None:
+                        break
+                    
                     candidate_val = candidate_shrinkable.value
+                    
                     # Test if this candidate also fails
                     test_inputs = shrunk_inputs[:i] + [candidate_val] + inputs[i + 1 :]
                     if not property_predicate(test_inputs):
@@ -191,6 +233,9 @@ class Property:
                         shrinkable = candidate_shrinkable
                         improved = True
                         break
+                    
+                    # Move to next candidate in stream
+                    current_stream = current_stream.tail()
 
             shrunk_inputs.append(current_val)
 

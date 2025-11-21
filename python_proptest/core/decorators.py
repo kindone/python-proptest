@@ -222,7 +222,7 @@ def for_all(
                     # Extract generators from Strategy objects if needed
                     actual_generators = []
                     for gen in generators:
-                        if hasattr(gen, "generator"):
+                        if isinstance(gen, Strategy):
                             # It's a Strategy object
                             actual_generators.append(gen.generator)
                         else:

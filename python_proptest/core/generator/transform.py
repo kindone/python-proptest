@@ -21,16 +21,7 @@ class MappedGenerator(Generator[U]):
 
     def generate(self, rng: Random) -> Shrinkable[U]:
         shrinkable = self.generator.generate(rng)
-        transformed_value = self.func(shrinkable.value)
-
-        def shrink_func() -> Stream[Shrinkable[U]]:
-            transformed_shrinks = [
-                Shrinkable(self.func(s.value), lambda: s.shrinks())  # type: ignore
-                for s in shrinkable.shrinks().to_list()
-            ]
-            return Stream.many(transformed_shrinks)
-
-        return Shrinkable(transformed_value, shrink_func)
+        return shrinkable.map(self.func)
 
 
 class FilteredGenerator(Generator[T]):
@@ -47,31 +38,17 @@ class FilteredGenerator(Generator[T]):
         self.max_attempts = max_attempts
 
     def generate(self, rng: Random) -> Shrinkable[T]:
-        for _ in range(self.max_attempts):
+        for attempt in range(self.max_attempts):
             shrinkable = self.generator.generate(rng)
-            if self.predicate(shrinkable.value):
-                # Create a new Shrinkable with filtered shrinking candidates
-                filtered_shrinks = self._filter_shrinks(shrinkable)
-                return Shrinkable(shrinkable.value, lambda: filtered_shrinks)
+            value = shrinkable.value
+            predicate_result = self.predicate(value)
+            if predicate_result:
+                filtered = shrinkable.filter(self.predicate)
+                return filtered
         raise ValueError(
             f"Could not generate value satisfying predicate after "
             f"{self.max_attempts} attempts"
         )
-
-    def _filter_shrinks(self, shrinkable: Shrinkable[T]):
-        """Filter shrinking candidates by predicate."""
-        def filtered_stream():
-            original_stream = shrinkable.shrinks()
-            filtered_candidates = []
-
-            # Get all candidates from the original stream
-            for candidate in original_stream:
-                if self.predicate(candidate.value):
-                    filtered_candidates.append(candidate)
-
-            return Stream.many(filtered_candidates)
-
-        return filtered_stream()
 
 
 class FlatMappedGenerator(Generator[U]):

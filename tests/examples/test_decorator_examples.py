@@ -5,13 +5,8 @@ This file shows how to use the Hypothesis-style decorator API for
 more ergonomic property-based testing.
 """
 
+import math
 import unittest
-
-try:
-    import pytest
-    HAS_PYTEST = True
-except ImportError:
-    HAS_PYTEST = False
 
 from python_proptest import (
     Gen,
@@ -31,8 +26,7 @@ from python_proptest import (
 )
 
 
-@unittest.skipIf(not HAS_PYTEST, "pytest is required for decorator API tests")
-class TestDecoratorAPIExamples:
+class TestDecoratorAPIExamples(unittest.TestCase):
     """Examples demonstrating the decorator-based API."""
 
     def test_basic_arithmetic_properties(self):
@@ -61,7 +55,7 @@ class TestDecoratorAPIExamples:
     def test_string_properties(self):
         """Test string properties using decorators."""
 
-        @given(Gen.str(min_size=1, max_size=20))
+        @given(Gen.str(min_length=1, max_length=20))
         def test_string_length(s: str):
             """String length is non-negative"""
             assert len(s) >= 0
@@ -111,7 +105,7 @@ class TestDecoratorAPIExamples:
 
         @for_all(
             Gen.dict(
-                Gen.str(min_size=1, max_size=5), Gen.int(min_value=0, max_value=100)
+                Gen.str(min_length=1, max_length=5), Gen.int(min_value=0, max_value=100)
             )
         )
         def test_dictionary_keys_values(d: dict):
@@ -124,7 +118,7 @@ class TestDecoratorAPIExamples:
 
         @for_all(
             Gen.dict(
-                Gen.str(min_size=1, max_size=3), Gen.int(), min_size=0, max_size=10
+                Gen.str(min_length=1, max_length=3), Gen.int(), min_size=0, max_size=10
             )
         )
         def test_dictionary_size(d: dict):
@@ -144,6 +138,8 @@ class TestDecoratorAPIExamples:
         def test_mixed_type_property(value):
             """Test properties that work with multiple types"""
             if isinstance(value, (int, float)):
+                if isinstance(value, float):
+                    assume(math.isfinite(value) and not math.isnan(value))
                 assert value == value  # Reflexivity
             elif isinstance(value, str):
                 assert len(value) >= 0
@@ -251,25 +247,9 @@ class TestDecoratorAPIExamples:
             assert x >= 0  # This will fail for negative integers
 
         # This test should fail, demonstrating shrinking
-        if HAS_PYTEST:
-            with pytest.raises(AssertionError):
-                test_failing_property()
-        else:
-            # If pytest is not available, just run the test and expect it to fail
-            try:
-                test_failing_property()
-                # If we get here, the test didn't fail as expected
-                raise AssertionError("Expected AssertionError but test passed")
-            except AssertionError as e:
-                # Check if this is the expected failure or our own assertion
-                if "Expected AssertionError but test passed" in str(e):
-                    raise  # Re-raise our own assertion
-                # Otherwise, this is the expected failure from the property test
-                pass
+        with self.assertRaises(AssertionError):
+            test_failing_property()
 
 
 if __name__ == "__main__":
-    if HAS_PYTEST:
-        pytest.main([__file__])
-    else:
-        unittest.main()
+    unittest.main()

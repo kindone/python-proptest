@@ -36,7 +36,7 @@ from .set import SetGenerator
 from .dict import DictGenerator
 
 # Combinator generators
-from .combinators import (
+from .combinator import (
     OneOfGenerator,
     ElementOfGenerator,
     JustGenerator,
