@@ -712,22 +712,30 @@ class IntGenerator(Generator[int]):
         """Generate shrinking candidates for an integer with recursive shrinking."""
         from python_proptest.core.stream import Stream
 
-        if value == self.min_value:
-            return []
-
         # Use binary search approach similar to dartproptest
         if self.min_value >= 0:
             # Range is entirely non-negative: shrink towards min_value
+            if value == self.min_value:
+                return []  # Already at minimum, can't shrink further
             return self._binary_search_towards_min(
                 value - self.min_value, self.min_value
             )
         elif self.max_value <= 0:
             # Range is entirely non-positive: shrink towards max_value
+            if value == self.max_value:
+                return []  # Already at maximum (least negative), can't shrink further
             return self._binary_search_towards_max(
                 value - self.max_value, self.max_value
             )
         else:
             # Range crosses zero: shrink towards 0
+            # For negative numbers, smaller negatives are more complex, so we should
+            # shrink towards 0 even if at min_value boundary
+            # For positive numbers, larger positives are more complex, so we should
+            # shrink towards 0 even if at max_value boundary
+            # Only 0 itself cannot shrink further
+            if value == 0:
+                return []  # Already at 0, can't shrink further
             return self._binary_search_towards_zero(value)
 
     def _binary_search_towards_zero(self, value: int) -> List[Shrinkable[int]]:
@@ -746,6 +754,7 @@ class IntGenerator(Generator[int]):
             return shrinks
         else:
             # For negative numbers, prioritize 0, then use binary search for (value, 0)
+            # This matches dartproptest's _binarySearchTowardsZero behavior
             shrinks = [Shrinkable(0)]
             # Only recurse if value < -1 (so range (value, 0] has room to shrink)
             if value < -1:
@@ -871,8 +880,9 @@ class IntGenerator(Generator[int]):
     ) -> List[Shrinkable[int]]:
         """
         Generate shrinks for a negative integer range using binary search.
+        Matches cppproptest's genneg implementation.
         Works on half-open range (min_val, max_val] to avoid duplicates.
-        Note: Uses _gen_pos for both halves (as per dartproptest implementation).
+        Note: Uses _gen_neg recursively for both halves (as per cppproptest implementation).
         """
         from python_proptest.core.stream import Stream
 
@@ -880,10 +890,19 @@ class IntGenerator(Generator[int]):
         if min_val + 1 >= max_val:
             return []  # No more shrinking possible
 
-        # Calculate midpoint, ensuring it rounds towards max correctly
+        # Calculate midpoint, matching cppproptest's formula:
+        # mid = min/2 + max/2 + ((min % 2 != 0 && max % 2 != 0) ? -1 : 0)
+        # Note: C++ integer division truncates towards 0, Python's // truncates towards -inf
+        # So we need to use math.floor for negative numbers to match C++ behavior
+        import math
+        def cpp_div(a, b):
+            """Simulate C++ integer division (truncates towards 0)"""
+            result = a / b
+            return int(result) if result >= 0 else int(math.ceil(result))
+        
         mid = (
-            ((min_val - 1) // 2 if min_val < 0 else min_val // 2)
-            + ((max_val - 1) // 2 if max_val < 0 else max_val // 2)
+            cpp_div(min_val, 2)
+            + cpp_div(max_val, 2)
             + (-1 if min_val % 2 != 0 and max_val % 2 != 0 else 0)
         )
 
@@ -904,33 +923,33 @@ class IntGenerator(Generator[int]):
                     return [Shrinkable(final_value)]
             return []
 
-        # Recursively generate shrinks: prioritize midpoint, then lower half, then upper half
-        # Note: _gen_neg uses _gen_pos for both halves (as per dartproptest implementation)
-        # Ranges are disjoint: (min_val, mid] and (mid, max_val] when using _gen_pos semantics
+        # midpoint with child from genneg(mid, max), then genneg(min, mid)
+        # This gives: midpoint, then its recursive children (from upper half), then lower half
         mid_value = mid + offset
         shrinks = []
+        
+        # First: midpoint with recursive shrinks from upper half genneg(mid, max)
         if self.min_value <= mid_value <= self.max_value:
             # Create recursive shrinkable for midpoint
-            # Range [min_val, mid) is disjoint from [mid, max_val), so no duplicates
-            # Only recurse if the range will actually shrink (mid > min_val + 1)
-            if min_val < mid < max_val and (mid - min_val) > 1:
+            # The child comes from genneg(mid, max) - the upper half
+            # Only recurse if the range will actually shrink (max_val > mid + 1)
+            if mid < max_val and (max_val - mid) > 1:
 
                 def make_mid_shrinks():
-                    mid_shrinks = self._gen_pos(min_val, mid, offset)
+                    # Child comes from genneg(mid, max) - upper half
+                    mid_shrinks = self._gen_neg(mid, max_val, offset)
                     return Stream.many(mid_shrinks) if mid_shrinks else Stream.empty()
 
                 shrinks.append(Shrinkable(mid_value, make_mid_shrinks))
-            elif min_val < mid < max_val:
-                # Mid is min_val + 1, just add it without recursion
+            elif mid < max_val:
+                # Mid is max_val - 1, just add it without recursion
                 shrinks.append(Shrinkable(mid_value))
-
-        # Add shrinks from upper half [mid, max_val) - disjoint from [min_val, mid)
-        # Only recurse if the range will actually shrink (max_val > mid + 1)
-        if mid < max_val:
-            if (max_val - mid) > 1:
-                upper_shrinks = self._gen_pos(mid, max_val, offset)
-                shrinks.extend(upper_shrinks)
-            # If max_val == mid + 1, the range [mid, max_val) is empty, so nothing to add
+        
+        # Then: lower half genneg(min, mid)
+        # Only recurse if the range will actually shrink (mid > min_val + 1)
+        if min_val < mid and (mid - min_val) > 1:
+            lower_shrinks = self._gen_neg(min_val, mid, offset)
+            shrinks.extend(lower_shrinks)
 
         return shrinks
 
