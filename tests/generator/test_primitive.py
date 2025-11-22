@@ -164,16 +164,14 @@ class TestPrimitive(unittest.TestCase):
             assert min_length <= len(shrinkable.value) <= max_length
 
             # Check shrinks
-            seen_values = set()
+            # Note: With new membership-wise shrinking, the same value can appear
+            # multiple times in the shrink tree via different paths (e.g., "ab" can
+            # come from "abc" by removing "c", or from "abd" by removing "d").
+            # This is correct behavior, so we only check length, not uniqueness.
+            def assert_length(shr: Shrinkable):
+                assert min_length <= len(shr.value) <= max_length
 
-            def assert_length_and_unique(shr: Shrinkable):
-                # Check for uniqueness
-                assert (
-                    shr.value not in seen_values
-                ), f"Duplicate value {shr.value!r} found"
-                seen_values.add(shr.value)
-
-            exhaustive_traversal(shrinkable, 5, assert_length_and_unique)
+            exhaustive_traversal(shrinkable, 5, assert_length)
 
     def test_string_generator_empty_string(self):
         """Test string generator with empty string range."""

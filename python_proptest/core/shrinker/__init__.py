@@ -58,10 +58,21 @@ class Shrinkable(Generic[T]):
     def concat(
         self, shrink_func: Callable[["Shrinkable[T]"], Stream["Shrinkable[T]"]]
     ) -> "Shrinkable[T]":
-        """Add shrinking candidates that depend on the current value."""
+        """
+        Add shrinking candidates that depend on the current value.
+        
+        Matches cppproptest's concat behavior:
+        - Recursively applies concat to each shrink in the stream
+        - Concatenates the result of shrink_func(self) to the stream
+        """
 
         def combined_shrinks() -> Stream["Shrinkable[T]"]:
-            return self.shrinks().concat(shrink_func(self))
+            # Transform each shrink in the current stream by recursively applying concat
+            transformed_shrinks = self.shrinks().map(
+                lambda shrink: shrink.concat(shrink_func)
+            )
+            # Concatenate the result of shrink_func(self) to the transformed stream
+            return transformed_shrinks.concat(shrink_func(self))
 
         return Shrinkable(self.value, combined_shrinks)
 

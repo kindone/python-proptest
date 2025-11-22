@@ -131,23 +131,25 @@ class TestShrinkerComprehensive(unittest.TestCase):
         shr1 = shr0.concat(lambda parent: Stream.one(Shrinkable(parent.value + 5)))
         assert serialize_shrinkable(shr1) == '{"value":100,"shrinks":[{"value":105}]}'
 
-        # Test 2: With existing shrinks - concat ADDS to existing shrinks
+        # Test 2: With existing shrinks - concat recursively applies to each shrink
+        # (matching cppproptest behavior)
         # The function is applied to the parent (2), adding 2+5=7 to the existing shrinks
+        # AND recursively applied to each existing shrink (0->5, 1->6)
         shr0 = gen_shrinkable_21()
         assert (
             serialize_shrinkable(shr0)
             == '{"value":2,"shrinks":[{"value":0},{"value":1}]}'
         )
         shr1 = shr0.concat(lambda parent: Stream.one(Shrinkable(parent.value + 5)))
-        # Existing shrinks [0, 1] + new shrink [7] = [0, 1, 7]
-        expected = '{"value":2,"shrinks":[{"value":0},{"value":1},{"value":7}]}'
+        # Existing shrinks [0, 1] with concat applied recursively: [0->5, 1->6] + new shrink [7]
+        expected = '{"value":2,"shrinks":[{"value":0,"shrinks":[{"value":5}]},{"value":1,"shrinks":[{"value":6}]},{"value":7}]}'
         assert serialize_shrinkable(shr1) == expected
 
         # Test 3: Complex case - same behavior
         shr = gen_shrinkable_40213()
         shr2 = shr.concat(lambda parent: Stream.one(Shrinkable(parent.value + 1)))
-        # Existing shrinks [0, 2->1, 3] + new shrink [5] = [0, 2->1, 3, 5]
-        expected = '{"value":4,"shrinks":[{"value":0},{"value":2,"shrinks":[{"value":1}]},{"value":3},{"value":5}]}'
+        # Existing shrinks [0, 2->1, 3] with concat applied recursively: [0->1, 2->1->2, 3->4] + new shrink [5]
+        expected = '{"value":4,"shrinks":[{"value":0,"shrinks":[{"value":1}]},{"value":2,"shrinks":[{"value":1,"shrinks":[{"value":2}]},{"value":3}]},{"value":3,"shrinks":[{"value":4}]},{"value":5}]}'
         assert serialize_shrinkable(shr2) == expected
 
     def test_shrinkable_and_then_static(self):
