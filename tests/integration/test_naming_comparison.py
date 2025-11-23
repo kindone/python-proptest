@@ -13,7 +13,7 @@ try:
 except ImportError:
     HAS_PYTEST = False
 
-from python_proptest import Gen, for_all, integers, run_for_all
+from python_proptest import Gen, for_all, run_for_all
 
 
 class TestNamingComparison(unittest.TestCase):
@@ -22,17 +22,17 @@ class TestNamingComparison(unittest.TestCase):
     def test_decorator_based_approach(self):
         """Test decorator-based @for_all approach (Recommended)."""
 
-        @for_all(integers(), integers())
+        @for_all(Gen.int(), Gen.int())
         def test_addition_commutativity(x: int, y: int):
             """Test that addition is commutative: x + y = y + x"""
             assert x + y == y + x
 
-        @for_all(integers(), integers(), integers())
+        @for_all(Gen.int(), Gen.int(), Gen.int())
         def test_addition_associativity(x: int, y: int, z: int):
             """Test that addition is associative: (x + y) + z = x + (y + z)"""
             assert (x + y) + z == x + (y + z)
 
-        @for_all(integers())
+        @for_all(Gen.int())
         def test_multiplication_by_zero(x: int):
             """Test that multiplying by zero gives zero: x * 0 = 0"""
             assert x * 0 == 0
@@ -64,7 +64,7 @@ class TestNamingComparison(unittest.TestCase):
 
         # Decorator approach
         @for_all(
-            integers(min_value=1, max_value=10), integers(min_value=1, max_value=10)
+            Gen.int(min_value=1, max_value=10), Gen.int(min_value=1, max_value=10)
         )
         def decorator_test(x: int, y: int):
             assert x + y > 0
@@ -87,7 +87,7 @@ class TestNamingComparison(unittest.TestCase):
         """Test examples that demonstrate when to use each approach."""
 
         # Use @for_all for complex assertions with multiple conditions
-        @for_all(integers(), integers())
+        @for_all(Gen.int(), Gen.int())
         def complex_assertion_test(x: int, y: int):
             """Complex test with multiple assertions - perfect for @for_all"""
             # Test multiple properties of addition and multiplication

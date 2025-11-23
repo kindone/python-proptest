@@ -181,6 +181,7 @@ from .list import (
     shrink_array_length,
 )
 from .pair import shrink_pair
+from .tuple import shrink_tuple
 
 # Import legacy classes and functions from shrinker.py for backward compatibility
 # We use importlib to load shrinker.py directly since there's a naming conflict
@@ -251,6 +252,7 @@ __all__ = [
     "shrink_set",
     "shrink_dict",
     "shrink_pair",
+    "shrink_tuple",
     "shrinkable_array",
     "shrink_membership_wise",
     "shrink_element_wise",

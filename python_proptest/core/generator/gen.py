@@ -335,31 +335,25 @@ class Gen:
 
     @staticmethod
     def tuple(*generators):
-        """Create a generator that generates tuples from multiple generators."""
+        """Create a generator that generates tuples from multiple generators.
+        
+        Uses shrink_tuple for recursive shrinking of all elements, matching cppproptest.
+        """
         if not generators:
             raise ValueError("At least one generator must be provided")
 
-        def generate(rng: Random) -> Shrinkable[tuple]:
-            values = []
-            shrinks = []
-            for gen in generators:
-                shrinkable = gen.generate(rng)
-                values.append(shrinkable.value)
-                shrinks.append(shrinkable)
-
-            # Create shrinks for the tuple
-            tuple_shrinks = []
-            for i, shrink in enumerate(shrinks):
-                for shr in shrink.shrinks().to_list():
-                    new_values = values.copy()
-                    new_values[i] = shr.value
-                    tuple_shrinks.append(Shrinkable(tuple(new_values)))
-
-            return Shrinkable(tuple(values), lambda: Stream.many(tuple_shrinks))
+        from ..shrinker.tuple import shrink_tuple
 
         class TupleGenerator(Generator[tuple]):
             def generate(self, rng: Random) -> Shrinkable[tuple]:
-                return generate(rng)
+                # Generate shrinkables for each element
+                shrinkables = []
+                for gen in generators:
+                    shrinkable = gen.generate(rng)
+                    shrinkables.append(shrinkable)
+                
+                # Use shrink_tuple to create a shrinkable tuple with recursive shrinking
+                return shrink_tuple(shrinkables)
 
         return TupleGenerator()
 
