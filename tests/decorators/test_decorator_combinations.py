@@ -1,6 +1,6 @@
 import unittest
 
-from python_proptest import Gen, example, for_all, given, settings
+from python_proptest import Gen, example, for_all, settings
 
 
 class TestDecoratorCombinations(unittest.TestCase):
@@ -33,10 +33,10 @@ class TestDecoratorCombinations(unittest.TestCase):
         assert len(seen) == 6
         assert 1 in seen  # example ran
 
-    def test_given_alias_with_example_and_settings(self):
+    def test_for_all_with_example_and_settings(self):
         hits = []
 
-        @given(Gen.int())
+        @for_all(Gen.int())
         @example(7)
         @settings(num_runs=8, seed=789)
         def prop(x: int):
@@ -99,8 +99,8 @@ class TestDecoratorCombinations(unittest.TestCase):
         assert len(c.seen) == 6
         assert 13 in c.seen
 
-    def test_strategy_and_generator_mix(self):
-        # Using Strategy wrapper for int and raw generator for string
+    def test_generator_mix(self):
+        # Using generators with filters
         ints = Gen.int().filter(lambda x: True)
         strs = Gen.str(min_length=0, max_length=3)
         seen = []

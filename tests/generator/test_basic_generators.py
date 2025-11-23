@@ -6,15 +6,8 @@ import unittest
 
 from python_proptest import (
     Gen,
-    dictionaries,
-    floats,
     for_all,
-    integers,
-    just,
-    lists,
-    one_of,
     run_for_all,
-    text,
 )
 
 

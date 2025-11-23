@@ -155,16 +155,6 @@ def for_all(
                                 return True  # Skip this test case
                             raise  # Re-raise other exceptions
 
-                    # Extract generators from Strategy objects if needed
-                    actual_generators = []
-                    for gen in generators:
-                        if isinstance(gen, Strategy):
-                            # It's a Strategy object
-                            actual_generators.append(gen.generator)
-                        else:
-                            # It's already a Generator
-                            actual_generators.append(gen)
-
                     # Apply settings overrides if provided
                     override_num_runs = existing_settings.get("num_runs", num_runs)
                     override_seed = existing_settings.get("seed", seed)
@@ -178,7 +168,7 @@ def for_all(
                     # Execute matrix cases first (do not count toward num_runs)
                     if existing_matrix:
                         _run_matrix_cases(func, args[0], existing_matrix)
-                    property_test.for_all(*actual_generators)
+                    property_test.for_all(*generators)
                     return None  # Test frameworks expect test functions to return
                     # None
                 except PropertyTestError as e:
@@ -219,16 +209,6 @@ def for_all(
                                 return True  # Skip this test case
                             raise  # Re-raise other exceptions
 
-                    # Extract generators from Strategy objects if needed
-                    actual_generators = []
-                    for gen in generators:
-                        if isinstance(gen, Strategy):
-                            # It's a Strategy object
-                            actual_generators.append(gen.generator)
-                        else:
-                            # It's already a Generator
-                            actual_generators.append(gen)
-
                     # Apply settings overrides if provided
                     override_num_runs = existing_settings.get("num_runs", num_runs)
                     override_seed = existing_settings.get("seed", seed)
@@ -242,7 +222,7 @@ def for_all(
                     # Execute matrix cases first (do not count toward num_runs)
                     if existing_matrix:
                         _run_matrix_cases(func, None, existing_matrix)
-                    property_test.for_all(*actual_generators)
+                    property_test.for_all(*generators)
                     return None  # Pytest expects test functions to return None
                 except PropertyTestError as e:
                     # Re-raise as AssertionError for better test framework integration
@@ -274,8 +254,6 @@ def for_all(
     return decorator
 
 
-# Alias for Hypothesis compatibility
-given = for_all
 
 
 def example(*values: Any):
@@ -464,110 +442,3 @@ def run_property_test(func: Callable) -> Any:
     return func()
 
 
-# Utility for creating custom strategies
-class Strategy:
-    """Base class for custom strategies."""
-
-    def __init__(self, generator: Generator[Any]):
-        self.generator = generator
-
-    def map(self, func: Callable[[Any], Any]) -> "Strategy":
-        """Map a function over this strategy."""
-        return Strategy(self.generator.map(func))
-
-    def filter(self, predicate: Callable[[Any], bool]) -> "Strategy":
-        """Filter this strategy with a predicate."""
-        return Strategy(self.generator.filter(predicate))
-
-    def flatmap(self, func: Callable[[Any], "Strategy"]) -> "Strategy":
-        """Flat map a function over this strategy."""
-
-        def generator_func(value):
-            strategy = func(value)
-            return strategy.generator
-
-        return Strategy(self.generator.flat_map(generator_func))
-
-
-# Convenience functions for creating strategies
-def integers(min_value: int = None, max_value: int = None) -> Strategy:
-    """Create an integer strategy."""
-    from .generator import Gen
-
-    # Only pass non-None values to avoid overriding defaults
-    kwargs = {}
-    if min_value is not None:
-        kwargs["min_value"] = min_value
-    if max_value is not None:
-        kwargs["max_value"] = max_value
-    return Strategy(Gen.int(**kwargs))
-
-
-def floats(min_value: float = None, max_value: float = None) -> Strategy:
-    """Create a float strategy."""
-    from .generator import Gen
-
-    # Only pass non-None values to avoid overriding defaults
-    kwargs = {}
-    if min_value is not None:
-        kwargs["min_value"] = min_value
-    if max_value is not None:
-        kwargs["max_value"] = max_value
-    return Strategy(Gen.float(**kwargs))
-
-
-def text(min_size: int = 0, max_size: int = None, alphabet: str = None) -> Strategy:
-    """Create a text strategy."""
-    from .generator import Gen
-
-    # Only pass non-None values to avoid overriding defaults
-    kwargs = {}
-    if min_size is not None:
-        kwargs["min_length"] = min_size
-    if max_size is not None:
-        kwargs["max_length"] = max_size
-    # For now, ignore alphabet parameter
-    return Strategy(Gen.str(**kwargs))  # type: ignore
-
-
-def lists(elements: Strategy, min_size: int = 0, max_size: int = None) -> Strategy:
-    """Create a list strategy."""
-    from .generator import Gen
-
-    # Only pass non-None values to avoid overriding defaults
-    kwargs = {}
-    if min_size is not None:
-        kwargs["min_length"] = min_size
-    if max_size is not None:
-        kwargs["max_length"] = max_size
-    return Strategy(Gen.list(elements.generator, **kwargs))
-
-
-def dictionaries(
-    keys: Strategy, values: Strategy, min_size: int = 0, max_size: int = None
-) -> Strategy:
-    """Create a dictionary strategy."""
-    from .generator import Gen
-
-    # Only pass non-None values to avoid overriding defaults
-    kwargs = {}
-    if min_size is not None:
-        kwargs["min_size"] = min_size
-    if max_size is not None:
-        kwargs["max_size"] = max_size
-    return Strategy(Gen.dict(keys.generator, values.generator, **kwargs))
-
-
-def one_of(*strategies: Strategy) -> Strategy:
-    """Create a strategy that chooses from multiple strategies."""
-    from .generator import Gen
-
-    generators = [s.generator for s in strategies]
-    return Strategy(Gen.one_of(*generators))
-
-
-def just(value: Any) -> Strategy:
-    """Create a strategy that always returns the same value."""
-    from .generator import Gen
-
-    return Strategy(Gen.just(value))

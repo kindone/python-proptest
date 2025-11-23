@@ -8,7 +8,7 @@ for combining and transforming generators.
 import random
 import unittest
 
-from python_proptest import Gen, PropertyTestError, for_all, integers, run_for_all
+from python_proptest import Gen, PropertyTestError, for_all, run_for_all
 
 
 class TestCombinators(unittest.TestCase):
@@ -220,7 +220,7 @@ class TestCombinators(unittest.TestCase):
     def test_combinator_with_property_testing(self):
         """Test combinators with property testing."""
 
-        @for_all(integers(min_value=1, max_value=10).map(lambda x: f"Number: {x}"))
+        @for_all(Gen.int(min_value=1, max_value=10).map(lambda x: f"Number: {x}"))
         def test_property(self, x: str):
             assert isinstance(x, str) and x.startswith("Number: ")
 
@@ -229,7 +229,7 @@ class TestCombinators(unittest.TestCase):
     def test_combinator_with_failing_property(self):
         """Test combinators with failing property."""
 
-        @for_all(integers(min_value=0, max_value=100).map(lambda x: x * 2))
+        @for_all(Gen.int(min_value=0, max_value=100).map(lambda x: x * 2))
         def test_failing_property(self, x: int):
             assert x < 50  # This will fail for x >= 50
 
@@ -294,7 +294,7 @@ class TestCombinators(unittest.TestCase):
         """Test combinator performance with large number of runs."""
 
         @for_all(
-            integers(min_value=1, max_value=100).map(lambda x: f"Number: {x}"),
+            Gen.int(min_value=1, max_value=100).map(lambda x: f"Number: {x}"),
             num_runs=1000,
         )
         def test_property(self, x: str):

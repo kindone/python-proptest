@@ -7,7 +7,7 @@ using both unittest and pytest frameworks.
 
 import unittest
 import pytest
-from python_proptest import for_all, Gen, integers, text
+from python_proptest import for_all, Gen
 
 
 # =============================================================================
@@ -17,28 +17,28 @@ from python_proptest import for_all, Gen, integers, text
 class TestMathPropertiesUnittest(unittest.TestCase):
     """Mathematical properties using unittest framework."""
 
-    @for_all(integers(), integers())
+    @for_all(Gen.int(), Gen.int())
     def test_addition_commutativity(self, x: int, y: int):
         """Test that addition is commutative."""
         result1 = x + y
         result2 = y + x
         self.assertEqual(result1, result2)
 
-    @for_all(integers(), integers(), integers())
+    @for_all(Gen.int(), Gen.int(), Gen.int())
     def test_multiplication_associativity(self, x: int, y: int, z: int):
         """Test that multiplication is associative."""
         result1 = (x * y) * z
         result2 = x * (y * z)
         self.assertEqual(result1, result2)
 
-    @for_all(integers(), integers(), integers())
+    @for_all(Gen.int(), Gen.int(), Gen.int())
     def test_distributive_property(self, x: int, y: int, z: int):
         """Test distributive property: x * (y + z) = x * y + x * z."""
         left = x * (y + z)
         right = x * y + x * z
         self.assertEqual(left, right)
 
-    @for_all(text(), text())
+    @for_all(Gen.str(), Gen.str())
     def test_string_concatenation(self, s1: str, s2: str):
         """Test string concatenation properties."""
         result = s1 + s2
@@ -46,7 +46,7 @@ class TestMathPropertiesUnittest(unittest.TestCase):
         self.assertTrue(result.startswith(s1))
         self.assertTrue(result.endswith(s2))
 
-    @for_all(integers(min_value=1, max_value=100))
+    @for_all(Gen.int(min_value=1, max_value=100))
     def test_positive_multiplication(self, x: int):
         """Test properties of positive number multiplication."""
         self.assertGreater(x * 2, x)
@@ -61,22 +61,22 @@ class TestMathPropertiesUnittest(unittest.TestCase):
 class TestMathPropertiesPytest:
     """Mathematical properties using pytest framework."""
 
-    @for_all(integers(), integers())
+    @for_all(Gen.int(), Gen.int())
     def test_addition_commutativity(self, x: int, y: int):
         """Test that addition is commutative."""
         assert x + y == y + x
 
-    @for_all(integers(), integers(), integers())
+    @for_all(Gen.int(), Gen.int(), Gen.int())
     def test_multiplication_associativity(self, x: int, y: int, z: int):
         """Test that multiplication is associative."""
         assert (x * y) * z == x * (y * z)
 
-    @for_all(integers(), integers(), integers())
+    @for_all(Gen.int(), Gen.int(), Gen.int())
     def test_distributive_property(self, x: int, y: int, z: int):
         """Test distributive property: x * (y + z) = x * y + x * z."""
         assert x * (y + z) == x * y + x * z
 
-    @for_all(text(), text())
+    @for_all(Gen.str(), Gen.str())
     def test_string_concatenation(self, s1: str, s2: str):
         """Test string concatenation properties."""
         result = s1 + s2
@@ -84,7 +84,7 @@ class TestMathPropertiesPytest:
         assert result.startswith(s1)
         assert result.endswith(s2)
 
-    @for_all(integers(min_value=1, max_value=100))
+    @for_all(Gen.int(min_value=1, max_value=100))
     def test_positive_multiplication(self, x: int):
         """Test properties of positive number multiplication."""
         assert x * 2 > x
@@ -99,7 +99,7 @@ class TestMathPropertiesPytest:
 class TestMixedAssertions(unittest.TestCase):
     """Test mixing unittest assertions with regular assertions."""
 
-    @for_all(integers(), integers())
+    @for_all(Gen.int(), Gen.int())
     def test_mixed_assertions(self, x: int, y: int):
         """Test mixing different assertion styles."""
         # Unittest assertions
@@ -124,7 +124,7 @@ class TestMixedAssertions(unittest.TestCase):
 class TestAdvancedUnittest(unittest.TestCase):
     """Advanced unittest examples with complex properties."""
 
-    @for_all(integers(), integers())
+    @for_all(Gen.int(), Gen.int())
     def test_absolute_value_properties(self, x: int, y: int):
         """Test properties of absolute value."""
         abs_x = abs(x)
@@ -135,7 +135,7 @@ class TestAdvancedUnittest(unittest.TestCase):
         self.assertEqual(abs_x, abs(-x))
         self.assertEqual(abs_y, abs(-y))
 
-    @for_all(text(), integers(min_value=0, max_value=10))
+    @for_all(Gen.str(), Gen.int(min_value=0, max_value=10))
     def test_string_repetition(self, s: str, n: int):
         """Test string repetition properties."""
         repeated = s * n
@@ -145,7 +145,7 @@ class TestAdvancedUnittest(unittest.TestCase):
             self.assertTrue(repeated.startswith(s))
             self.assertTrue(repeated.endswith(s))
 
-    @for_all(integers(min_value=0, max_value=100), integers(min_value=1, max_value=100))
+    @for_all(Gen.int(min_value=0, max_value=100), Gen.int(min_value=1, max_value=100))
     def test_modulo_properties(self, x: int, y: int):
         """Test modulo operation properties."""
         remainder = x % y

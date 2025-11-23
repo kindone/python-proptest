@@ -941,7 +941,7 @@ class TestComplexCombinatorChains(unittest.TestCase):
         """Test string generator with filter and map maintains conditions."""
         rng = random.Random(42)
         gen = (
-            Gen.str(min_length=5, max_length=15)
+            Gen.str(min_length=5, max_length=10)
             .filter(lambda s: len(s) >= 8)  # At least 8 characters
             .map(lambda s: s.upper())        # Convert to uppercase
         )

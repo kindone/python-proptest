@@ -41,7 +41,6 @@ classifiers = [
     "Topic :: Software Development :: Quality Assurance",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Framework :: Pytest",
-    "Framework :: Hypothesis",
 ]
 
 dependencies = []

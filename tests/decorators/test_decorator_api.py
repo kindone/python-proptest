@@ -10,19 +10,11 @@ import unittest
 from python_proptest import (
     Gen,
     assume,
-    dictionaries,
     example,
-    floats,
     for_all,
-    given,
-    integers,
-    just,
-    lists,
     note,
-    one_of,
     run_property_test,
     settings,
-    text,
 )
 
 
@@ -42,13 +34,13 @@ class TestDecoratorAPI(unittest.TestCase):
         # Run the test
         test_addition_commutativity()
 
-    def test_decorator_with_strategies(self):
-        """Test @for_all decorator with Strategy objects."""
+    def test_decorator_with_generators(self):
+        """Test @for_all decorator with Generator objects."""
 
         @for_all(
-            integers(min_value=1, max_value=100),
-            integers(min_value=1, max_value=100),
-            integers(min_value=1, max_value=100),
+            Gen.int(min_value=1, max_value=100),
+            Gen.int(min_value=1, max_value=100),
+            Gen.int(min_value=1, max_value=100),
         )
         def test_multiplication_associativity(x: int, y: int, z: int):
             """Test that multiplication is associative."""
@@ -60,7 +52,7 @@ class TestDecoratorAPI(unittest.TestCase):
     def test_decorator_with_mixed_types(self):
         """Test @for_all decorator with mixed types."""
 
-        @for_all(integers(), text(min_size=1, max_size=10))
+        @for_all(Gen.int(), Gen.str(min_length=1, max_length=10))
         def test_string_length_property(x: int, s: str):
             """Test string length property."""
             assert len(s) >= 0
@@ -71,9 +63,9 @@ class TestDecoratorAPI(unittest.TestCase):
         test_string_length_property()
 
     def test_decorator_with_lists(self):
-        """Test @for_all decorator with list strategies."""
+        """Test @for_all decorator with list generators."""
 
-        @for_all(lists(integers(), min_size=0, max_size=10))
+        @for_all(Gen.list(Gen.int(), min_length=0, max_length=10))
         def test_list_sorting(lst: list):
             """Test list sorting properties."""
             if len(lst) <= 1:
@@ -89,11 +81,11 @@ class TestDecoratorAPI(unittest.TestCase):
         test_list_sorting()
 
     def test_decorator_with_dictionaries(self):
-        """Test @for_all decorator with dictionary strategies."""
+        """Test @for_all decorator with dictionary generators."""
 
         @for_all(
-            dictionaries(
-                text(min_size=1, max_size=5), integers(), min_size=0, max_size=5
+            Gen.dict(
+                Gen.str(min_length=1, max_length=5), Gen.int(), min_size=0, max_size=5
             )
         )
         def test_dictionary_properties(d: dict):
@@ -108,9 +100,9 @@ class TestDecoratorAPI(unittest.TestCase):
         test_dictionary_properties()
 
     def test_decorator_with_one_of(self):
-        """Test @for_all decorator with one_of strategy."""
+        """Test @for_all decorator with one_of generator."""
 
-        @for_all(one_of(integers(), floats(), text()))
+        @for_all(Gen.one_of(Gen.int(), Gen.float(), Gen.str()))
         def test_mixed_type_property(value):
             """Test property with mixed types."""
             assert value is not None
@@ -122,7 +114,7 @@ class TestDecoratorAPI(unittest.TestCase):
     def test_decorator_with_example(self):
         """Test @for_all decorator with @example."""
 
-        @for_all(integers())
+        @for_all(Gen.int())
         @example(42)
         @example(-1)
         def test_integer_properties(x: int):
@@ -136,7 +128,7 @@ class TestDecoratorAPI(unittest.TestCase):
     def test_decorator_with_settings(self):
         """Test @for_all decorator with @settings."""
 
-        @for_all(integers())
+        @for_all(Gen.int())
         @settings(num_runs=50, seed=42)
         def test_with_custom_settings(x: int):
             """Test with custom settings."""
@@ -148,7 +140,7 @@ class TestDecoratorAPI(unittest.TestCase):
     def test_decorator_with_assume(self):
         """Test @for_all decorator with assume."""
 
-        @for_all(integers(), integers())
+        @for_all(Gen.int(), Gen.int())
         def test_division_property(x: int, y: int):
             """Test division property with assumption."""
             assume(y != 0)  # Skip cases where y is 0
@@ -163,7 +155,7 @@ class TestDecoratorAPI(unittest.TestCase):
     def test_decorator_with_note(self):
         """Test @for_all decorator with note."""
 
-        @for_all(integers())
+        @for_all(Gen.int())
         def test_with_note(x: int):
             """Test with note for debugging."""
             note(f"Testing with x = {x}")
@@ -175,7 +167,7 @@ class TestDecoratorAPI(unittest.TestCase):
     def test_decorator_error_handling(self):
         """Test error handling in decorator API."""
 
-        @for_all(integers())
+        @for_all(Gen.int())
         def test_failing_property(x: int):
             """Test that fails for certain values."""
             assert x < 100  # This will fail for x >= 100
@@ -189,7 +181,7 @@ class TestDecoratorAPI(unittest.TestCase):
 
         with self.assertRaises(ValueError):
 
-            @for_all(integers(), integers())
+            @for_all(Gen.int(), Gen.int())
             def test_wrong_arg_count(x: int):
                 """Function with wrong argument count."""
                 assert x > 0
@@ -197,7 +189,7 @@ class TestDecoratorAPI(unittest.TestCase):
     def test_run_property_test_function(self):
         """Test the run_property_test utility function."""
 
-        @for_all(integers())
+        @for_all(Gen.int())
         def test_simple_property(x: int):
             """Simple property test."""
             assert x * 0 == 0
@@ -209,7 +201,7 @@ class TestDecoratorAPI(unittest.TestCase):
     def test_decorator_with_complex_function(self):
         """Test decorator with a complex function that would be awkward with lambda."""
 
-        @for_all(lists(integers(), min_size=1, max_size=10))
+        @for_all(Gen.list(Gen.int(), min_length=1, max_length=10))
         def test_list_operations(lst: list):
             """Test complex list operations."""
             # This would be very awkward with lambda syntax
@@ -242,10 +234,10 @@ class TestDecoratorAPI(unittest.TestCase):
         """Test decorator with nested data structures."""
 
         @for_all(
-            lists(
-                dictionaries(text(min_size=1), integers(), min_size=1, max_size=3),
-                min_size=0,
-                max_size=5,
+            Gen.list(
+                Gen.dict(Gen.str(min_length=1), Gen.int(), min_size=1, max_size=3),
+                min_length=0,
+                max_length=5,
             )
         )
         def test_nested_structures(data: list):
@@ -265,33 +257,33 @@ class TestDecoratorAPI(unittest.TestCase):
         test_nested_structures()
 
     @for_all(
-        integers(min_value=1, max_value=100)
+        Gen.int(min_value=1, max_value=100)
         .filter(lambda x: x % 2 == 0)
         .map(lambda x: x * 2)
     )
-    def test_decorator_with_custom_strategy_chain(self, x: int):
-        """Test decorator with chained strategies."""
+    def test_decorator_with_custom_generator_chain(self, x: int):
+        """Test decorator with chained generators."""
 
-        """Test custom strategy chain."""
+        """Test custom generator chain."""
         assert x > 0
         assert x % 4 == 0  # Even number * 2 is divisible by 4
         assert isinstance(x, int)
 
-    @for_all(integers(min_value=1, max_value=100))
+    @for_all(Gen.int(min_value=1, max_value=100))
     def test_for_all_decorator(self, x: int):
-        """Test custom strategy chain."""
+        """Test custom generator chain."""
         assert x >= 1
         assert x <= 100
         assert isinstance(x, int)
 
 
-class TestStrategyAPI(unittest.TestCase):
-    """Test the Strategy API."""
+class TestGeneratorAPI(unittest.TestCase):
+    """Test the Generator API with map/filter/flat_map."""
 
-    def test_strategy_map(self):
-        """Test Strategy.map method."""
-        strategy = integers(min_value=1, max_value=10)
-        doubled = strategy.map(lambda x: x * 2)
+    def test_generator_map(self):
+        """Test Generator.map method."""
+        generator = Gen.int(min_value=1, max_value=10)
+        doubled = generator.map(lambda x: x * 2)
 
         @for_all(doubled)
         def test_doubled_integers(x: int):
@@ -301,10 +293,10 @@ class TestStrategyAPI(unittest.TestCase):
 
         test_doubled_integers()
 
-    def test_strategy_filter(self):
-        """Test Strategy.filter method."""
-        strategy = integers(min_value=1, max_value=20)
-        even_only = strategy.filter(lambda x: x % 2 == 0)
+    def test_generator_filter(self):
+        """Test Generator.filter method."""
+        generator = Gen.int(min_value=1, max_value=20)
+        even_only = generator.filter(lambda x: x % 2 == 0)
 
         @for_all(even_only)
         def test_even_integers(x: int):
@@ -314,16 +306,16 @@ class TestStrategyAPI(unittest.TestCase):
 
         test_even_integers()
 
-    def test_strategy_flatmap(self):
-        """Test Strategy.flatmap method."""
-        strategy = integers(min_value=1, max_value=5)
+    def test_generator_flat_map(self):
+        """Test Generator.flat_map method."""
+        generator = Gen.int(min_value=1, max_value=5)
 
-        def create_list_strategy(n: int):
-            return lists(just(n), min_size=n, max_size=n)
+        def create_list_generator(n: int):
+            return Gen.list(Gen.just(n), min_length=n, max_length=n)
 
-        list_strategy = strategy.flatmap(create_list_strategy)
+        list_generator = generator.flat_map(create_list_generator)
 
-        @for_all(list_strategy)
+        @for_all(list_generator)
         def test_flatmap_result(lst: list):
             assert len(lst) > 0
             assert all(isinstance(x, int) for x in lst)
@@ -331,27 +323,17 @@ class TestStrategyAPI(unittest.TestCase):
 
         test_flatmap_result()
 
-    def test_given_alias_compatibility(self):
-        """Test that @given works as an alias for @for_all (Hypothesis compatibility)."""
-
-        @given(integers(), integers())
-        def test_with_given_alias(x: int, y: int):
-            """Test using @given alias."""
-            assert x + y == y + x
-
-        # Should work identically to @for_all
-        test_with_given_alias()
 
 
 if __name__ == "__main__":
     # Run some examples
     print("Running decorator API examples...")
 
-    @for_all(integers(), integers())
+    @for_all(Gen.int(), Gen.int())
     def example_commutativity(x: int, y: int):
         assert x + y == y + x
 
-    @for_all(lists(integers(), min_size=0, max_size=10))
+    @for_all(Gen.list(Gen.int(), min_length=0, max_length=10))
     def example_list_sorting(lst: list):
         if len(lst) <= 1:
             return

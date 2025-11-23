@@ -5,22 +5,13 @@ A clean, Pythonic property-based testing library with seamless pytest integratio
 """
 
 from .core.decorators import (
-    Strategy,
     assume,
-    dictionaries,
     example,
-    floats,
     for_all,
-    given,
-    integers,
-    just,
-    lists,
     matrix,
     note,
-    one_of,
     run_property_test,
     settings,
-    text,
 )
 from .core.either import Either, Left, Right
 from .core.generator import Gen, Generator
@@ -71,19 +62,10 @@ __all__ = [
     "actionGenOf",
     "statefulProperty",
     "simpleStatefulProperty",
-    "given",
     "example",
     "matrix",
     "settings",
     "assume",
     "note",
     "run_property_test",
-    "Strategy",
-    "integers",
-    "floats",
-    "text",
-    "lists",
-    "dictionaries",
-    "one_of",
-    "just",
 ]

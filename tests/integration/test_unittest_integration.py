@@ -7,13 +7,13 @@ unittest.TestCase classes.
 
 import unittest
 
-from python_proptest import Gen, for_all, integers, text
+from python_proptest import Gen, for_all
 
 
 class TestUnittestIntegration(unittest.TestCase):
     """Test unittest integration with python-proptest."""
 
-    @for_all(integers(), integers())
+    @for_all(Gen.int(), Gen.int())
     def test_addition_commutativity(self, x: int, y: int):
         """Test that addition is commutative using unittest assertions."""
         result1 = x + y
@@ -24,7 +24,7 @@ class TestUnittestIntegration(unittest.TestCase):
             f"Addition not commutative: {x} + {y} = {result1}, {y} + {x} = {result2}",
         )
 
-    @for_all(integers(), integers(), integers())
+    @for_all(Gen.int(), Gen.int(), Gen.int())
     def test_multiplication_associativity(self, x: int, y: int, z: int):
         """Test that multiplication is associative using unittest assertions."""
         result1 = (x * y) * z
@@ -35,7 +35,7 @@ class TestUnittestIntegration(unittest.TestCase):
             f"Multiplication not associative: ({x} * {y}) * {z} = {result1}, {x} * ({y} * {z}) = {result2}",
         )
 
-    @for_all(text(), text())
+    @for_all(Gen.str(), Gen.str())
     def test_string_concatenation(self, s1: str, s2: str):
         """Test string concatenation properties using unittest assertions."""
         result = s1 + s2
@@ -51,7 +51,7 @@ class TestUnittestIntegration(unittest.TestCase):
             result.endswith(s2), f"Result '{result}' does not end with '{s2}'"
         )
 
-    @for_all(integers(min_value=1, max_value=100), integers(min_value=1, max_value=100))
+    @for_all(Gen.int(min_value=1, max_value=100), Gen.int(min_value=1, max_value=100))
     def test_division_properties(self, x: int, y: int):
         """Test division properties using unittest assertions."""
         # Test that x / y * y equals x (for integer division)
@@ -63,7 +63,7 @@ class TestUnittestIntegration(unittest.TestCase):
             f"Division property failed: {x} // {y} * {y} + {x} % {y} = {quotient * y + remainder}, expected {x}",
         )
 
-    @for_all(integers(), integers())
+    @for_all(Gen.int(), Gen.int())
     def test_mixed_assertions(self, x: int, y: int):
         """Test mixing unittest assertions with regular assertions."""
         # Use unittest assertions

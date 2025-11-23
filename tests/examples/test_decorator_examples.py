@@ -11,18 +11,10 @@ import unittest
 from python_proptest import (
     Gen,
     assume,
-    dictionaries,
     example,
-    floats,
     for_all,
-    given,
-    integers,
-    just,
-    lists,
     note,
-    one_of,
     settings,
-    text,
 )
 
 
@@ -55,7 +47,7 @@ class TestDecoratorAPIExamples(unittest.TestCase):
     def test_string_properties(self):
         """Test string properties using decorators."""
 
-        @given(Gen.str(min_length=1, max_length=20))
+        @for_all(Gen.str(min_length=1, max_length=20))
         def test_string_length(s: str):
             """String length is non-negative"""
             assert len(s) >= 0
