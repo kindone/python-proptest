@@ -61,23 +61,37 @@ class FlatMappedGenerator(Generator[U]):
         self.func = func
 
     def generate(self, rng: Random) -> Shrinkable[U]:
+        # Generate first value
         first_shrinkable = self.generator.generate(rng)
+        
+        # Save RNG state after first generation for deterministic regeneration
+        rng_state_after_first = rng.getstate()
+        
+        # Generate second value
         second_generator = self.func(first_shrinkable.value)
         second_shrinkable = second_generator.generate(rng)
 
         def shrink_func() -> Stream[Shrinkable[U]]:
-            # Shrink the second value first
+            # Shrink the second value first (keeping first fixed)
             second_shrinks = [
                 Shrinkable(s.value, lambda: s.shrinks())
                 for s in second_shrinkable.shrinks().to_list()
             ]
 
             # Then shrink the first value and regenerate the second
+            # IMPORTANT: Restore RNG state to ensure deterministic regeneration
+            original_rng_state = rng.getstate()
             first_shrinks = []
-            for first_shrink in first_shrinkable.shrinks().to_list():
-                new_second_gen = self.func(first_shrink.value)
-                new_second_shrink = new_second_gen.generate(rng)
-                first_shrinks.append(new_second_shrink)
+            try:
+                for first_shrink in first_shrinkable.shrinks().to_list():
+                    # Restore RNG state to what it was after first generation
+                    rng.setstate(rng_state_after_first)
+                    new_second_gen = self.func(first_shrink.value)
+                    new_second_shrink = new_second_gen.generate(rng)
+                    first_shrinks.append(new_second_shrink)
+            finally:
+                # Restore original RNG state
+                rng.setstate(original_rng_state)
 
             return Stream.many(second_shrinks + first_shrinks)
 
