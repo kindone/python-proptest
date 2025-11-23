@@ -4,7 +4,7 @@ Shrinker for list-like containers (lists, sets, dicts).
 Matches cppproptest's listlike, set, and map shrinker implementations.
 """
 
-from typing import List, Set, Dict, TypeVar, Generic
+from typing import List, Set, Dict, Tuple, TypeVar, Generic
 from . import Shrinkable
 from .integral import binary_search_shrinkable, shrink_integral
 from python_proptest.core.stream import Stream
@@ -343,7 +343,12 @@ def shrink_dict(
     min_size: int = 0,
 ) -> Shrinkable[Dict[T, U]]:
     """
-    Shrink a dictionary value.
+    Shrink a dictionary value using pair shrinking.
+
+    Matches cppproptest's shrinkMap implementation:
+    - Creates pairs from (key, value) shrinkables
+    - Uses shrinkable_array with both membership-wise and element-wise shrinking
+    - Element-wise shrinking uses pair shrinking, allowing both keys and values to shrink
 
     Args:
         key_shrinkables: List of Shrinkable keys
@@ -352,37 +357,29 @@ def shrink_dict(
 
     Returns:
         A Shrinkable containing the dict and its shrinks.
-        Shrinks both membership-wise and element-wise (values only).
+        Shrinks both membership-wise (removing pairs) and element-wise (shrinking pairs).
     """
+    from .pair import shrink_pair
+    
     # Create pairs of (key, value) shrinkables
-    # For dict shrinking, we shrink values but not keys (to maintain dict structure)
-    # We'll create a list of value shrinkables and shrink them element-wise
-    # while keeping keys fixed
+    # Each pair is a Shrinkable<(key, value)>
+    pair_shrinkables: List[Shrinkable[Tuple[T, U]]] = []
+    for key_shr, value_shr in zip(key_shrinkables, value_shrinkables):
+        pair_shr = shrink_pair(key_shr, value_shr)
+        pair_shrinkables.append(pair_shr)
     
-    # Create initial dict
-    initial_dict = {
-        key_shr.value: value_shr.value
-        for key_shr, value_shr in zip(key_shrinkables, value_shrinkables)
-    }
-    
-    # Shrink by membership (removing key-value pairs)
-    # and by element-wise (shrinking values)
-    # We'll use shrinkable_array on the values, then reconstruct the dict
-    
-    # For membership-wise: remove pairs
-    # For element-wise: shrink values
-    # This is a simplified version - a full implementation would use pair shrinking
-    value_list_shrinkable = shrinkable_array(
-        value_shrinkables, min_size, membership_wise=True, element_wise=True
+    # Use shrinkable_array with both membership-wise and element-wise shrinking
+    # Element-wise shrinking will recursively shrink each pair (both key and value)
+    array_shrinkable = shrinkable_array(
+        pair_shrinkables, min_size, membership_wise=True, element_wise=True
     )
     
-    # Reconstruct dict by pairing with keys
-    def reconstruct_dict(values: List[U]) -> Dict[T, U]:
+    # Convert list of pairs to dictionary
+    def pairs_to_dict(pairs: List[Tuple[T, U]]) -> Dict[T, U]:
         result = {}
-        for i, value in enumerate(values):
-            if i < len(key_shrinkables):
-                result[key_shrinkables[i].value] = value
+        for key, value in pairs:
+            result[key] = value
         return result
     
-    return value_list_shrinkable.map(reconstruct_dict)
+    return array_shrinkable.map(pairs_to_dict)
 
