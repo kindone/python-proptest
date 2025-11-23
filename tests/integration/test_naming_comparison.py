@@ -9,6 +9,7 @@ import unittest
 
 try:
     import pytest
+
     HAS_PYTEST = True
 except ImportError:
     HAS_PYTEST = False
@@ -63,9 +64,7 @@ class TestNamingComparison(unittest.TestCase):
         """Test that both approaches produce equivalent results."""
 
         # Decorator approach
-        @for_all(
-            Gen.int(min_value=1, max_value=10), Gen.int(min_value=1, max_value=10)
-        )
+        @for_all(Gen.int(min_value=1, max_value=10), Gen.int(min_value=1, max_value=10))
         def decorator_test(x: int, y: int):
             assert x + y > 0
             assert x * y > 0

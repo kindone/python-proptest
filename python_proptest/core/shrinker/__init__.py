@@ -60,7 +60,7 @@ class Shrinkable(Generic[T]):
     ) -> "Shrinkable[T]":
         """
         Add shrinking candidates that depend on the current value.
-        
+
         Matches cppproptest's concat behavior:
         - Recursively applies concat to each shrink in the stream
         - Concatenates the result of shrink_func(self) to the stream
@@ -163,63 +163,73 @@ class Shrinkable(Generic[T]):
         return Shrinkable(self.value, limited_shrinks)
 
 
-# Import shrinker functions (must be after Shrinkable definition to avoid circular imports)
-from .integral import (
-    shrink_integral,
-    binary_search_shrinkable,
-)
-from .floating import shrink_float
-from .bool import shrink_bool
-from .string import shrink_string, shrink_unicode_string
-from .list import (
-    shrink_list,
-    shrink_set,
-    shrink_dict,
-    shrinkable_array,
-    shrink_membership_wise,
-    shrink_element_wise,
-    shrink_array_length,
-)
-from .pair import shrink_pair
-from .tuple import shrink_tuple
-
 # Import legacy classes and functions from shrinker.py for backward compatibility
 # We use importlib to load shrinker.py directly since there's a naming conflict
 # (both shrinker.py file and shrinker/ package exist)
 import importlib.util
 import os
 
-_shrinker_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'shrinker.py')
+from .bool import shrink_bool  # noqa: E402
+from .floating import shrink_float  # noqa: E402
+
+# Import shrinker functions (must be after Shrinkable definition to avoid circular imports)
+from .integral import (  # noqa: E402
+    binary_search_shrinkable,
+    shrink_integral,
+)
+from .list import (  # noqa: E402
+    shrink_array_length,
+    shrink_dict,
+    shrink_element_wise,
+    shrink_list,
+    shrink_membership_wise,
+    shrink_set,
+    shrinkable_array,
+)
+from .pair import shrink_pair  # noqa: E402
+from .string import shrink_string, shrink_unicode_string  # noqa: E402
+from .tuple import shrink_tuple  # noqa: E402
+
+_shrinker_file_path = os.path.join(
+    os.path.dirname(os.path.dirname(__file__)), "shrinker.py"
+)
 if os.path.exists(_shrinker_file_path):
     import sys
-    _spec = importlib.util.spec_from_file_location("python_proptest.core.shrinker_file", _shrinker_file_path)
+
+    _spec = importlib.util.spec_from_file_location(
+        "python_proptest.core.shrinker_file", _shrinker_file_path
+    )
+    if _spec is None or _spec.loader is None:
+        raise ImportError(f"Could not load spec from {_shrinker_file_path}")
     _shrinker_file_module = importlib.util.module_from_spec(_spec)
     # Set up the module's package and name for proper imports
-    _shrinker_file_module.__package__ = 'python_proptest.core'
-    _shrinker_file_module.__name__ = 'python_proptest.core.shrinker_file'
-    
+    _shrinker_file_module.__package__ = "python_proptest.core"
+    _shrinker_file_module.__name__ = "python_proptest.core.shrinker_file"
+
     # The shrinker.py file tries to do "from .shrinker import Shrinkable"
     # We need to make sure this import works. Since we're in the shrinker package's __init__.py,
     # we can create a temporary module object that the relative import will find.
     # Actually, the relative import ".shrinker" will resolve to this package (python_proptest.core.shrinker)
     # So we need to make sure this package is in sys.modules and has Shrinkable
-    
+
     # Save current state
-    _old_shrinker_in_sys = 'python_proptest.core.shrinker' in sys.modules
-    
+    _old_shrinker_in_sys = "python_proptest.core.shrinker" in sys.modules
+
     # Make sure this package is in sys.modules (it should be, since we're executing it)
     # and that it has Shrinkable available
     # The shrinker.py file will import from this package, so Shrinkable should already be available
-    
+
     # Also set Shrinkable and Stream directly in the module namespace as a fallback
-    _shrinker_file_module.Shrinkable = Shrinkable
+    _shrinker_file_module.Shrinkable = Shrinkable  # type: ignore[attr-defined]
     from ..stream import Stream as StreamClass
-    _shrinker_file_module.Stream = StreamClass
-    
+
+    _shrinker_file_module.Stream = StreamClass  # type: ignore[attr-defined]
+
     # Now execute the module - the "from .shrinker import Shrinkable" should work
     # because this package (python_proptest.core.shrinker) is in sys.modules
-    _spec.loader.exec_module(_shrinker_file_module)
-    
+    if _spec.loader is not None:
+        _spec.loader.exec_module(_shrinker_file_module)
+
     # Export the classes and functions
     Shrinker = _shrinker_file_module.Shrinker
     IntegerShrinker = _shrinker_file_module.IntegerShrinker
@@ -267,4 +277,3 @@ __all__ = [
     "shrinkable_boolean",
     "shrinkable_float",
 ]
-

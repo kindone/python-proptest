@@ -13,20 +13,17 @@ from typing import Any, Callable, Generic, List, TypeVar
 # Import Shrinkable and Stream
 # Note: When loaded via importlib, these may already be set in the module namespace
 # Check if they're already set (by importlib), otherwise import normally
-if 'Shrinkable' not in globals() or Shrinkable is None:
-    try:
-        # Try importing from the shrinker package (this will work when imported normally)
-        from .shrinker import Shrinkable
-    except (ImportError, ValueError):
-        # If that fails, it should have been set by importlib
-        pass
+try:
+    from .shrinker import Shrinkable
+except (ImportError, ValueError):
+    # If that fails, it should have been set by importlib
+    Shrinkable = None  # type: ignore[assignment, misc]
 
-if 'Stream' not in globals() or Stream is None:
-    try:
-        from .stream import Stream
-    except (ImportError, ValueError):
-        # If that fails, it should have been set by importlib
-        pass
+try:
+    from .stream import Stream
+except (ImportError, ValueError):
+    # If that fails, it should have been set by importlib
+    Stream = None  # type: ignore[assignment, misc]
 
 T = TypeVar("T")
 U = TypeVar("U")
@@ -304,8 +301,9 @@ def shrink_array_length(
 ) -> Shrinkable[List[T]]:
     """
     Shrinks an array by reducing its length from the rear.
-    It attempts to produce arrays with lengths ranging from the original size down to `minSize`.
-    Uses binary search internally for efficiency, but ensures we eventually reach `minSize`.
+    It attempts to produce arrays with lengths ranging from the original size
+    down to `minSize`. Uses binary search internally for efficiency, but ensures
+    we eventually reach `minSize`.
 
     Args:
         shrinkable_elems: The array of Shrinkable elements

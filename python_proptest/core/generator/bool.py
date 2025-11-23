@@ -16,4 +16,3 @@ class BoolGenerator(Generator[bool]):
     def generate(self, rng: Random) -> Shrinkable[bool]:
         value = rng.random() < self.true_prob
         return shrink_bool(value)
-

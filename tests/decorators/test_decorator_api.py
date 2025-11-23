@@ -324,7 +324,6 @@ class TestGeneratorAPI(unittest.TestCase):
         test_flatmap_result()
 
 
-
 if __name__ == "__main__":
     # Run some examples
     print("Running decorator API examples...")

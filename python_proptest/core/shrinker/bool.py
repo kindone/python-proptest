@@ -4,8 +4,9 @@ Shrinker for boolean values.
 Matches cppproptest's shrinkBool implementation.
 """
 
-from . import Shrinkable
 from python_proptest.core.stream import Stream
+
+from . import Shrinkable
 
 
 def shrink_bool(value: bool) -> Shrinkable[bool]:
@@ -25,4 +26,3 @@ def shrink_bool(value: bool) -> Shrinkable[bool]:
     else:
         # False cannot shrink further
         return Shrinkable(value, lambda: Stream.empty())
-

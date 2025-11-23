@@ -6,7 +6,6 @@ from abc import ABC, abstractmethod
 from typing import Any, Callable, Generic, List, Optional, Protocol, TypeVar
 
 from ..shrinker import Shrinkable
-from ..stream import Stream
 
 T = TypeVar("T")
 U = TypeVar("U")
@@ -171,21 +170,25 @@ class Generator(ABC, Generic[T]):
     def map(self, func: Callable[[T], U]) -> "Generator[U]":
         """Transform generated values using a function."""
         from .transform import MappedGenerator
+
         return MappedGenerator(self, func)
 
     def filter(self, predicate: Callable[[T], bool]) -> "Generator[T]":
         """Filter generated values using a predicate."""
         from .transform import FilteredGenerator
+
         return FilteredGenerator(self, predicate)
 
     def flat_map(self, func: Callable[[T], "Generator[U]"]) -> "Generator[U]":
         """Generate a value, then use it to generate another value."""
         from .transform import FlatMappedGenerator
+
         return FlatMappedGenerator(self, func)
 
     def chain(self, gen_factory: Callable[[T], "Generator[U]"]) -> "Generator[tuple]":
         """Chain this generator with a dependent generator to create tuples."""
         from .chain import ChainGenerator
+
         return ChainGenerator(self, gen_factory)
 
     def aggregate(
@@ -196,6 +199,7 @@ class Generator(ABC, Generic[T]):
     ) -> "Generator[List[T]]":
         """Create a list where each element depends on the previous one."""
         from .aggregate import AggregateGenerator
+
         return AggregateGenerator(self, gen_factory, min_size, max_size)
 
     def accumulate(
@@ -206,5 +210,5 @@ class Generator(ABC, Generic[T]):
     ) -> "Generator[T]":
         """Generate a final value through successive dependent generations."""
         from .aggregate import AccumulateGenerator
-        return AccumulateGenerator(self, gen_factory, min_size, max_size)
 
+        return AccumulateGenerator(self, gen_factory, min_size, max_size)

@@ -58,7 +58,7 @@ test:
 lint:
 	@echo "🔍 Running flake8 linting..."
 	flake8 python_proptest --count --select=E9,F63,F7,F82 --show-source --statistics
-	flake8 python_proptest --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics
+	flake8 python_proptest --count --exit-zero --max-complexity=10 --max-line-length=88 --extend-ignore=E501,F405,E402,E203 --statistics
 
 # Format code
 format:
@@ -70,7 +70,7 @@ format:
 # Type checking
 type-check:
 	@echo "🔍 Running mypy type checking..."
-	mypy python_proptest/
+	mypy python_proptest/ --config-file pyproject.toml
 
 # Security analysis
 security:

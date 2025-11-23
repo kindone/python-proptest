@@ -71,6 +71,7 @@ class UniqueListGenerator(Generator[List[T]]):
         """Generate a list with unique elements."""
         # Use set generator and convert to list
         from .set import SetGenerator
+
         set_gen = SetGenerator(self.element_generator, self.min_length, self.max_length)
         set_shrinkable = set_gen.generate(rng)
 
@@ -86,4 +87,3 @@ class UniqueListGenerator(Generator[List[T]]):
             shrinks.append(Shrinkable(shrink_list))
 
         return Shrinkable(unique_list, lambda: Stream.many(shrinks))
-

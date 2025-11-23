@@ -4,10 +4,12 @@ Shrinker for list-like containers (lists, sets, dicts).
 Matches cppproptest's listlike, set, and map shrinker implementations.
 """
 
-from typing import List, Set, Dict, Tuple, TypeVar, Generic
+from typing import Dict, List, Set, Tuple, TypeVar
+
+from python_proptest.core.stream import Stream
+
 from . import Shrinkable
 from .integral import binary_search_shrinkable, shrink_integral
-from python_proptest.core.stream import Stream
 
 T = TypeVar("T")
 U = TypeVar("U")
@@ -156,30 +158,30 @@ def _shrink_front_and_then_mid(
 ) -> Shrinkable[List[Shrinkable[T]]]:
     """
     Shrinks an array using the shrinkFrontAndThenMid strategy from cppproptest.
-    
+
     This strategy:
     1. Shrinks the front size (number of elements to keep from front) using binary search
     2. Keeps rear_size elements at the end intact
     3. Recursively shrinks by incrementing rear_size
-    
+
     This generates all 2^N subsets for a list of size N.
-    
+
     Args:
         shrinkable_elems: The array of Shrinkable elements
         min_size: The minimum allowed size for the shrunken array
         rear_size: Number of elements to keep at the rear (fixed)
-    
+
     Returns:
         A Shrinkable representing arrays with potentially fewer elements
     """
     shrinkable_cont = shrinkable_elems
     min_front_size = min_size - rear_size if min_size >= rear_size else 0
     max_front_size = len(shrinkable_cont) - rear_size
-    
+
     # If no valid front size range, return empty shrinks
     if max_front_size < min_front_size:
         return Shrinkable(shrinkable_elems)
-    
+
     # Shrink the front size using binary search (shrinkIntegral for size_t)
     # Range is [min_front_size, max_front_size] (inclusive)
     # We shrink (max_front_size - min_front_size) to get values in [0, max_front_size - min_front_size]
@@ -187,16 +189,16 @@ def _shrink_front_and_then_mid(
     range_size = max_front_size - min_front_size
     if range_size < 0:
         return Shrinkable(shrinkable_elems)
-    
+
     # Use shrink_integral to shrink the range size, then map to actual front sizes
     range_shrinkable = shrink_integral(range_size, min_value=0, max_value=range_size)
-    
+
     # Map the shrunk range size back to front size
     def map_to_front_size(range_val: int) -> int:
         return range_val + min_front_size
-    
+
     front_size_shrinkable = range_shrinkable.map(map_to_front_size)
-    
+
     # For each front size, create a list with front_size elements from front + rear elements
     def create_list_with_front_size(front_size: int) -> List[Shrinkable[T]]:
         # Take front_size elements from the front
@@ -205,27 +207,35 @@ def _shrink_front_and_then_mid(
         rear_part = shrinkable_cont[max_front_size:]
         # Concatenate front and rear
         return front_part + rear_part
-    
+
     # Flat map: for each front size, create the corresponding list
     # Each shrinkable created here will have recursive shrinks added via concat
-    def create_shrinkable_with_front_size(front_size: int) -> Shrinkable[List[Shrinkable[T]]]:
+    def create_shrinkable_with_front_size(
+        front_size: int,
+    ) -> Shrinkable[List[Shrinkable[T]]]:
         new_list = create_list_with_front_size(front_size)
         return Shrinkable(new_list)
-    
-    result_shrinkable = front_size_shrinkable.flat_map(create_shrinkable_with_front_size)
-    
+
+    result_shrinkable = front_size_shrinkable.flat_map(
+        create_shrinkable_with_front_size
+    )
+
     # Recursively shrink by incrementing rear_size
     # This adds recursive shrinks to each parent shrinkable
-    def recursive_shrinks(parent: Shrinkable[List[Shrinkable[T]]]) -> Stream[Shrinkable[List[Shrinkable[T]]]]:
+    def recursive_shrinks(
+        parent: Shrinkable[List[Shrinkable[T]]],
+    ) -> Stream[Shrinkable[List[Shrinkable[T]]]]:
         parent_size = len(parent.value)
         # No further shrinking possible
         if parent_size <= min_size or parent_size <= rear_size:
             return Stream.empty()
         # Shrink front further by fixing one more element to rear
         # This returns a Shrinkable, and we want its shrinks
-        recursive_result = _shrink_front_and_then_mid(parent.value, min_size, rear_size + 1)
+        recursive_result = _shrink_front_and_then_mid(
+            parent.value, min_size, rear_size + 1
+        )
         return recursive_result.shrinks()
-    
+
     # Concatenate recursive shrinks to the result
     # This adds recursive shrinks to each shrinkable in the result
     return result_shrinkable.concat(recursive_shrinks)
@@ -236,7 +246,7 @@ def shrink_membership_wise(
 ) -> Shrinkable[List[Shrinkable[T]]]:
     """
     Shrinks an array by removing elements (membership).
-    
+
     Uses shrinkFrontAndThenMid strategy from cppproptest, which generates
     all 2^N subsets for a list of size N.
 
@@ -360,26 +370,25 @@ def shrink_dict(
         Shrinks both membership-wise (removing pairs) and element-wise (shrinking pairs).
     """
     from .pair import shrink_pair
-    
+
     # Create pairs of (key, value) shrinkables
     # Each pair is a Shrinkable<(key, value)>
     pair_shrinkables: List[Shrinkable[Tuple[T, U]]] = []
     for key_shr, value_shr in zip(key_shrinkables, value_shrinkables):
         pair_shr = shrink_pair(key_shr, value_shr)
         pair_shrinkables.append(pair_shr)
-    
+
     # Use shrinkable_array with both membership-wise and element-wise shrinking
     # Element-wise shrinking will recursively shrink each pair (both key and value)
     array_shrinkable = shrinkable_array(
         pair_shrinkables, min_size, membership_wise=True, element_wise=True
     )
-    
+
     # Convert list of pairs to dictionary
     def pairs_to_dict(pairs: List[Tuple[T, U]]) -> Dict[T, U]:
         result = {}
         for key, value in pairs:
             result[key] = value
         return result
-    
-    return array_shrinkable.map(pairs_to_dict)
 
+    return array_shrinkable.map(pairs_to_dict)

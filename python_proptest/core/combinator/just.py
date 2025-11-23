@@ -6,9 +6,9 @@ Always returns the same value.
 
 from typing import TypeVar
 
+from ..generator.base import Generator, Random
 from ..shrinker import Shrinkable
 from ..stream import Stream
-from ..generator.base import Generator, Random
 
 T = TypeVar("T")
 
@@ -21,4 +21,3 @@ class JustGenerator(Generator[T]):
 
     def generate(self, rng: Random) -> Shrinkable[T]:
         return Shrinkable(self.value, lambda: Stream.empty())
-

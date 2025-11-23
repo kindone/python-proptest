@@ -142,4 +142,3 @@ class AccumulateGenerator(Generator[T]):
             return Stream.many(shrinks)
 
         return Shrinkable(final_value, create_shrinks)
-

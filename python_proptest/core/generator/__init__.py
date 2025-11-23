@@ -5,56 +5,56 @@ This module contains generator implementations for various types,
 separated from shrinker logic for better organization.
 """
 
+# Combinator generators
+from ..combinator import (
+    ConstructGenerator,
+    ElementOfGenerator,
+    JustGenerator,
+    LazyGenerator,
+    OneOfGenerator,
+)
+
+# Aggregate generators
+from .aggregate import (
+    AccumulateGenerator,
+    AggregateGenerator,
+)
+
 # Base Generator class and common utilities
 from .base import (
     Generator,
     Random,
     Weighted,
     WeightedValue,
-    is_weighted_value,
     is_weighted_generator,
-    normalize_weighted_values,
+    is_weighted_value,
     normalize_weighted_generators,
+    normalize_weighted_values,
 )
+from .bool import BoolGenerator
 
-# Transform generators
-from .transform import (
-    MappedGenerator,
-    FilteredGenerator,
-    FlatMappedGenerator,
-)
+# Chain generators
+from .chain import ChainGenerator, ChainTupleGenerator
+from .dict import DictGenerator
+from .floating import FloatGenerator
+
+# Gen class with static methods
+from .gen import Gen
 
 # Primitive generators
 from .integral import IntGenerator, UnicodeCharGenerator
-from .bool import BoolGenerator
-from .floating import FloatGenerator
-from .string import StringGenerator, UnicodeStringGenerator
 
 # Container generators
 from .list import ListGenerator, UniqueListGenerator
 from .set import SetGenerator
-from .dict import DictGenerator
+from .string import StringGenerator, UnicodeStringGenerator
 
-# Combinator generators
-from ..combinator import (
-    OneOfGenerator,
-    ElementOfGenerator,
-    JustGenerator,
-    LazyGenerator,
-    ConstructGenerator,
+# Transform generators
+from .transform import (
+    FilteredGenerator,
+    FlatMappedGenerator,
+    MappedGenerator,
 )
-
-# Chain generators
-from .chain import ChainGenerator, ChainTupleGenerator
-
-# Aggregate generators
-from .aggregate import (
-    AggregateGenerator,
-    AccumulateGenerator,
-)
-
-# Gen class with static methods
-from .gen import Gen
 
 __all__ = [
     # Base
@@ -97,4 +97,3 @@ __all__ = [
     # Gen
     "Gen",
 ]
-

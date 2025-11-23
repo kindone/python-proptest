@@ -2,10 +2,10 @@
 Generators for integral types (integers, Unicode character codes).
 """
 
-from typing import List, TypeVar
+from typing import List
 
 from ..shrinker import Shrinkable
-from ..shrinker.integral import binary_search_shrinkable, shrink_integral
+from ..shrinker.integral import shrink_integral
 from ..stream import Stream
 from .base import Generator, Random
 
@@ -56,4 +56,3 @@ class UnicodeCharGenerator(Generator[int]):
                 shrinks.append(Shrinkable(mid))
 
         return shrinks
-

@@ -63,7 +63,9 @@ class TestShrinker(unittest.TestCase):
         assert "BCD" in candidates  # Should remove first character
         # Note: "A" and "D" are recursive shrinks (e.g., "A" is a shrink of "AB", "AC", "AD")
         # They are not direct shrinks, so we check for other direct shrinks instead
-        assert "AB" in candidates or "AC" in candidates or "AD" in candidates  # Should have some 2-char prefixes
+        assert (
+            "AB" in candidates or "AC" in candidates or "AD" in candidates
+        )  # Should have some 2-char prefixes
         assert "D" in candidates  # Should shrink to last character (direct shrink)
 
     def test_string_shrinker_with_empty_string(self):

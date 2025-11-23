@@ -120,7 +120,7 @@ class Property:
 
         # Then run random tests
         for run in range(self.num_runs):
-            saved_rng_state = self._rng.getstate()
+            saved_rng_state = self._rng.getstate()  # type: ignore[attr-defined]
             try:
                 # Generate test inputs
                 inputs = []
@@ -178,8 +178,8 @@ class Property:
         # Regenerate the shrinkables for this run using the saved RNG state
         regenerated_shrinkables: List[Shrinkable[Any]] = []
         if rng_state is not None:
-            original_state = self._rng.getstate()
-            self._rng.setstate(rng_state)
+            original_state = self._rng.getstate()  # type: ignore[attr-defined]
+            self._rng.setstate(rng_state)  # type: ignore[attr-defined]
         else:
             original_state = None
         try:
@@ -188,12 +188,13 @@ class Property:
                 regenerated_shrinkables.append(regenerated)
                 if regenerated.value != inputs[i]:
                     raise RuntimeError(
-                        f"Regenerated value {regenerated.value} != expected {inputs[i]}. "
+                        f"Regenerated value {regenerated.value} != "
+                        f"expected {inputs[i]}. "
                         "RNG state cloning may be incorrect."
                     )
         finally:
             if original_state is not None:
-                self._rng.setstate(original_state)
+                self._rng.setstate(original_state)  # type: ignore[attr-defined]
 
         # Shrink each input individually using the shrinkable candidates
         shrunk_inputs: List[Any] = []
@@ -215,16 +216,16 @@ class Property:
                 improved = False
                 # Get shrinks as a stream (lazy evaluation, like cppproptest)
                 shrinks_stream = shrinkable.shrinks()
-                
+
                 # Iterate through shrinks using the stream iterator
                 current_stream = shrinks_stream
                 while not current_stream.is_empty():
                     candidate_shrinkable = current_stream.head()
                     if candidate_shrinkable is None:
                         break
-                    
+
                     candidate_val = candidate_shrinkable.value
-                    
+
                     # Test if this candidate also fails
                     test_inputs = shrunk_inputs[:i] + [candidate_val] + inputs[i + 1 :]
                     if not property_predicate(test_inputs):
@@ -233,7 +234,7 @@ class Property:
                         shrinkable = candidate_shrinkable
                         improved = True
                         break
-                    
+
                     # Move to next candidate in stream
                     current_stream = current_stream.tail()
 

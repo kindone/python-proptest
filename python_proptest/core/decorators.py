@@ -254,8 +254,6 @@ def for_all(
     return decorator
 
 
-
-
 def example(*values: Any):
     """
     Decorator to provide example values for a property test.
@@ -440,5 +438,3 @@ def run_property_test(func: Callable) -> Any:
         raise ValueError(f"Function {func.__name__} is not decorated with @for_all")
 
     return func()
-
-

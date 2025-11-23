@@ -5,10 +5,9 @@ This module provides helper functions for visualizing and analyzing shrink trees
 """
 
 import json
-from typing import Any, List, Optional, TypeVar
+from typing import Any, List, TypeVar
 
 from .shrinker import Shrinkable
-from .stream import Stream
 
 T = TypeVar("T")
 

@@ -9,6 +9,7 @@ from typing import Any, Dict, List
 
 try:
     import pytest
+
     HAS_PYTEST = True
 except ImportError:
     HAS_PYTEST = False

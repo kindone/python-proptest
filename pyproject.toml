@@ -115,7 +115,7 @@ warn_unreachable = false
 strict_equality = false
 
 [[tool.mypy.overrides]]
-module = "python_proptest.core.generator"
+module = "python_proptest.core.generator.gen"
 disable_error_code = ["valid-type"]
 
 [tool.pytest.ini_options]

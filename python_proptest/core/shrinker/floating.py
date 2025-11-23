@@ -5,8 +5,9 @@ Note: This is a simplified implementation. cppproptest uses a more sophisticated
 approach with frexp/ldexp to decompose floats into fraction and exponent.
 """
 
-from . import Shrinkable
 from python_proptest.core.stream import Stream
+
+from . import Shrinkable
 
 
 def shrink_float(value: float) -> Shrinkable[float]:
@@ -33,5 +34,6 @@ def shrink_float(value: float) -> Shrinkable[float]:
         shrinks.append(Shrinkable(value / 2))
         shrinks.append(Shrinkable(-value / 2))
 
-    return Shrinkable(value, lambda: Stream.many(shrinks) if shrinks else Stream.empty())
-
+    return Shrinkable(
+        value, lambda: Stream.many(shrinks) if shrinks else Stream.empty()
+    )

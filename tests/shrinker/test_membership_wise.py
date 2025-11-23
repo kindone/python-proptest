@@ -3,8 +3,9 @@ Tests for membership-wise shrinking to verify it matches cppproptest behavior.
 """
 
 import unittest
-from python_proptest.core.shrinker.list import shrink_membership_wise
+
 from python_proptest.core.shrinker import Shrinkable
+from python_proptest.core.shrinker.list import shrink_membership_wise
 
 
 class TestMembershipWiseShrinking(unittest.TestCase):
@@ -38,7 +39,9 @@ class TestMembershipWiseShrinking(unittest.TestCase):
             (1, 2, 3),
         }
 
-        self.assertEqual(len(all_values), 8, f"Expected 8 subsets, got {len(all_values)}")
+        self.assertEqual(
+            len(all_values), 8, f"Expected 8 subsets, got {len(all_values)}"
+        )
         self.assertEqual(all_values, expected_subsets)
 
     def test_list_size_3_structure_matches_cppproptest(self):
@@ -66,7 +69,9 @@ class TestMembershipWiseShrinking(unittest.TestCase):
             if values == (1, 2):
                 found_1_2 = True
                 recursive = list(shrink.shrinks().to_list())
-                self.assertEqual(len(recursive), 1, "[1, 2] should have 1 recursive shrink")
+                self.assertEqual(
+                    len(recursive), 1, "[1, 2] should have 1 recursive shrink"
+                )
                 self.assertEqual(
                     tuple(s.value for s in recursive[0].value),
                     (2,),
@@ -92,7 +97,9 @@ class TestMembershipWiseShrinking(unittest.TestCase):
         collect_values(result)
 
         expected_subsets = {(), (1,), (2,), (1, 2)}
-        self.assertEqual(len(all_values), 4, f"Expected 4 subsets, got {len(all_values)}")
+        self.assertEqual(
+            len(all_values), 4, f"Expected 4 subsets, got {len(all_values)}"
+        )
         self.assertEqual(all_values, expected_subsets)
 
     def test_list_size_1_generates_all_subsets(self):
@@ -111,7 +118,9 @@ class TestMembershipWiseShrinking(unittest.TestCase):
         collect_values(result)
 
         expected_subsets = {(), (1,)}
-        self.assertEqual(len(all_values), 2, f"Expected 2 subsets, got {len(all_values)}")
+        self.assertEqual(
+            len(all_values), 2, f"Expected 2 subsets, got {len(all_values)}"
+        )
         self.assertEqual(all_values, expected_subsets)
 
     def test_respects_min_size(self):
@@ -138,4 +147,3 @@ class TestMembershipWiseShrinking(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

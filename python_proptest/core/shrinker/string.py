@@ -6,9 +6,12 @@ Only shrinks by length (prefixes and suffixes), NOT by character codes.
 """
 
 from typing import List
-from . import Shrinkable
-from .integral import shrink_integral
+
 from python_proptest.core.stream import Stream
+
+from . import Shrinkable
+from .integral import binary_search_shrinkable, shrink_integral
+from .list import shrinkable_array
 
 
 def shrink_string(
@@ -16,7 +19,7 @@ def shrink_string(
 ) -> Shrinkable[str]:
     """
     Shrink a string value by length only (prefixes and suffixes).
-    
+
     Matches cppproptest's shrinkString implementation:
     - Shrinks rear (prefixes): "", "a", "ab", ...
     - Shrinks front (suffixes): for each prefix, generates suffixes by removing from front
@@ -32,16 +35,18 @@ def shrink_string(
         Only shrinks by length, not by character codes.
     """
     size = len(value)
-    
+
     # Step 1: Shrink rear (prefixes)
     # shrinkIntegral(size - min_length) -> map to substr(0, size + min_length)
-    size_shrinkable = shrink_integral(size - min_length, min_value=0, max_value=size - min_length)
-    
+    size_shrinkable = shrink_integral(
+        size - min_length, min_value=0, max_value=size - min_length
+    )
+
     def create_prefix(the_size: int) -> str:
-        return value[:the_size + min_length]
-    
+        return value[: the_size + min_length]
+
     shrink_rear = size_shrinkable.map(create_prefix)
-    
+
     # Step 2: Shrink front (for each rear shrink, remove from front)
     # This generates suffixes by removing characters from the beginning
     def shrink_front(parent: Shrinkable[str]) -> Stream[Shrinkable[str]]:
@@ -49,21 +54,21 @@ def shrink_string(
         str_size = len(str_val)
         if str_size <= min_length + 1:
             return Stream.empty()
-        
+
         # shrinkIntegral(str_size - (min_length + 1))
         front_size_shrinkable = shrink_integral(
-            str_size - (min_length + 1), 
-            min_value=0, 
-            max_value=str_size - (min_length + 1)
+            str_size - (min_length + 1),
+            min_value=0,
+            max_value=str_size - (min_length + 1),
         )
-        
+
         def create_suffix(front_offset: int) -> str:
             start = min_length + 1 + front_offset
             end = str_size
             return str_val[start:end]
-        
+
         return front_size_shrinkable.map(create_suffix).shrinks()
-    
+
     return shrink_rear.concat(shrink_front)
 
 
@@ -112,4 +117,3 @@ def shrink_unicode_string(
         return "".join(result_chars)
 
     return array_shrinkable.map(to_string)
-

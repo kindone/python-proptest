@@ -6,7 +6,7 @@ generator module structure.
 """
 
 # Re-export everything from the new generator module
-from .generator import *  # noqa: F403, F401
+from .generator import *  # noqa: F403, F401, F405
 
 __all__ = [
     # Base

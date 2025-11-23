@@ -4,11 +4,12 @@ Shrinker for integral types (integers).
 Matches cppproptest's shrinkIntegral implementation.
 """
 
-from typing import List
-from . import Shrinkable
-from ..stream import Stream
 import math
 import sys
+from typing import List
+
+from ..stream import Stream
+from . import Shrinkable
 
 
 def cpp_div(a: int, b: int) -> int:
@@ -297,5 +298,6 @@ def binary_search_shrinkable(value: int) -> Shrinkable[int]:
     This is the core function used when the range crosses zero.
     """
     shrinks = _binary_search_towards_zero(value)
-    return Shrinkable(value, lambda: Stream.many(shrinks) if shrinks else Stream.empty())
-
+    return Shrinkable(
+        value, lambda: Stream.many(shrinks) if shrinks else Stream.empty()
+    )

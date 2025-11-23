@@ -90,4 +90,3 @@ class UnicodeStringGenerator(Generator[str]):
             return "".join(result_chars)
 
         return array_shrinkable.map(to_string)
-

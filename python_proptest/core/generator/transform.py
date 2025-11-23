@@ -2,7 +2,7 @@
 Transform generators (map, filter, flat_map).
 """
 
-from typing import Callable, Generic, TypeVar
+from typing import Callable, TypeVar
 
 from ..shrinker import Shrinkable
 from ..stream import Stream
@@ -54,19 +54,17 @@ class FilteredGenerator(Generator[T]):
 class FlatMappedGenerator(Generator[U]):
     """Generator that generates a value, then uses it to generate another value."""
 
-    def __init__(
-        self, generator: Generator[T], func: Callable[[T], Generator[U]]
-    ):
+    def __init__(self, generator: Generator[T], func: Callable[[T], Generator[U]]):
         self.generator = generator
         self.func = func
 
     def generate(self, rng: Random) -> Shrinkable[U]:
         # Generate first value
         first_shrinkable = self.generator.generate(rng)
-        
+
         # Save RNG state after first generation for deterministic regeneration
-        rng_state_after_first = rng.getstate()
-        
+        rng_state_after_first = rng.getstate()  # type: ignore[attr-defined]
+
         # Generate second value
         second_generator = self.func(first_shrinkable.value)
         second_shrinkable = second_generator.generate(rng)
@@ -80,20 +78,19 @@ class FlatMappedGenerator(Generator[U]):
 
             # Then shrink the first value and regenerate the second
             # IMPORTANT: Restore RNG state to ensure deterministic regeneration
-            original_rng_state = rng.getstate()
+            original_rng_state = rng.getstate()  # type: ignore[attr-defined]
             first_shrinks = []
             try:
                 for first_shrink in first_shrinkable.shrinks().to_list():
                     # Restore RNG state to what it was after first generation
-                    rng.setstate(rng_state_after_first)
+                    rng.setstate(rng_state_after_first)  # type: ignore[attr-defined]
                     new_second_gen = self.func(first_shrink.value)
                     new_second_shrink = new_second_gen.generate(rng)
                     first_shrinks.append(new_second_shrink)
             finally:
                 # Restore original RNG state
-                rng.setstate(original_rng_state)
+                rng.setstate(original_rng_state)  # type: ignore[attr-defined]
 
             return Stream.many(second_shrinks + first_shrinks)
 
         return Shrinkable(second_shrinkable.value, shrink_func)
-

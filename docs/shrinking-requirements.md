@@ -8,7 +8,7 @@ This document outlines the core requirements and design principles for shrinking
 
 **Requirement**: Each value must appear exactly once in the shrink tree, even if it could be reached via multiple paths.
 
-**Rationale**: 
+**Rationale**:
 - Prevents redundant exploration of the same values
 - Enables efficient cut-off strategies
 - Simplifies tree structure and analysis
@@ -46,7 +46,7 @@ For `Gen.int(0, 8)` with value `8`, the shrink order should be:
 - Logarithmic steps ensure we cover the space meaningfully
 - Matches the "try simplest, then grow logarithmically" principle
 
-**Implementation**: 
+**Implementation**:
 - Integers use binary search shrinking (midpoint, then recursive halves)
 - Arrays use binary search for length reduction
 - Element-wise shrinking uses chunked approaches

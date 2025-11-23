@@ -17,4 +17,3 @@ class FloatGenerator(Generator[float]):
     def generate(self, rng: Random) -> Shrinkable[float]:
         value = rng.random() * (self.max_value - self.min_value) + self.min_value
         return shrink_float(value)
-

@@ -6,9 +6,9 @@ Delays evaluation until generation.
 
 from typing import Callable, TypeVar
 
+from ..generator.base import Generator, Random
 from ..shrinker import Shrinkable
 from ..stream import Stream
-from ..generator.base import Generator, Random
 
 T = TypeVar("T")
 
@@ -22,4 +22,3 @@ class LazyGenerator(Generator[T]):
     def generate(self, rng: Random) -> Shrinkable[T]:
         value = self.func()
         return Shrinkable(value, lambda: Stream.empty())
-

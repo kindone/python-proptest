@@ -62,4 +62,3 @@ class SetGenerator(Generator[Set[T]]):
                 shrinks.append(Shrinkable({e.value for e in new_elements}))
 
         return shrinks
-

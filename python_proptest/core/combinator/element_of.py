@@ -6,9 +6,9 @@ Randomly chooses from multiple values with optional weights.
 
 from typing import Any, List, TypeVar
 
+from ..generator.base import Generator, Random, normalize_weighted_values
 from ..shrinker import Shrinkable
 from ..stream import Stream
-from ..generator.base import Generator, Random, normalize_weighted_values
 
 T = TypeVar("T")
 
@@ -35,4 +35,3 @@ class ElementOfGenerator(Generator[T]):
                     if wv.value != value
                 ]
                 return Shrinkable(value, lambda: Stream.many(shrinks))
-

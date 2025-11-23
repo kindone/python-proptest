@@ -2,7 +2,7 @@
 Chain generators for dependent value generation.
 """
 
-from typing import Any, Callable, Tuple, TypeVar
+from typing import Any, Callable, TypeVar
 
 from ..shrinker import Shrinkable
 from ..stream import Stream
@@ -150,4 +150,3 @@ class ChainGenerator(Generator[tuple]):
     def _create_base_shrinks(self, base_shrinkable, dependent_shrinkable, rng):
         """Create shrinks for when we've kept base and shrunk dependent."""
         return Stream.empty()  # No further shrinks needed for this path
-

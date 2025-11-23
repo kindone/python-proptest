@@ -3,11 +3,8 @@ Gen class with static factory methods for creating generators.
 """
 
 import sys
-from typing import Any, Callable, Optional, TypeVar
+from typing import Any, Callable, List, Optional, TypeVar
 
-from .base import Generator, Random, Weighted, WeightedValue
-from .bool import BoolGenerator
-from .chain import ChainGenerator
 from ..combinator import (
     ConstructGenerator,
     ElementOfGenerator,
@@ -15,14 +12,16 @@ from ..combinator import (
     LazyGenerator,
     OneOfGenerator,
 )
+from ..shrinker import Shrinkable
+from .base import Generator, Random, Weighted, WeightedValue
+from .bool import BoolGenerator
+from .chain import ChainGenerator
 from .dict import DictGenerator
 from .floating import FloatGenerator
 from .integral import IntGenerator, UnicodeCharGenerator
 from .list import ListGenerator, UniqueListGenerator
 from .set import SetGenerator
 from .string import StringGenerator, UnicodeStringGenerator
-from ..shrinker import Shrinkable
-from ..stream import Stream
 
 T = TypeVar("T")
 
@@ -253,7 +252,7 @@ class Gen:
         gen_factory: Callable[[T], "Generator[T]"],
         min_size: int = 0,
         max_size: int = 10,
-    ) -> "AggregateGenerator[T]":
+    ) -> "Generator[List[T]]":
         """Generate a list where each element depends on the previous one.
 
         Creates a list of dependent values starting with a value from initial_gen,
@@ -288,6 +287,7 @@ class Gen:
             # Result: [50, 45, 52, 48, ...] - bounded random walk
         """
         from .aggregate import AggregateGenerator
+
         return AggregateGenerator(initial_gen, gen_factory, min_size, max_size)
 
     @staticmethod
@@ -296,7 +296,7 @@ class Gen:
         gen_factory: Callable[[T], "Generator[T]"],
         min_size: int = 0,
         max_size: int = 10,
-    ) -> "AccumulateGenerator[T]":
+    ) -> "Generator[T]":
         """Generate a final value through successive dependent generations.
 
         Like aggregate, but returns only the final value after all accumulation
@@ -331,12 +331,13 @@ class Gen:
             # Result: Single float (final amount after compounding)
         """
         from .aggregate import AccumulateGenerator
+
         return AccumulateGenerator(initial_gen, gen_factory, min_size, max_size)
 
     @staticmethod
     def tuple(*generators):
         """Create a generator that generates tuples from multiple generators.
-        
+
         Uses shrink_tuple for recursive shrinking of all elements, matching cppproptest.
         """
         if not generators:
@@ -351,9 +352,8 @@ class Gen:
                 for gen in generators:
                     shrinkable = gen.generate(rng)
                     shrinkables.append(shrinkable)
-                
+
                 # Use shrink_tuple to create a shrinkable tuple with recursive shrinking
                 return shrink_tuple(shrinkables)
 
         return TupleGenerator()
-
