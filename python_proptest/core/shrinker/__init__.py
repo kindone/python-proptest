@@ -173,10 +173,7 @@ from .bool import shrink_bool  # noqa: E402
 from .floating import shrink_float  # noqa: E402
 
 # Import shrinker functions (must be after Shrinkable definition to avoid circular imports)
-from .integral import (  # noqa: E402
-    binary_search_shrinkable,
-    shrink_integral,
-)
+from .integral import binary_search_shrinkable, shrink_integral  # noqa: E402
 from .list import (  # noqa: E402
     shrink_array_length,
     shrink_dict,

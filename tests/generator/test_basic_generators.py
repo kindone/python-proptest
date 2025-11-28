@@ -4,11 +4,7 @@ Tests for basic generators.
 
 import unittest
 
-from python_proptest import (
-    Gen,
-    for_all,
-    run_for_all,
-)
+from python_proptest import Gen, for_all, run_for_all
 
 
 class TestIntGenerator(unittest.TestCase):

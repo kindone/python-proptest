@@ -15,10 +15,7 @@ from ..combinator import (
 )
 
 # Aggregate generators
-from .aggregate import (
-    AccumulateGenerator,
-    AggregateGenerator,
-)
+from .aggregate import AccumulateGenerator, AggregateGenerator
 
 # Base Generator class and common utilities
 from .base import (
@@ -50,11 +47,7 @@ from .set import SetGenerator
 from .string import StringGenerator, UnicodeStringGenerator
 
 # Transform generators
-from .transform import (
-    FilteredGenerator,
-    FlatMappedGenerator,
-    MappedGenerator,
-)
+from .transform import FilteredGenerator, FlatMappedGenerator, MappedGenerator
 
 __all__ = [
     # Base

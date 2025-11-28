@@ -8,14 +8,7 @@ more ergonomic property-based testing.
 import math
 import unittest
 
-from python_proptest import (
-    Gen,
-    assume,
-    example,
-    for_all,
-    note,
-    settings,
-)
+from python_proptest import Gen, assume, example, for_all, note, settings
 
 
 class TestDecoratorAPIExamples(unittest.TestCase):
