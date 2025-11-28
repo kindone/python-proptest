@@ -51,7 +51,9 @@ class TestStatefulPropertyEdgeCases(unittest.TestCase):
         startup_callback = Mock()
 
         # Create an action that will fail
-        failing_action = SimpleAction(lambda s: (_ for _ in ()).throw(ValueError("Test error")))
+        failing_action = SimpleAction(
+            lambda s: (_ for _ in ()).throw(ValueError("Test error"))
+        )
 
         prop = StatefulProperty(
             Gen.just(0),
@@ -142,6 +144,7 @@ class TestStatefulPropertyEdgeCases(unittest.TestCase):
         prop = StatefulProperty(
             Gen.just(0),
             Gen.just(action),
+            max_actions=1,
             num_runs=1,
             initial_model_gen=Gen.just(model_state),
         )
@@ -152,6 +155,7 @@ class TestStatefulPropertyEdgeCases(unittest.TestCase):
 
     def test_action_without_model_raises(self):
         """Test Action without model raises error."""
+
         def action_func(state: int, model: dict):
             model["count"] += 1
 
@@ -222,7 +226,9 @@ class TestStatefulPropertyEdgeCases(unittest.TestCase):
 
     def test_property_test_error_message(self):
         """Test PropertyTestError includes run number."""
-        failing_action = SimpleAction(lambda s: (_ for _ in ()).throw(ValueError("Test")))
+        failing_action = SimpleAction(
+            lambda s: (_ for _ in ()).throw(ValueError("Test"))
+        )
 
         prop = StatefulProperty(
             Gen.just(0),
@@ -325,5 +331,3 @@ class TestStatefulPropertyFactory(unittest.TestCase):
         )
         self.assertIsInstance(prop, StatefulProperty)
         prop.go()
-
-

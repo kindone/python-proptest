@@ -443,7 +443,9 @@ class TestDictShrinkTreeExpectations(unittest.TestCase):
         # Check for single-pair shrinks with their own children
         single_pair_5_2 = next((s for s in shrinks if s["value"] == {5: 2}), None)
         self.assertIsNotNone(single_pair_5_2, "Should include {5: 2} shrink")
-        self.assertGreater(len(single_pair_5_2["shrinks"]), 0, "{5: 2} should have children")
+        self.assertGreater(
+            len(single_pair_5_2["shrinks"]), 0, "{5: 2} should have children"
+        )
 
         # Verify key shrinking: {5: 2} should shrink to {0: 2}, {2: 2}, etc.
         key_shrinks = [s["value"] for s in single_pair_5_2["shrinks"]]
@@ -451,12 +453,22 @@ class TestDictShrinkTreeExpectations(unittest.TestCase):
         self.assertIn({5: 0}, key_shrinks, "Should shrink value 2 to 0")
 
         # Check for pair shrinking in the full dict: keys should change
-        full_dict_with_key_shrink = next((s for s in shrinks if s["value"] == {0: 2, 8: 3}), None)
-        self.assertIsNotNone(full_dict_with_key_shrink, "Should shrink key 5 to 0 while keeping both pairs")
+        full_dict_with_key_shrink = next(
+            (s for s in shrinks if s["value"] == {0: 2, 8: 3}), None
+        )
+        self.assertIsNotNone(
+            full_dict_with_key_shrink,
+            "Should shrink key 5 to 0 while keeping both pairs",
+        )
 
         # Check for value shrinking in the full dict
-        full_dict_with_value_shrink = next((s for s in shrinks if s["value"] == {5: 0, 8: 3}), None)
-        self.assertIsNotNone(full_dict_with_value_shrink, "Should shrink value 2 to 0 while keeping both pairs")
+        full_dict_with_value_shrink = next(
+            (s for s in shrinks if s["value"] == {5: 0, 8: 3}), None
+        )
+        self.assertIsNotNone(
+            full_dict_with_value_shrink,
+            "Should shrink value 2 to 0 while keeping both pairs",
+        )
 
         # Verify all shrinks are dicts
         def verify_all_dicts(node):

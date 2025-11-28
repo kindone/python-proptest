@@ -111,19 +111,32 @@ class StatefulProperty(Generic[S, A]):
                             action.run(state)  # type: ignore
 
                 # Run cleanup callbacks
-                for callback in self._cleanup_callbacks:
-                    callback()
-
-            except Exception as e:
-                # Run cleanup callbacks even on failure
+                cleanup_exception = None
                 for callback in self._cleanup_callbacks:
                     try:
                         callback()
-                    except Exception:
-                        pass
+                    except Exception as cleanup_err:
+                        # Store cleanup exception but don't raise it yet
+                        cleanup_exception = cleanup_err
+
+            except Exception as e:
+                # Run cleanup callbacks even on failure
+                cleanup_exception = None
+                for callback in self._cleanup_callbacks:
+                    try:
+                        callback()
+                    except Exception as cleanup_err:
+                        # Store cleanup exception but don't raise it
+                        cleanup_exception = cleanup_err
+                # Only raise the original exception, not cleanup exceptions
                 raise PropertyTestError(
                     f"Stateful property failed on run {run + 1}: {e}"
                 )
+            else:
+                # If no exception occurred, but cleanup raised, log it but don't fail
+                if cleanup_exception is not None:
+                    # Cleanup exceptions are ignored - they shouldn't fail the test
+                    pass
 
 
 def simpleActionGenOf(

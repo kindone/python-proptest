@@ -175,20 +175,12 @@ class TestOptionChaining(unittest.TestCase):
 
     def test_filter_none_in_chain(self):
         """Test filter causing None in chain."""
-        result = (
-            Some(5)
-            .filter(lambda x: x < 0)
-            .map(lambda x: x * 2)
-        )
+        result = Some(5).filter(lambda x: x < 0).map(lambda x: x * 2)
         self.assertIsInstance(result, None_)
 
     def test_flat_map_none_in_chain(self):
         """Test flat_map returning None in chain."""
-        result = (
-            Some(5)
-            .flat_map(lambda x: None_())
-            .map(lambda x: x * 2)
-        )
+        result = Some(5).flat_map(lambda x: None_()).map(lambda x: x * 2)
         self.assertIsInstance(result, None_)
 
 
@@ -218,5 +210,3 @@ class TestOptionEdgeCases(unittest.TestCase):
         # Option doesn't catch exceptions in filter
         with self.assertRaises(ValueError):
             result.filter(failing_predicate)
-
-

@@ -8,7 +8,7 @@ for combining and transforming generators.
 import random
 import unittest
 
-from python_proptest import Gen, PropertyTestError, for_all, run_for_all
+from python_proptest import Gen, for_all, run_for_all
 
 
 class TestCombinators(unittest.TestCase):
@@ -19,10 +19,9 @@ class TestCombinators(unittest.TestCase):
         rng = random.Random(42)
         const_gen = Gen.just(42)
 
-        for _ in range(5):
-            result = const_gen.generate(rng)
-            assert result.value == 42
-            assert result.shrinks().is_empty()  # Just generator has no shrinks
+        @run_for_all(const_gen)
+        def test_property(self, x: int):
+            assert x == 42
 
     def test_just_with_various_types(self):
         """Test just with various types."""

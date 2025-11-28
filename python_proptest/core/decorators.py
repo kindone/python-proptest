@@ -56,10 +56,10 @@ def for_all(
 
     def decorator(func: Callable) -> Callable:
         # Preserve any existing _proptest_examples / _proptest_settings /
-        # _proptest_matrix
+        # _proptest_matrices
         existing_examples = getattr(func, "_proptest_examples", [])
         existing_settings = getattr(func, "_proptest_settings", {})
-        existing_matrix = getattr(func, "_proptest_matrix", None)
+        existing_matrices = getattr(func, "_proptest_matrices", [])
 
         # Get function signature to validate argument count
         sig = inspect.signature(func)
@@ -166,8 +166,9 @@ def for_all(
                         examples=existing_examples,
                     )
                     # Execute matrix cases first (do not count toward num_runs)
-                    if existing_matrix:
-                        _run_matrix_cases(func, args[0], existing_matrix)
+                    # Run each matrix spec independently
+                    for matrix_spec in existing_matrices:
+                        _run_matrix_cases(func, args[0], matrix_spec)
                     property_test.for_all(*generators)
                     return None  # Test frameworks expect test functions to return
                     # None
@@ -220,8 +221,9 @@ def for_all(
                         examples=existing_examples,
                     )
                     # Execute matrix cases first (do not count toward num_runs)
-                    if existing_matrix:
-                        _run_matrix_cases(func, None, existing_matrix)
+                    # Run each matrix spec independently
+                    for matrix_spec in existing_matrices:
+                        _run_matrix_cases(func, None, matrix_spec)
                     property_test.for_all(*generators)
                     return None  # Pytest expects test functions to return None
                 except PropertyTestError as e:
@@ -243,11 +245,10 @@ def for_all(
         wrapper._proptest_is_unittest_method = is_unittest_method  # type: ignore
         wrapper._proptest_is_test_method = is_test_method  # type: ignore
 
-        # Preserve examples, settings, and matrix from other decorators
+        # Preserve examples, settings, and matrices from other decorators
         wrapper._proptest_examples = existing_examples  # type: ignore
         wrapper._proptest_settings = existing_settings  # type: ignore
-        if existing_matrix is not None:
-            wrapper._proptest_matrix = existing_matrix  # type: ignore
+        wrapper._proptest_matrices = existing_matrices  # type: ignore
 
         return wrapper
 
@@ -294,15 +295,17 @@ def matrix(**kwargs: Iterable[Any]):
     Notes:
         - Matrix cases are executed once per combination, before examples/random runs.
         - Matrix cases do not count toward settings(num_runs).
+        - Multiple @matrix decorators can be stacked. Each decorator creates separate
+          matrix cases that run independently. If you want to merge values, combine
+          them in a single @matrix decorator.
     """
 
     def decorator(func: Callable) -> Callable:
-        # Store matrix spec for later use
-        if not hasattr(func, "_proptest_matrix"):
-            func._proptest_matrix = {}  # type: ignore
-        # Merge if applied multiple times - later decorators overwrite earlier ones
-        current = getattr(func, "_proptest_matrix")  # type: ignore
-        current.update(kwargs)
+        # Store matrix specs as a list (each decorator adds its own spec)
+        if not hasattr(func, "_proptest_matrices"):
+            func._proptest_matrices = []  # type: ignore
+        # Append this matrix spec to the list
+        func._proptest_matrices.append(dict(kwargs))  # type: ignore
         return func
 
     return decorator
@@ -437,4 +440,7 @@ def run_property_test(func: Callable) -> Any:
     if not hasattr(func, "_proptest_generators"):
         raise ValueError(f"Function {func.__name__} is not decorated with @for_all")
 
-    return func()
+    # Run the property test
+    func()
+    # Return True to indicate successful execution
+    return True

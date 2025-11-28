@@ -120,7 +120,7 @@ fi
 
 # Test 4: Run a few pytest tests
 print_status "Test 4: Running pytest tests..."
-if $PYTHON38_CMD -m pytest tests/test_basic_generators.py -q 2>/dev/null; then
+if $PYTHON38_CMD -m pytest tests/generator/test_basic_generators.py -q 2>/dev/null; then
     print_success "Pytest tests passed"
 else
     print_error "Pytest tests failed"

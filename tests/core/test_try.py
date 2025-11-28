@@ -222,6 +222,7 @@ class TestAttempt(unittest.TestCase):
 
     def test_attempt_success(self):
         """Test attempt with successful function."""
+
         def successful_func() -> int:
             return 42
 
@@ -231,6 +232,7 @@ class TestAttempt(unittest.TestCase):
 
     def test_attempt_failure(self):
         """Test attempt with failing function."""
+
         def failing_func() -> int:
             raise ValueError("Test exception")
 
@@ -241,6 +243,7 @@ class TestAttempt(unittest.TestCase):
 
     def test_attempt_with_different_exceptions(self):
         """Test attempt catches different exception types."""
+
         def raise_key_error() -> Any:
             raise KeyError("Missing key")
 
@@ -250,6 +253,7 @@ class TestAttempt(unittest.TestCase):
 
     def test_attempt_with_no_return(self):
         """Test attempt with function that returns None."""
+
         def no_return_func() -> None:
             pass
 
@@ -285,22 +289,12 @@ class TestTryChaining(unittest.TestCase):
 
     def test_recover_in_chain(self):
         """Test recover in a chain."""
-        result = (
-            Failure(ValueError("Error"))
-            .recover(lambda e: 42)
-            .map(lambda x: x * 2)
-        )
+        result = Failure(ValueError("Error")).recover(lambda e: 42).map(lambda x: x * 2)
         self.assertIsInstance(result, Success)
         self.assertEqual(result.get(), 84)
 
     def test_filter_failure_in_chain(self):
         """Test filter causing failure in chain."""
-        result = (
-            Success(5)
-            .filter(lambda x: x < 0)
-            .map(lambda x: x * 2)
-        )
+        result = Success(5).filter(lambda x: x < 0).map(lambda x: x * 2)
         self.assertIsInstance(result, Failure)
         self.assertIsInstance(result.get_exception(), ValueError)
-
-

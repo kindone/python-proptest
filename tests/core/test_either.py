@@ -149,41 +149,25 @@ class TestEitherChaining(unittest.TestCase):
 
     def test_right_chain(self):
         """Test chaining multiple operations on Right."""
-        result = (
-            Right(5)
-            .map(lambda x: x * 2)
-            .flat_map(lambda x: Right(x + 1))
-        )
+        result = Right(5).map(lambda x: x * 2).flat_map(lambda x: Right(x + 1))
         self.assertIsInstance(result, Right)
         self.assertEqual(result.get_right(), 11)
 
     def test_left_chain(self):
         """Test chaining operations on Left."""
-        result = (
-            Left("error")
-            .map(lambda x: x * 2)
-            .flat_map(lambda x: Right(x + 1))
-        )
+        result = Left("error").map(lambda x: x * 2).flat_map(lambda x: Right(x + 1))
         self.assertIsInstance(result, Left)
         self.assertEqual(result.get_left(), "error")
 
     def test_map_left_in_chain(self):
         """Test map_left in a chain."""
-        result = (
-            Left(5)
-            .map_left(lambda x: x * 2)
-            .map(lambda x: x + 1)
-        )
+        result = Left(5).map_left(lambda x: x * 2).map(lambda x: x + 1)
         self.assertIsInstance(result, Left)
         self.assertEqual(result.get_left(), 10)
 
     def test_flat_map_left_in_chain(self):
         """Test flat_map with Left in chain."""
-        result = (
-            Right(5)
-            .flat_map(lambda x: Left("error"))
-            .map(lambda x: x * 2)
-        )
+        result = Right(5).flat_map(lambda x: Left("error")).map(lambda x: x * 2)
         self.assertIsInstance(result, Left)
         self.assertEqual(result.get_left(), "error")
 
@@ -220,5 +204,3 @@ class TestEitherErrorHandling(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             result.flat_map(failing_func)
-
-

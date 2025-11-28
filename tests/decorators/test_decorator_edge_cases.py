@@ -16,6 +16,7 @@ class TestDecoratorEdgeCases(unittest.TestCase):
 
     def test_context_detection_without_self(self):
         """Test decorator on function without self parameter."""
+
         @for_all(Gen.int())
         def standalone_test(x: int):
             assert x == x
@@ -25,6 +26,7 @@ class TestDecoratorEdgeCases(unittest.TestCase):
 
     def test_context_detection_class_lookup_failure(self):
         """Test decorator when class lookup fails."""
+
         # Create a function with qualname but class doesn't exist in module
         def fake_func():
             pass
@@ -43,6 +45,7 @@ class TestDecoratorEdgeCases(unittest.TestCase):
         """Test decorator when inspect.getmodule returns None."""
         # Create a mock function where getmodule returns None
         with patch("inspect.getmodule", return_value=None):
+
             @for_all(Gen.int())
             def test_with_no_module(x: int):
                 assert x == x
@@ -53,6 +56,7 @@ class TestDecoratorEdgeCases(unittest.TestCase):
     def test_generator_count_mismatch(self):
         """Test ValueError when generator count doesn't match parameters."""
         with self.assertRaises(ValueError) as cm:
+
             @for_all(Gen.int(), Gen.str())
             def test_wrong_count(x: int):
                 assert x == x
@@ -63,6 +67,7 @@ class TestDecoratorEdgeCases(unittest.TestCase):
     def test_generator_count_mismatch_with_self(self):
         """Test ValueError with self parameter."""
         with self.assertRaises(ValueError) as cm:
+
             @for_all(Gen.int(), Gen.str())
             def test_wrong_count_with_self(self, x: int):
                 assert x == x
@@ -71,6 +76,7 @@ class TestDecoratorEdgeCases(unittest.TestCase):
 
     def test_unittest_import_error(self):
         """Test decorator when unittest import fails."""
+
         # This is hard to test directly, but we can verify the code path exists
         # by checking that ImportError is caught
         @for_all(Gen.int())
@@ -81,6 +87,7 @@ class TestDecoratorEdgeCases(unittest.TestCase):
 
     def test_run_property_test_function(self):
         """Test the run_property_test convenience function."""
+
         @for_all(Gen.int())
         def test_property(x: int):
             assert x == x
@@ -92,6 +99,7 @@ class TestDecoratorEdgeCases(unittest.TestCase):
 
     def test_decorator_preserves_metadata(self):
         """Test that decorator preserves function metadata."""
+
         @for_all(Gen.int())
         def test_with_doc(x: int):
             """This is a test function."""
@@ -134,10 +142,11 @@ class TestDecoratorEdgeCases(unittest.TestCase):
         def test_with_matrix(x: int):
             assert x == x
 
-        self.assertTrue(hasattr(test_with_matrix, "_proptest_matrix"))
+        self.assertTrue(hasattr(test_with_matrix, "_proptest_matrices"))
 
     def test_wrapper_with_exception(self):
         """Test wrapper handles exceptions correctly."""
+
         @for_all(Gen.int())
         def test_that_fails(x: int):
             assert x < 0  # Will fail for positive numbers
@@ -148,6 +157,7 @@ class TestDecoratorEdgeCases(unittest.TestCase):
 
     def test_wrapper_with_assertion_error(self):
         """Test wrapper converts AssertionError appropriately."""
+
         @for_all(Gen.int())
         def test_with_assertion(x: int):
             assert x < 0
@@ -157,6 +167,7 @@ class TestDecoratorEdgeCases(unittest.TestCase):
 
     def test_decorator_on_unittest_method(self):
         """Test decorator on unittest.TestCase method."""
+
         class TestUnittestClass(unittest.TestCase):
             @for_all(Gen.int())
             def test_unittest_method(self, x: int):
@@ -168,6 +179,7 @@ class TestDecoratorEdgeCases(unittest.TestCase):
 
     def test_decorator_on_pytest_style_method(self):
         """Test decorator on pytest-style class method."""
+
         class TestPytestClass:
             @for_all(Gen.int())
             def test_pytest_method(self, x: int):
@@ -179,6 +191,7 @@ class TestDecoratorEdgeCases(unittest.TestCase):
 
     def test_decorator_with_custom_seed(self):
         """Test decorator with custom seed."""
+
         @for_all(Gen.int(), seed=42)
         def test_with_seed(x: int):
             assert x == x
@@ -188,11 +201,10 @@ class TestDecoratorEdgeCases(unittest.TestCase):
 
     def test_decorator_with_custom_num_runs(self):
         """Test decorator with custom num_runs."""
+
         @for_all(Gen.int(), num_runs=50)
         def test_with_runs(x: int):
             assert x == x
 
         self.assertEqual(test_with_runs._proptest_num_runs, 50)
         test_with_runs()
-
-

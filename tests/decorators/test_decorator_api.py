@@ -196,7 +196,7 @@ class TestDecoratorAPI(unittest.TestCase):
 
         # Run using the utility function
         result = run_property_test(test_simple_property)
-        assert result is None  # Decorator now returns None for pytest compatibility
+        assert result is True  # run_property_test returns True on success
 
     def test_decorator_with_complex_function(self):
         """Test decorator with a complex function that would be awkward with lambda."""

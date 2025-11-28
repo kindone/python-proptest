@@ -352,17 +352,38 @@ def run_for_all(
                         is_unittest_method = False
 
                     try:
+                        # Check if function signature has 'self' as first parameter
+                        import inspect
 
-                        def test_property(*generated_values):
-                            try:
-                                func(*generated_values)
-                                return True
-                            except AssertionError:
-                                return False
-                            except Exception as e:
-                                if "Assumption failed" in str(e):
+                        sig = inspect.signature(func)
+                        params = list(sig.parameters.values())
+                        has_self = params and params[0].name == "self"
+
+                        if has_self:
+                            # Function expects self as first parameter
+                            def test_property(*generated_values):
+                                try:
+                                    func(self_obj, *generated_values)
                                     return True
-                                raise
+                                except AssertionError:
+                                    return False
+                                except Exception as e:
+                                    if "Assumption failed" in str(e):
+                                        return True
+                                    raise
+
+                        else:
+                            # Function doesn't have self parameter
+                            def test_property(*generated_values):
+                                try:
+                                    func(*generated_values)
+                                    return True
+                                except AssertionError:
+                                    return False
+                                except Exception as e:
+                                    if "Assumption failed" in str(e):
+                                        return True
+                                    raise
 
                         property_test = Property(test_property, num_runs, seed)
                         property_test.for_all(*all_generators)

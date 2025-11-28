@@ -21,33 +21,60 @@ class TestMatrixDecorator(unittest.TestCase):
         def test_func(x, y):
             pass
 
-        # Check that matrix spec is stored
-        self.assertTrue(hasattr(test_func, "_proptest_matrix"))
-        self.assertEqual(test_func._proptest_matrix, {"x": [1, 2], "y": ["a", "b"]})
+        # Check that matrix specs are stored as a list
+        self.assertTrue(hasattr(test_func, "_proptest_matrices"))
+        self.assertEqual(test_func._proptest_matrices, [{"x": [1, 2], "y": ["a", "b"]}])
 
-    def test_matrix_decorator_merges_multiple_applications(self):
-        """Test that multiple @matrix decorators merge their specifications."""
+    def test_matrix_decorator_stores_multiple_specs_separately(self):
+        """Test that multiple @matrix decorators store separate specifications."""
 
         @matrix(x=[1, 2])
         @matrix(y=["a", "b"])
         def test_func(x, y):
             pass
 
-        # Check that both specs are merged
-        expected = {"x": [1, 2], "y": ["a", "b"]}
-        self.assertEqual(test_func._proptest_matrix, expected)
+        # Check that each decorator creates a separate matrix spec
+        # Decorators are applied bottom-up, so bottom decorator is first in the list
+        expected = [{"y": ["a", "b"]}, {"x": [1, 2]}]
+        self.assertEqual(test_func._proptest_matrices, expected)
 
-    def test_matrix_decorator_overwrites_duplicate_keys(self):
-        """Test that later @matrix decorators overwrite earlier ones for same keys."""
+    def test_matrix_decorator_creates_separate_cases_for_overlapping_keys(self):
+        """Test that overlapping keys in multiple @matrix decorators create separate cases."""
 
         @matrix(x=[1, 2], y=["a"])
         @matrix(x=[3, 4], y=["b", "c"])
         def test_func(x, y):
             pass
 
-        # First decorator (applied last) should overwrite second decorator values
-        expected = {"x": [1, 2], "y": ["a"]}
-        self.assertEqual(test_func._proptest_matrix, expected)
+        # Each decorator creates separate matrix cases (no merging)
+        # Decorators are applied bottom-up, so bottom decorator is first in the list
+        expected = [{"x": [3, 4], "y": ["b", "c"]}, {"x": [1, 2], "y": ["a"]}]
+        self.assertEqual(test_func._proptest_matrices, expected)
+
+    def test_matrix_decorator_allows_partial_keys(self):
+        """Test that @matrix decorators can have different keys (no restriction)."""
+
+        @matrix(x=[3, 4])  # Top decorator - only x
+        @matrix(x=[1, 2], y=["a"])  # Bottom decorator - has x and y
+        def test_func(x, y):
+            pass
+
+        # Each decorator creates separate matrix cases, so partial keys are fine
+        expected = [{"x": [1, 2], "y": ["a"]}, {"x": [3, 4]}]
+        self.assertEqual(test_func._proptest_matrices, expected)
+
+    def test_matrix_decorator_allows_completely_different_keys(self):
+        """Test that completely different keys in multiple decorators are allowed."""
+
+        @matrix(x=[1, 2])
+        @matrix(y=["a", "b"])
+        @matrix(z=[True, False])
+        def test_func(x, y, z):
+            pass
+
+        # Each decorator creates separate matrix cases
+        expected = [{"z": [True, False]}, {"y": ["a", "b"]}, {"x": [1, 2]}]
+        self.assertEqual(test_func._proptest_matrices, expected)
 
     def test_matrix_with_for_all_integration(self):
         """Test that @matrix works with @for_all decorator."""
