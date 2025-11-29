@@ -152,11 +152,9 @@ docs-build:
 		echo "🔧 Creating virtual environment..."; \
 		python3 -m venv venv; \
 	fi
-	@if ! source venv/bin/activate && python -m mkdocs --version >/dev/null 2>&1; then \
-		echo "⚠️  MkDocs not found. Installing documentation dependencies..."; \
-		source venv/bin/activate && pip install -e ".[docs]"; \
-	fi
-	source venv/bin/activate && python -m mkdocs build --strict
+	@echo "🔧 Installing/updating documentation dependencies..."
+	@source venv/bin/activate && pip install -q --upgrade pip && pip install -q -e ".[docs]"
+	@source venv/bin/activate && python -m mkdocs build --strict
 
 docs-serve:
 	@echo "📚 Serving documentation locally..."
@@ -165,11 +163,9 @@ docs-serve:
 		echo "🔧 Creating virtual environment..."; \
 		python3 -m venv venv; \
 	fi
-	@if ! source venv/bin/activate && python -m mkdocs --version >/dev/null 2>&1; then \
-		echo "⚠️  MkDocs not found. Installing documentation dependencies..."; \
-		source venv/bin/activate && pip install -e ".[docs]"; \
-	fi
-	source venv/bin/activate && python -m mkdocs serve
+	@echo "🔧 Installing/updating documentation dependencies..."
+	@source venv/bin/activate && pip install -q --upgrade pip && pip install -q -e ".[docs]"
+	@source venv/bin/activate && python -m mkdocs serve
 
 docs-deploy:
 	@echo "🚀 Deploying documentation to GitHub Pages..."
@@ -177,8 +173,6 @@ docs-deploy:
 		echo "🔧 Creating virtual environment..."; \
 		python3 -m venv venv; \
 	fi
-	@if ! source venv/bin/activate && python -m mkdocs --version >/dev/null 2>&1; then \
-		echo "⚠️  MkDocs not found. Installing documentation dependencies..."; \
-		source venv/bin/activate && pip install -e ".[docs]"; \
-	fi
-	source venv/bin/activate && python -m mkdocs gh-deploy --force
+	@echo "🔧 Installing/updating documentation dependencies..."
+	@source venv/bin/activate && pip install -q --upgrade pip && pip install -q -e ".[docs]"
+	@source venv/bin/activate && python -m mkdocs gh-deploy --force
