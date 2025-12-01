@@ -56,13 +56,18 @@ def for_all(
 
     def decorator(func: Callable) -> Callable:
         # Preserve any existing _proptest_examples / _proptest_settings /
-        # _proptest_matrices
+        # _proptest_matrices / _proptest_for_all_configs
         existing_examples = getattr(func, "_proptest_examples", [])
         existing_settings = getattr(func, "_proptest_settings", {})
         existing_matrices = getattr(func, "_proptest_matrices", [])
+        existing_for_all_configs = getattr(func, "_proptest_for_all_configs", [])
 
         # Get function signature to validate argument count
-        sig = inspect.signature(func)
+        # If function is already wrapped by @for_all, use the original signature
+        if hasattr(func, "_proptest_original_sig"):
+            sig = func._proptest_original_sig  # type: ignore
+        else:
+            sig = inspect.signature(func)
         params = [
             p for p in sig.parameters.values() if p.kind == p.POSITIONAL_OR_KEYWORD
         ]
@@ -159,16 +164,33 @@ def for_all(
                     override_num_runs = existing_settings.get("num_runs", num_runs)
                     override_seed = existing_settings.get("seed", seed)
 
+                    # Execute matrix cases first (do not count toward num_runs)
+                    # Run each matrix spec independently
+                    for matrix_spec in existing_matrices:
+                        _run_matrix_cases(func, args[0], matrix_spec)
+
+                    # Run all @for_all configurations (append behavior)
+                    # Examples are shared across all configs
+                    for config in existing_for_all_configs:
+                        config_generators = config["generators"]
+                        config_num_runs = config.get("num_runs", override_num_runs)
+                        config_seed = config.get("seed", override_seed)
+
+                        property_test = Property(
+                            test_property,
+                            num_runs=config_num_runs,
+                            seed=config_seed,
+                            examples=existing_examples,  # Examples shared across all configs
+                        )
+                        property_test.for_all(*config_generators)
+
+                    # Run the current @for_all configuration
                     property_test = Property(
                         test_property,
                         num_runs=override_num_runs,
                         seed=override_seed,
                         examples=existing_examples,
                     )
-                    # Execute matrix cases first (do not count toward num_runs)
-                    # Run each matrix spec independently
-                    for matrix_spec in existing_matrices:
-                        _run_matrix_cases(func, args[0], matrix_spec)
                     property_test.for_all(*generators)
                     return None  # Test frameworks expect test functions to return
                     # None
@@ -214,16 +236,33 @@ def for_all(
                     override_num_runs = existing_settings.get("num_runs", num_runs)
                     override_seed = existing_settings.get("seed", seed)
 
+                    # Execute matrix cases first (do not count toward num_runs)
+                    # Run each matrix spec independently
+                    for matrix_spec in existing_matrices:
+                        _run_matrix_cases(func, None, matrix_spec)
+
+                    # Run all @for_all configurations (append behavior)
+                    # Examples are shared across all configs
+                    for config in existing_for_all_configs:
+                        config_generators = config["generators"]
+                        config_num_runs = config.get("num_runs", override_num_runs)
+                        config_seed = config.get("seed", override_seed)
+
+                        property_test = Property(
+                            assertion_property,
+                            num_runs=config_num_runs,
+                            seed=config_seed,
+                            examples=existing_examples,  # Examples shared across all configs
+                        )
+                        property_test.for_all(*config_generators)
+
+                    # Run the current @for_all configuration
                     property_test = Property(
                         assertion_property,
                         num_runs=override_num_runs,
                         seed=override_seed,
                         examples=existing_examples,
                     )
-                    # Execute matrix cases first (do not count toward num_runs)
-                    # Run each matrix spec independently
-                    for matrix_spec in existing_matrices:
-                        _run_matrix_cases(func, None, matrix_spec)
                     property_test.for_all(*generators)
                     return None  # Pytest expects test functions to return None
                 except PropertyTestError as e:
@@ -237,6 +276,14 @@ def for_all(
         wrapper.__module__ = func.__module__
         wrapper.__annotations__ = func.__annotations__
 
+        # Store original signature for validation when stacking decorators
+        # If func is already wrapped, preserve its original signature
+        if hasattr(func, "_proptest_original_sig"):
+            wrapper._proptest_original_sig = func._proptest_original_sig  # type: ignore
+        else:
+            # Store the original function's signature (before wrapping)
+            wrapper._proptest_original_sig = sig  # type: ignore
+
         # Add metadata for introspection
         wrapper._proptest_generators = generators  # type: ignore
         wrapper._proptest_num_runs = num_runs  # type: ignore
@@ -249,6 +296,15 @@ def for_all(
         wrapper._proptest_examples = existing_examples  # type: ignore
         wrapper._proptest_settings = existing_settings  # type: ignore
         wrapper._proptest_matrices = existing_matrices  # type: ignore
+
+        # Append this @for_all configuration to the list (append behavior)
+        # Store the configuration for this decorator
+        new_config = {
+            "generators": generators,
+            "num_runs": num_runs,
+            "seed": seed,
+        }
+        wrapper._proptest_for_all_configs = existing_for_all_configs + [new_config]  # type: ignore
 
         return wrapper
 

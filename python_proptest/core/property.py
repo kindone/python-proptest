@@ -332,6 +332,15 @@ def run_for_all(
         def decorator(func: Callable) -> Callable:
             import inspect
 
+            # Preserve any existing _proptest_examples / _proptest_settings /
+            # _proptest_matrices / _proptest_run_for_all_configs
+            existing_examples = getattr(func, "_proptest_examples", [])
+            existing_settings = getattr(func, "_proptest_settings", {})
+            existing_matrices = getattr(func, "_proptest_matrices", [])
+            existing_run_for_all_configs = getattr(
+                func, "_proptest_run_for_all_configs", []
+            )
+
             # Check if this is a nested function inside a test method
             # by looking at the call stack
             frame = inspect.currentframe()
@@ -385,6 +394,17 @@ def run_for_all(
                                         return True
                                     raise
 
+                        # Run all previous @run_for_all configurations
+                        for config in existing_run_for_all_configs:
+                            config_generators = config["generators"]
+                            config_num_runs = config.get("num_runs", num_runs)
+                            config_seed = config.get("seed", seed)
+                            property_test = Property(
+                                test_property, config_num_runs, config_seed
+                            )
+                            property_test.for_all(*config_generators)
+
+                        # Run current configuration
                         property_test = Property(test_property, num_runs, seed)
                         property_test.for_all(*all_generators)
                         # Return the original function for potential inspection
@@ -403,7 +423,11 @@ def run_for_all(
 
             # Not a nested function in test method - return wrapper for test framework
             # Get function signature
-            sig = inspect.signature(func)
+            # If function is already wrapped by @run_for_all, use the original signature
+            if hasattr(func, "_proptest_original_sig"):
+                sig = func._proptest_original_sig  # type: ignore
+            else:
+                sig = inspect.signature(func)
             params = [
                 p for p in sig.parameters.values() if p.kind == p.POSITIONAL_OR_KEYWORD
             ]
@@ -439,6 +463,29 @@ def run_for_all(
                     f"were provided"
                 )
 
+            # If func is already wrapped, update its existing configs list
+            # Otherwise, create a new list
+            if hasattr(func, "_proptest_run_for_all_configs"):
+                # Update the existing list (shared via closure in the existing wrapper)
+                shared_configs = func._proptest_run_for_all_configs  # type: ignore
+                shared_configs.append(
+                    {
+                        "generators": all_generators,
+                        "num_runs": num_runs,
+                        "seed": seed,
+                    }
+                )
+            else:
+                # Create a new list
+                shared_configs = list(existing_run_for_all_configs)
+                shared_configs.append(
+                    {
+                        "generators": all_generators,
+                        "num_runs": num_runs,
+                        "seed": seed,
+                    }
+                )
+
             def wrapper(*args, **kwargs):
                 # For test methods, args[0] is 'self'
                 if is_test_method and len(args) == 1:
@@ -458,8 +505,28 @@ def run_for_all(
                                     return True
                                 raise
 
-                        property_test = Property(test_property, num_runs, seed)
-                        property_test.for_all(*all_generators)
+                        # Apply settings overrides if provided
+                        override_num_runs = existing_settings.get("num_runs", num_runs)
+                        override_seed = existing_settings.get("seed", seed)
+
+                        # Execute matrix cases first (do not count toward num_runs)
+                        # Run each matrix spec independently
+                        from .decorators import _run_matrix_cases
+
+                        for matrix_spec in existing_matrices:
+                            _run_matrix_cases(func, self_obj, matrix_spec)
+
+                        # Run all @run_for_all configurations (append behavior)
+                        # Use shared_configs from closure (will be updated when attribute is set)
+                        # Examples are shared across all configs
+                        for config in shared_configs:
+                            config_generators = config["generators"]
+                            config_num_runs = config.get("num_runs", override_num_runs)
+                            config_seed = config.get("seed", override_seed)
+                            property_test = Property(
+                                test_property, config_num_runs, config_seed
+                            )
+                            property_test.for_all(*config_generators)
                         return None
 
                     except PropertyTestError as e:
@@ -479,9 +546,33 @@ def run_for_all(
                                 return True
                             except AssertionError:
                                 return False
+                            except Exception as e:
+                                if "Assumption failed" in str(e):
+                                    return True
+                                raise
 
-                        property_test = Property(test_property, num_runs, seed)
-                        property_test.for_all(*all_generators)
+                        # Apply settings overrides if provided
+                        override_num_runs = existing_settings.get("num_runs", num_runs)
+                        override_seed = existing_settings.get("seed", seed)
+
+                        # Execute matrix cases first (do not count toward num_runs)
+                        # Run each matrix spec independently
+                        from .decorators import _run_matrix_cases
+
+                        for matrix_spec in existing_matrices:
+                            _run_matrix_cases(func, None, matrix_spec)
+
+                        # Run all @run_for_all configurations (append behavior)
+                        # Use shared_configs from closure (will be updated when attribute is set)
+                        # Examples are shared across all configs
+                        for config in shared_configs:
+                            config_generators = config["generators"]
+                            config_num_runs = config.get("num_runs", override_num_runs)
+                            config_seed = config.get("seed", override_seed)
+                            property_test = Property(
+                                test_property, config_num_runs, config_seed
+                            )
+                            property_test.for_all(*config_generators)
                         return None
 
                     except PropertyTestError as e:
@@ -496,6 +587,24 @@ def run_for_all(
             wrapper.__doc__ = func.__doc__
             wrapper.__module__ = func.__module__
             wrapper.__annotations__ = func.__annotations__
+
+            # Store original signature for validation when stacking decorators
+            # If func is already wrapped, preserve its original signature
+            if hasattr(func, "_proptest_original_sig"):
+                wrapper._proptest_original_sig = func._proptest_original_sig  # type: ignore
+            else:
+                # Store the original function's signature (before wrapping)
+                wrapper._proptest_original_sig = sig  # type: ignore
+
+            # Preserve examples, settings, and matrices from other decorators
+            wrapper._proptest_examples = existing_examples  # type: ignore
+            wrapper._proptest_settings = existing_settings  # type: ignore
+            wrapper._proptest_matrices = existing_matrices  # type: ignore
+
+            # Append this @run_for_all configuration to the list (append behavior)
+            # Store the configuration for this decorator
+            # Update shared_configs to match what we set on the wrapper
+            wrapper._proptest_run_for_all_configs = shared_configs  # type: ignore
 
             return wrapper
 
