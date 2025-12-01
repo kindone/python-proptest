@@ -1,6 +1,6 @@
 # python-proptest
 
-A property-based testing framework for Python, inspired by Haskell's QuickCheck and Python's Hypothesis.
+A property-based testing framework for Python, ported from cppproptest and inspired by Haskell's QuickCheck and Python's Hypothesis.
 
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
@@ -12,7 +12,7 @@ A property-based testing framework for Python, inspired by Haskell's QuickCheck 
 
 Property-based testing shifts the focus from example-based verification to defining universal *properties* or *invariants* that must hold true for an input domain. Instead of manually crafting test cases for specific inputs, you describe the *domain* of inputs your function expects and the *general characteristics* of the output.
 
-python-proptest then generates hundreds or thousands of varied inputs, searching for edge cases or unexpected behaviors that violate your defined properties. This approach significantly increases test coverage and the likelihood of finding subtle bugs.
+python-proptest then generates hundreds of varied inputs, searching for edge cases or unexpected behaviors that violate your defined properties. This approach significantly increases test coverage, the likelihood of finding subtle bugs, and developer confidence in code correctness.
 
 ## Quick Start
 
@@ -33,66 +33,28 @@ pip install python-proptest[dev]
 ```python
 from python_proptest import run_for_all, Gen
 
-def test_simple_properties():
-    # Suitable for simple lambda-based properties
-    result = run_for_all(
-        lambda x, y: x + y == y + x,  # Addition is commutative
-        Gen.int(), Gen.int()
-    )
+# Suitable for simple lambda-based properties
+result = run_for_all(
+    lambda x, y: x + y == y + x,  # Addition is commutative
+    Gen.int(), Gen.int()
+)
 
-    result = run_for_all(
-        lambda x: isinstance(x, int),  # Type check
-        Gen.int(min_value=0, max_value=100)
-    )
+result = run_for_all(
+    lambda x: isinstance(x, int),  # Type check
+    Gen.int(min_value=0, max_value=100)
+)
 
-    assert result is True
+assert result is True
 ```
 
 ### Framework Integration
 
-**python-proptest works with both pytest and unittest.** Just add the `@for_all` decorator to your test methods, and python-proptest automatically generates hundreds of random test cases:
-
-**Pytest Integration:**
-```python
-import pytest
-from python_proptest import for_all, Gen, matrix, example, settings
-
-class TestMathProperties:
-    @for_all(Gen.int(), Gen.int())
-    def test_addition_commutativity(self, x: int, y: int):
-        """Test that addition is commutative - automatically runs 100+ random cases."""
-        assert x + y == y + x
-
-    @for_all(Gen.int(), Gen.int())
-    def test_multiplication_associativity(self, x: int, y: int, z: int):
-        """Test that multiplication is associative."""
-        assert (x * y) * z == x * (y * z)
-
-class TestStringProperties:
-    @for_all(Gen.str(), Gen.str())
-    def test_string_concatenation(self, s1: str, s2: str):
-        """Test string concatenation properties."""
-        result = s1 + s2
-        assert len(result) == len(s1) + len(s2)
-        assert result.startswith(s1)
-        assert result.endswith(s2)
-
-class TestMatrixProperties:
-    @for_all(Gen.int(), Gen.int())
-    @matrix(x=[0, 1, -1], y=[0, 1, -1])  # Test edge cases exhaustively
-    @example(42, 24)                      # Test specific known values
-    @settings(num_runs=50, seed=42)       # Configure test parameters
-    def test_addition_with_matrix(self, x: int, y: int):
-        """Test addition with matrix cases, examples, and random generation."""
-        assert x + y == y + x
-
-# Run pytest. Methods are automatically parameterized
-```
+**python-proptest works seamlessly with unittest (the default Python testing framework) and pytest.** Just add the `@for_all` decorator to your test methods, and python-proptest automatically generates hundreds of random test cases:
 
 **Unittest Integration:**
 ```python
 import unittest
-from python_proptest import for_all, Gen
+from python_proptest import for_all, Gen, matrix, example, settings
 
 class TestMathProperties(unittest.TestCase):
     @for_all(Gen.int(), Gen.int())
@@ -100,7 +62,7 @@ class TestMathProperties(unittest.TestCase):
         """Test that addition is commutative - automatically runs 100+ random cases."""
         self.assertEqual(x + y, y + x)
 
-    @for_all(Gen.int(), Gen.int())
+    @for_all(Gen.int(), Gen.int(), Gen.int())
     def test_multiplication_associativity(self, x: int, y: int, z: int):
         """Test that multiplication is associative."""
         self.assertEqual((x * y) * z, x * (y * z))
@@ -114,8 +76,21 @@ class TestStringProperties(unittest.TestCase):
         self.assertTrue(result.startswith(s1))
         self.assertTrue(result.endswith(s2))
 
+class TestMatrixProperties(unittest.TestCase):
+    @example(-2, 100)                    # Test specific known values
+    @example(42, 24)                     # decorators can appear multiple times
+    @matrix(x=[0, 1, -1], y=[0, 1, -1])  # Test combination of edge cases exhaustively
+    @for_all(Gen.int(), Gen.int())       # Test larger domain with randomization
+    @settings(num_runs=50, seed=42)      # Configure test parameters
+    def test_addition_with_matrix(self, x: int, y: int):
+        """Test addition with matrix cases, examples, and random generation."""
+        self.assertEqual(x + y, y + x)
+
 # Run unittest. Methods are automatically parameterized
 ```
+
+**Pytest Integration:**
+The same decorators work with pytest - just use `assert` instead of `self.assertEqual()` and `self.assertTrue()`. Pytest users can follow the same patterns shown above.
 
 
 ### Standalone Function-Based Tests
@@ -147,7 +122,7 @@ test_complex_math_property()
 - **🎯 Reproducible Tests**: Support for seeds to make tests deterministic
 - **💡 Type Safety**: Full type hints support for better IDE integration
 
-## Examples
+## More Examples
 
 ### Testing List Operations
 

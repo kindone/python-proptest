@@ -1,8 +1,8 @@
 # python-proptest
 
-`python-proptest` is a property-based testing (PBT) framework for Python, drawing inspiration from libraries such as Haskell's QuickCheck and Python's Hypothesis. Property-based testing shifts the focus from example-based verification to defining universal *properties* or *invariants* that must hold true for an input domain.
+`python-proptest` is a property-based testing (PBT) framework ported from for `cppproptest`, drawing inspiration from libraries such as Haskell's QuickCheck and Python's Hypothesis. Property-based testing shifts the focus from example-based verification to defining universal *properties* or *invariants* that must hold true for an input domain.
 
-python-proptest provides seamless integration with pytest through the `@for_all` decorator, automatically detecting pytest context and adapting behavior accordingly.
+python-proptest provides seamless integration with `unittest` or `pytest` through the convenient decorators like `@for_all`, automatically detecting pytest context and adapting behavior accordingly.
 
 Instead of manually crafting test cases for specific inputs, PBT allows you to describe the *domain* of inputs your function expects and the *general characteristics* of the output (e.g., `add(a, b)` should always be greater than or equal to `a` and `b` if they are non-negative). PBT then generates hundreds or thousands of varied inputs, searching for edge cases or unexpected behaviors that violate your defined properties. This approach significantly increases test coverage and the likelihood of finding subtle bugs.
 
@@ -20,23 +20,22 @@ Consider verifying a round-trip property for a custom parser/serializer:
 import json
 from python_proptest import run_for_all, Gen
 
-def test_serialize_parse_roundtrip():
-    """Test that serializing and parsing preserves data."""
-    # Generator for keys (non-empty strings without special characters)
-    key_gen = Gen.str(min_length=1, max_length=10).filter(
-        lambda s: s and '&' not in s and '=' not in s
-    )
-    # Generator for arbitrary string values
-    value_gen = Gen.str(min_length=0, max_length=10)
-    # Generator for dictionaries with our specific keys and values
-    data_object_gen = Gen.dict(key_gen, value_gen, min_size=0, max_size=10)
+"""Test that serializing and parsing preserves data."""
+# Generator for keys (non-empty strings without special characters)
+key_gen = Gen.str(min_length=1, max_length=10).filter(
+    lambda s: s and '&' not in s and '=' not in s
+)
+# Generator for arbitrary string values
+value_gen = Gen.str(min_length=0, max_length=10)
+# Generator for dictionaries with our specific keys and values
+data_object_gen = Gen.dict(key_gen, value_gen, min_size=0, max_size=10)
 
-    # Simple lambda-based property - perfect for run_for_all
-    result = run_for_all(
-        lambda original_data: json.loads(json.dumps(original_data)) == original_data,
-        data_object_gen
-    )
-    assert result is True
+# Simple lambda-based property is suitable for run_for_all
+result = run_for_all(
+    lambda original_data: json.loads(json.dumps(original_data)) == original_data,
+    data_object_gen
+)
+assert result is True
 ```
 
 This PBT approach facilitates the discovery of edge cases and intricate bugs that might be neglected by traditional, example-driven testing methodologies.
@@ -151,9 +150,9 @@ def test_addition_commutativity():
 ```python
 from python_proptest import for_all, Gen, example, settings, matrix
 
-@for_all(Gen.int(), Gen.int())
-@matrix(x=[0, 1], y=[0, 1])  # Test edge cases exhaustively
-@example(42, 24)             # Test specific known values
+@for_all(Gen.int(), Gen.int())   # Test domain with random generated values
+@matrix(x=[0, 1], y=[0, 1])      # Test combination of edge cases exhaustively
+@example(42, 24)                 # Test specific known values
 @settings(num_runs=50, seed=42)  # Configure test parameters
 def test_addition_commutativity(x: int, y: int):
     assert x + y == y + x
@@ -164,19 +163,7 @@ test_addition_commutativity()
 
 ### 3. Framework Integration
 
-The `@for_all` decorator integrates with both pytest and unittest using direct decoration:
-
-**Pytest Integration:**
-```python
-import pytest
-from python_proptest import for_all, Gen
-
-class TestMathProperties:
-    @for_all(Gen.int(), Gen.int())
-    def test_addition_commutativity(self, x: int, y: int):
-        """Test that addition is commutative - direct decoration."""
-        assert x + y == y + x
-```
+The `@for_all` decorator integrates with both `unittest` and `pytest` using direct decoration:
 
 **Unittest Integration:**
 ```python
@@ -190,6 +177,17 @@ class TestMathProperties(unittest.TestCase):
         self.assertEqual(x + y, y + x)
 ```
 
+**Pytest Integration:**
+```python
+import pytest
+from python_proptest import for_all, Gen
+
+class TestMathProperties:
+    @for_all(Gen.int(), Gen.int())
+    def test_addition_commutativity(self, x: int, y: int):
+        """Test that addition is commutative - direct decoration."""
+        assert x + y == y + x
+```
 
 ## Choosing the Right Approach
 
@@ -202,61 +200,76 @@ Suitable for simple property checks that can be expressed as lambdas:
 ```python
 from python_proptest import run_for_all, Gen
 
-def test_simple_properties():
-    # Type checks
-    result = run_for_all(
-        lambda x: isinstance(x, int),
-        Gen.int(min_value=0, max_value=100)
-    )
+# Type checks
+result = run_for_all(
+    lambda x: isinstance(x, int),
+    Gen.int(min_value=0, max_value=100)
+)
 
-    # Range validations
-    result = run_for_all(
-        lambda x: 0 <= x <= 100,
-        Gen.int(min_value=0, max_value=100)
-    )
+# Range validations
+result = run_for_all(
+    lambda x: 0 <= x <= 100,
+    Gen.int(min_value=0, max_value=100)
+)
 
-    # Simple assertions
-    result = run_for_all(
-        lambda lst: all(isinstance(x, int) for x in lst),
-        Gen.list(Gen.int())
-    )
+# Simple assertions
+result = run_for_all(
+    lambda lst: all(isinstance(x, int) for x in lst),
+    Gen.list(Gen.int())
+)
 ```
 
-### Use `@run_for_all` Decorator for Complex Generators
+### Use `@run_for_all` Decorator for Named Functions
 
-Perfect for working with `chain`, `aggregate`, and `accumulate` combinators:
+While standalone `run_for_all` function can only work on lambdas,
+`@run_for_all` decorator can work on a named function.
 
 ```python
 from python_proptest import run_for_all, Gen
-import unittest
 
-class TestDependencies(unittest.TestCase):
-    def test_chain_dependency(self):
-        gen = Gen.chain(Gen.int(1, 10), lambda x: Gen.int(x, x + 10))
+gen = Gen.chain(Gen.int(1, 10), lambda x: Gen.int(x, x + 10))
 
-        @run_for_all(gen, num_runs=50)
-        def check_dependency(pair):
-            base, dependent = pair
-            self.assertGreaterEqual(dependent, base)
-            self.assertLessEqual(dependent, base + 10)
-        # Auto-executes when decorated!
+@run_for_all(gen, num_runs=50)
+def check_dependency(pair):
+    base, dependent = pair
+    self.assertGreaterEqual(dependent, base)
+    self.assertLessEqual(dependent, base + 10)
+# Auto-executes when decorated!
 
-    def test_aggregate_sequence(self):
-        gen = Gen.aggregate(
-            Gen.int(0, 10),
-            lambda n: Gen.int(n, n + 5),
-            min_size=5, max_size=10
-        )
 
-        @run_for_all(gen, num_runs=30)
-        def check_increasing(values):
-            for i in range(1, len(values)):
-                self.assertGreaterEqual(values[i], values[i - 1])
+gen = Gen.aggregate(
+    Gen.int(0, 10),
+    lambda n: Gen.int(n, n + 5),
+    min_size=5, max_size=10
+)
+
+@run_for_all(gen, num_runs=30)
+def check_increasing(values):
+    for i in range(1, len(values)):
+        self.assertGreaterEqual(values[i], values[i - 1])
 ```
 
-### Use `@for_all` for Independent Generators
+### Use `@for_all` for Test Frameworks
 
-Suitable for complex assertions with multiple independent parameters:
+`@for_all` decorator can be used to create a property-based test in a test frameworks like `unittest` or `pytest`.
+Method parameters are randomized according to the specified generators and the method body is wrapped within a property-based test loop.
+As a result, the method becomes a conforming test case of the test framework.
+
+```python
+import unittest
+from python_proptest import for_all, Gen
+
+class TestStringProperties(unittest.TestCase):
+    @for_all(Gen.str(), Gen.str())
+    def test_string_concatenation(self, s1: str, s2: str):
+        """Test string concatenation properties."""
+        result = s1 + s2
+        self.assertEqual(len(result), len(s1) + len(s2))
+        self.assertTrue(result.startswith(s1))
+        self.assertTrue(result.endswith(s2))
+```
+
+Note that `@for_all` decorator does not itself executes the test and let it execute by the containing framework whereas `@run_for_all` does the execution as well.
 
 ```python
 from python_proptest import for_all, Gen
@@ -269,21 +282,24 @@ def test_complex_math_property(x: int, y: int):
     assert result >= y
     assert result % 2 == (x + y) % 2
 
-@for_all(Gen.str(), Gen.str())
+# need to call the function explicitly to execute the property test
+test_complex_math_property()
+
+# this one does not need explicit call
+@run_for_all(Gen.str(), Gen.str())
 def test_string_operations(s1: str, s2: str):
     """Test string operations with multiple assertions."""
     combined = s1 + s2
     assert len(combined) == len(s1) + len(s2)
     assert combined.startswith(s1)
     assert combined.endswith(s2)
+
 ```
 
 ### Guidelines
 
-- **Use `run_for_all` function** for simple property checks with lambdas
-- **Use `@run_for_all` decorator** for complex generators (`chain`, `aggregate`, `accumulate`) with auto-execution
-- **Use `@for_all`** for complex assertions with multiple independent parameters
-- **Use `run_for_all`** for seed-based reproducibility testing
-- **Use `@run_for_all`** when you want the property test to execute immediately in nested contexts
+- **Use `run_for_all` function** for immediately testing a property with a lambda with single statement
+- **Use `@run_for_all` decorator** for immediately testing a property with a named functions with longer body
+- **Use `@for_all`** for use in test frameworks like `unittest` or `pytest`.
 
-All approaches provide the same functionality - choose based on your testing framework and preferences. For more details on decorators, see [Decorators](decorators.md). For framework integration, see [Pytest Integration](pytest-integration.md), [Unittest Integration](unittest-integration.md), and [Pytest Best Practices](pytest-best-practices.md).
+All approaches reach the same goal - choose based on your testing framework and preferences. For more details on decorators, see [Decorators](decorators.md). For framework integration, see [Pytest Integration](pytest-integration.md), [Unittest Integration](unittest-integration.md), and [Pytest Best Practices](pytest-best-practices.md).

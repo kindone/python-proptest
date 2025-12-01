@@ -53,10 +53,10 @@ plugins:
 
 nav:
   - 'Introduction': index.md
+  - 'Decorators': decorators.md
+  - 'Properties': properties.md
   - 'Generators': generators.md
   - 'Combinators': combinators.md
-  - 'Properties': properties.md
-  - 'Decorators': decorators.md
   - 'Shrinking': shrinking.md
   - 'Stateful Testing': stateful-testing.md
   - 'Pytest Integration': pytest-integration.md
