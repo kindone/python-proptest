@@ -85,9 +85,22 @@ class Shrinkable(Generic[T]):
     def and_then(
         self, shrink_func: Callable[["Shrinkable[T]"], Stream["Shrinkable[T]"]]
     ) -> "Shrinkable[T]":
-        """Replace shrinking candidates with new ones that depend on the current
-        value."""
-        return Shrinkable(self.value, lambda: shrink_func(self))
+        """
+        Replace shrinking candidates with new ones that depend on the current value.
+
+        Matches cppproptest's andThen behavior:
+        - If current shrinks are empty, applies shrink_func to self
+        - Otherwise, recursively applies and_then to each shrink in the stream
+        """
+        current_shrinks = self.shrinks()
+        if current_shrinks.is_empty():
+            return Shrinkable(self.value, lambda: shrink_func(self))
+        else:
+
+            def transformed_shrinks() -> Stream["Shrinkable[T]"]:
+                return current_shrinks.map(lambda shrink: shrink.and_then(shrink_func))
+
+            return Shrinkable(self.value, transformed_shrinks)
 
     def map(self, func: Callable[[T], U]) -> "Shrinkable[U]":
         """Transform the value and all shrinking candidates."""

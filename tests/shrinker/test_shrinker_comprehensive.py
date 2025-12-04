@@ -176,24 +176,29 @@ class TestShrinkerComprehensive(unittest.TestCase):
 
     def test_shrinkable_and_then(self):
         """Test and_then method."""
-        # Test 1: Simple case
+        # Test 1: Simple case - no existing shrinks
         shr = Shrinkable(100)
         shr2 = shr.and_then(lambda _: Stream.one(Shrinkable(200)))
         assert serialize_shrinkable(shr2) == '{"value":100,"shrinks":[{"value":200}]}'
 
-        # Test 2: With existing shrinks - and_then REPLACES shrinks, doesn't add to them
-        # So it applies the function to the parent (value 2), not to each child
+        # Test 2: With existing shrinks - and_then recursively applies to each child
+        # Matches cppproptest behavior: each child gets and_then applied recursively
         shr = gen_shrinkable_21()
         shr2 = shr.and_then(lambda parent: Stream.one(Shrinkable(parent.value + 5)))
-        # The function is applied to the parent (2), so we get 2 + 5 = 7
-        expected = '{"value":2,"shrinks":[{"value":7}]}'
+        # The function is recursively applied to each child:
+        # - Child 0 gets 0 + 5 = 5
+        # - Child 1 gets 1 + 5 = 6
+        expected = '{"value":2,"shrinks":[{"value":0,"shrinks":[{"value":5}]},{"value":1,"shrinks":[{"value":6}]}]}'
         assert serialize_shrinkable(shr2) == expected
 
-        # Test 3: Complex case - same behavior
+        # Test 3: Complex case - same recursive behavior
         shr = gen_shrinkable_40213()
         shr2 = shr.and_then(lambda parent: Stream.one(Shrinkable(parent.value + 1)))
-        # The function is applied to the parent (4), so we get 4 + 1 = 5
-        expected = '{"value":4,"shrinks":[{"value":5}]}'
+        # The function is recursively applied to each child:
+        # - Child 0 gets 0 + 1 = 1
+        # - Child 2 gets 2 + 1 = 3 (and its child 1 gets 1 + 1 = 2)
+        # - Child 3 gets 3 + 1 = 4
+        expected = '{"value":4,"shrinks":[{"value":0,"shrinks":[{"value":1}]},{"value":2,"shrinks":[{"value":1,"shrinks":[{"value":2}]}]},{"value":3,"shrinks":[{"value":4}]}]}'
         assert serialize_shrinkable(shr2) == expected
 
     def test_shrinkable_map(self):

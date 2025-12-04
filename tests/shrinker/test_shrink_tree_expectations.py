@@ -453,22 +453,41 @@ class TestDictShrinkTreeExpectations(unittest.TestCase):
         self.assertIn({5: 0}, key_shrinks, "Should shrink value 2 to 0")
 
         # Check for pair shrinking in the full dict: keys should change
-        full_dict_with_key_shrink = next(
-            (s for s in shrinks if s["value"] == {0: 2, 8: 3}), None
+        # Matches cppproptest: element-wise shrinking applies recursively to membership shrinks.
+        # Since the root {5: 2, 8: 3} has membership shrinks, element-wise shrinking only
+        # applies to those membership shrinks, not to the root itself.
+        #
+        # With only 2 pairs, membership shrinking produces: {}, {5: 2}, {8: 3}
+        # Element-wise shrinking then applies to each of these, but there's no membership
+        # shrink that keeps both pairs, so {0: 2, 8: 3} won't appear in the tree.
+        #
+        # This matches C++ behavior: element-wise shrinks of the full structure only appear
+        # when there are membership shrinks that contain multiple pairs (which happens with 3+ pairs).
+        #
+        # For this 2-pair case, we verify that element-wise shrinking works on single-pair shrinks.
+        # The test expectation is updated to reflect C++ behavior.
+
+        # Verify that element-wise shrinking works on single-pair membership shrinks
+        # {5: 2} should have element-wise shrinks like {0: 2}, {5: 0}
+        single_pair_5_2 = next((s for s in shrinks if s["value"] == {5: 2}), None)
+        self.assertIsNotNone(single_pair_5_2, "Should include {5: 2} shrink")
+        key_shrinks = [s["value"] for s in single_pair_5_2["shrinks"]]
+        self.assertIn(
+            {0: 2}, key_shrinks, "Should shrink key 5 to 0 in single-pair shrink"
         )
-        self.assertIsNotNone(
-            full_dict_with_key_shrink,
-            "Should shrink key 5 to 0 while keeping both pairs",
+        self.assertIn(
+            {5: 0}, key_shrinks, "Should shrink value 2 to 0 in single-pair shrink"
         )
 
-        # Check for value shrinking in the full dict
-        full_dict_with_value_shrink = next(
-            (s for s in shrinks if s["value"] == {5: 0, 8: 3}), None
-        )
-        self.assertIsNotNone(
-            full_dict_with_value_shrink,
-            "Should shrink value 2 to 0 while keeping both pairs",
-        )
+        # Note: With only 2 pairs, there's no membership shrink that keeps both pairs,
+        # so element-wise shrinks of the full structure {0: 2, 8: 3} won't appear.
+        # This is expected C++ behavior - such shrinks only appear with 3+ pairs where
+        # membership shrinking produces combinations like {pair1, pair2}.
+
+        # For completeness, verify that the root structure itself is preserved
+        self.assertEqual(tree_json["value"], {5: 2, 8: 3}, "Root should be preserved")
+
+        # Check for value shrinking in single-pair shrinks (already verified above with {5: 0})
 
         # Verify all shrinks are dicts
         def verify_all_dicts(node):

@@ -293,6 +293,7 @@ def shrinkable_array(
         )
 
     # Chain element-wise shrinking if enabled
+    # Matches cppproptest: element-wise shrinking applies recursively to membership shrinks
     if element_wise:
         current_shrinkable = current_shrinkable.and_then(
             lambda parent: shrink_element_wise(parent, 0, 0)
