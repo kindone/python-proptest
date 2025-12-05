@@ -2,28 +2,30 @@
 
 import unittest
 
-from python_proptest import Gen, PropertyTestError, run_for_all
+from python_proptest import Gen, PropertyTestError, for_all, run_for_all
 
 
 class TestGeneratorTransformations(unittest.TestCase):
     """Cover transformation APIs on generators."""
 
-    def test_map_transformation_preserves_structure(self):
+    @for_all(
+        Gen.int(min_value=1, max_value=50).map(lambda value: f"Value: {value}"),
+        num_runs=200,
+    )
+    def test_map_transformation_preserves_structure(self, value: str):
         """Mapping integers to strings keeps formatting contract."""
 
-        generator = Gen.int(min_value=1, max_value=50).map(lambda value: f"Value: {value}")
+        self.assertTrue(value.startswith("Value: "))
+        self.assertTrue(value[7:].isdigit())
 
-        def predicate(value: str) -> bool:
-            return value.startswith("Value: ") and value[7:].isdigit()
-
-        run_for_all(predicate, generator, num_runs=200)
-
-    def test_filter_removes_odd_numbers(self):
+    @for_all(
+        Gen.int(min_value=0, max_value=100).filter(lambda value: value % 2 == 0),
+        num_runs=200,
+    )
+    def test_filter_removes_odd_numbers(self, value: int):
         """Filtering even values ensures modulus predicate holds."""
 
-        generator = Gen.int(min_value=0, max_value=100).filter(lambda value: value % 2 == 0)
-
-        run_for_all(lambda value: value % 2 == 0, generator, num_runs=200)
+        self.assertEqual(value % 2, 0)
 
     def test_filter_impossible_predicate_raises(self):
         """Impossible filter must surface ``ValueError`` via ``PropertyTestError``."""
@@ -35,26 +37,23 @@ class TestGeneratorTransformations(unittest.TestCase):
 
         self.assertIsInstance(ctx.exception.__cause__, ValueError)
 
-    def test_flat_map_generates_nested_constraints(self):
-        """Flat map allows dependent ranges to stay consistent."""
-
-        generator = Gen.int(min_value=1, max_value=5).flat_map(
+    @for_all(
+        Gen.int(min_value=1, max_value=5).flat_map(
             lambda length: Gen.list(
                 Gen.int(0, 10),
                 min_length=length,
                 max_length=length,
             ).map(lambda items: (length, items))
-        )
+        ),
+        num_runs=200,
+    )
+    def test_flat_map_generates_nested_constraints(self, value):
+        """Flat map allows dependent ranges to stay consistent."""
 
-        def predicate(value):
-            length, items = value
-            return (
-                isinstance(length, int)
-                and length == len(items)
-                and all(isinstance(elem, int) and 0 <= elem <= 10 for elem in items)
-            )
-
-        run_for_all(predicate, generator, num_runs=200)
+        length, items = value
+        self.assertIsInstance(length, int)
+        self.assertEqual(length, len(items))
+        self.assertTrue(all(isinstance(elem, int) and 0 <= elem <= 10 for elem in items))
 
     def test_flat_map_shrinks_maintain_dependency(self):
         """Shrinking keeps dependent values aligned with the base value."""

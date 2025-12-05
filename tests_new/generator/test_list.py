@@ -2,43 +2,30 @@
 
 import unittest
 
-from python_proptest import Gen, PropertyTestError, run_for_all
+from python_proptest import Gen, PropertyTestError, for_all, run_for_all
 
 
 class TestListGenerator(unittest.TestCase):
     """Cover list-oriented generators and shrinking behaviour."""
 
-    def test_list_respects_length_and_element_type(self):
+    @for_all(Gen.list(Gen.int(min_value=0, max_value=10), min_length=0, max_length=5), num_runs=200)
+    def test_list_respects_length_and_element_type(self, value):
         """Generated lists honour declared bounds and element generators."""
 
-        def predicate(value):
-            return (
-                isinstance(value, list)
-                and 0 <= len(value) <= 5
-                and all(isinstance(elem, int) and 0 <= elem <= 10 for elem in value)
-            )
+        self.assertIsInstance(value, list)
+        self.assertLessEqual(len(value), 5)
+        self.assertTrue(all(isinstance(elem, int) and 0 <= elem <= 10 for elem in value))
 
-        run_for_all(
-            predicate,
-            Gen.list(Gen.int(min_value=0, max_value=10), min_length=0, max_length=5),
-            num_runs=200,
-        )
-
-    def test_unique_list_contains_no_duplicates(self):
+    @for_all(
+        Gen.unique_list(Gen.int(min_value=0, max_value=10), min_length=0, max_length=5),
+        num_runs=200,
+    )
+    def test_unique_list_contains_no_duplicates(self, value):
         """``Gen.unique_list`` produces strictly unique elements."""
 
-        def predicate(value):
-            return (
-                isinstance(value, list)
-                and value == sorted(value)
-                and len(value) == len(set(value))
-            )
-
-        run_for_all(
-            predicate,
-            Gen.unique_list(Gen.int(min_value=0, max_value=10), min_length=0, max_length=5),
-            num_runs=200,
-        )
+        self.assertIsInstance(value, list)
+        self.assertEqual(value, sorted(value))
+        self.assertEqual(len(value), len(set(value)))
 
     def test_list_shrinks_to_minimum_length(self):
         """Failing property shrinks towards the declared minimum length."""

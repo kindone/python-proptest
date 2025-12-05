@@ -2,30 +2,28 @@
 
 import unittest
 
-from python_proptest import Gen, PropertyTestError, run_for_all
+from python_proptest import Gen, PropertyTestError, for_all, run_for_all
 
 
 class TestAggregateGenerator(unittest.TestCase):
     """Exercise ``Gen.aggregate`` behaviour across scenarios."""
 
-    def test_increasing_sequence_respects_bounds(self):
-        """Aggregate sequences stay non-decreasing within declared length bounds."""
-
-        generator = Gen.aggregate(
+    @for_all(
+        Gen.aggregate(
             Gen.int(0, 10),
             lambda value: Gen.int(value, value + 5),
             min_size=3,
             max_size=5,
-        )
+        ),
+        num_runs=200,
+    )
+    def test_increasing_sequence_respects_bounds(self, values):
+        """Aggregate sequences stay non-decreasing within declared length bounds."""
 
-        def predicate(values):
-            if not isinstance(values, list):
-                return False
-            if not (3 <= len(values) <= 5):
-                return False
-            return all(values[i] <= values[i + 1] for i in range(len(values) - 1))
-
-        run_for_all(predicate, generator, num_runs=200)
+        self.assertIsInstance(values, list)
+        self.assertGreaterEqual(len(values), 3)
+        self.assertLessEqual(len(values), 5)
+        self.assertTrue(all(values[i] <= values[i + 1] for i in range(len(values) - 1)))
 
     def test_zero_min_size_allows_empty_list(self):
         """Aggregate with min size 0 can shrink to empty list on failure."""
@@ -42,22 +40,22 @@ class TestAggregateGenerator(unittest.TestCase):
 
         self.assertEqual(ctx.exception.minimal_inputs[0], [])
 
-    def test_string_sequence_has_non_decreasing_length(self):
-        """String-based aggregation maintains monotonic lengths."""
-
-        generator = Gen.aggregate(
+    @for_all(
+        Gen.aggregate(
             Gen.ascii_string(min_length=1, max_length=3),
             lambda text: Gen.ascii_string(min_length=len(text), max_length=len(text) + 2),
             min_size=2,
             max_size=5,
-        )
+        ),
+        num_runs=200,
+    )
+    def test_string_sequence_has_non_decreasing_length(self, values):
+        """String-based aggregation maintains monotonic lengths."""
 
-        def predicate(values):
-            if not (isinstance(values, list) and 2 <= len(values) <= 5):
-                return False
-            return all(len(values[i]) <= len(values[i + 1]) for i in range(len(values) - 1))
-
-        run_for_all(predicate, generator, num_runs=200)
+        self.assertIsInstance(values, list)
+        self.assertGreaterEqual(len(values), 2)
+        self.assertLessEqual(len(values), 5)
+        self.assertTrue(all(len(values[i]) <= len(values[i + 1]) for i in range(len(values) - 1)))
 
     def test_shrinks_reduce_length(self):
         """Shrinking a failing property drives towards the minimum size."""

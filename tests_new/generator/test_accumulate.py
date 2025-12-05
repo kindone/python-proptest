@@ -2,23 +2,26 @@
 
 import unittest
 
-from python_proptest import Gen, PropertyTestError, run_for_all
+from python_proptest import Gen, PropertyTestError, for_all, run_for_all
 
 
 class TestAccumulateGenerator(unittest.TestCase):
     """Validate ``Gen.accumulate`` behaviour and shrinking."""
 
-    def test_accumulate_returns_final_value(self):
-        """Accumulation yields a single value within expected bounds."""
-
-        generator = Gen.accumulate(
+    @for_all(
+        Gen.accumulate(
             Gen.int(0, 10),
             lambda value: Gen.int(value, value + 5),
             min_size=3,
             max_size=5,
-        )
+        ),
+        num_runs=200,
+    )
+    def test_accumulate_returns_final_value(self, value):
+        """Accumulation yields a single value within expected bounds."""
 
-        run_for_all(lambda value: isinstance(value, int) and value >= 0, generator, num_runs=200)
+        self.assertIsInstance(value, int)
+        self.assertGreaterEqual(value, 0)
 
     def test_zero_min_steps_allows_initial_value(self):
         """Zero minimum size lets shrinking reach the initial value."""
@@ -37,17 +40,20 @@ class TestAccumulateGenerator(unittest.TestCase):
         self.assertGreaterEqual(minimal_value, 10)
         self.assertLessEqual(minimal_value, 20)
 
-    def test_string_growth_returns_final_string(self):
-        """String accumulation returns a sufficiently long final string."""
-
-        generator = Gen.accumulate(
+    @for_all(
+        Gen.accumulate(
             Gen.ascii_string(min_length=1, max_length=2),
             lambda text: Gen.ascii_string(min_length=len(text) + 1, max_length=len(text) + 2),
             min_size=3,
             max_size=5,
-        )
+        ),
+        num_runs=200,
+    )
+    def test_string_growth_returns_final_string(self, value):
+        """String accumulation returns a sufficiently long final string."""
 
-        run_for_all(lambda value: isinstance(value, str) and len(value) >= 4, generator, num_runs=200)
+        self.assertIsInstance(value, str)
+        self.assertGreaterEqual(len(value), 4)
 
     def test_shrinking_produces_minimal_value(self):
         """Failing property shrinks towards the minimal accumulated output."""
