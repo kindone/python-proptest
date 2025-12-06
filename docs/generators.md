@@ -8,7 +8,7 @@ Generators are the foundation of property-based testing in `python-proptest`. Th
 | :------------------------ | :-------------------------------------------------------------- | :------------------------------------------------- | :---------------------------------------------------- |
 | **Primitives**            |                                                                 |                                                    |                                                       |
 | [`Gen.bool()`](#genbooltrue_prob)             | Generates `True` or `False` with configurable probability.     | `true_prob` (def: 0.5)                              | `Gen.bool(true_prob=0.8)`                                       |
-| [`Gen.float()`](#genfloatmin_value-max_value)             | Generates floating-point numbers (incl. `inf`, `-inf`, `nan`).     | `min_value`, `max_value`                              | `Gen.float(min_value=0.0, max_value=1.0)`                                         |
+| [`Gen.float()`](#genfloatmin_value-max_value-nan_prob-posinf_prob-neginf_prob)             | Generates floating-point numbers. By default generates only finite values. Can optionally generate `inf`, `-inf`, `nan` with specified probabilities.     | `min_value`, `max_value`, `nan_prob`, `posinf_prob`, `neginf_prob`                              | `Gen.float(min_value=0.0, max_value=1.0, nan_prob=0.01)`                                         |
 | [`Gen.int()`](#genintmin_value-max_value)  | Generates integers in the range `[min_value, max_value]`.                   | `min_value`, `max_value`                                       | `Gen.int(min_value=0, max_value=10)`                                 |
 | [`Gen.str()`](#genstrmin_length-max_length)  | Generates strings (defaults to ASCII).                          | `min_length` (def: 0), `max_length` (def: 10)        | `Gen.str(min_length=0, max_length=5)`                                    |
 | [`Gen.ascii_string(...)`](#genascii_stringmin_length-max_length)    | Generates strings containing only ASCII chars (0-127).          | `min_length` (def: 0), `max_length` (def: 10)        | `Gen.ascii_string(min_length=1, max_length=8)`                               |
@@ -57,32 +57,60 @@ Gen.int(min_value=42, max_value=42)
 - Generating array indices
 - Creating test IDs or counts
 
-**See Also:** [`Gen.in_range()`](#genin_rangemin_value-max_value), [`Gen.interval()`](#genintervalmin_value-max_value), [`Gen.float()`](#genfloatmin_value-max_value)
+**See Also:** [`Gen.in_range()`](#genin_rangemin_value-max_value), [`Gen.interval()`](#genintervalmin_value-max_value), [`Gen.float()`](#genfloatmin_value-max_value-nan_prob-posinf_prob-neginf_prob)
 
-### `Gen.float(min_value, max_value)`
+### `Gen.float(min_value, max_value, nan_prob, posinf_prob, neginf_prob)`
 
-Generates random floating-point numbers within the specified range.
+Generates random floating-point numbers within the specified range. By default, generates only finite values. Can optionally generate special values (NaN, +inf, -inf) with specified probabilities.
 
 **Parameters:**
-- `min_value` (float, optional): Minimum float value to generate. If not specified, uses `-sys.float_info.max` (full float range)
-- `max_value` (float, optional): Maximum float value to generate. If not specified, uses `sys.float_info.max` (full float range)
+- `min_value` (float, optional): Minimum float value to generate. If not specified, uses `-sys.float_info.max` (full finite float range)
+- `max_value` (float, optional): Maximum float value to generate. If not specified, uses `sys.float_info.max` (full finite float range)
+- `nan_prob` (float, default: 0.0): Probability of generating NaN. Must be between 0.0 and 1.0
+- `posinf_prob` (float, default: 0.0): Probability of generating +inf. Must be between 0.0 and 1.0
+- `neginf_prob` (float, default: 0.0): Probability of generating -inf. Must be between 0.0 and 1.0
+
+**Constraints:**
+- The sum of `nan_prob`, `posinf_prob`, and `neginf_prob` must be <= 1.0
+- The remaining probability (1.0 - sum) is used for finite values
+- Each probability must be between 0.0 and 1.0 (inclusive)
 
 **Examples:**
 ```python
-# Generate floats from 0.0 to 1.0
+# Generate finite floats only (default)
+Gen.float()
+
+# Generate floats from 0.0 to 1.0 (finite only)
 Gen.float(min_value=0.0, max_value=1.0)
 
-# Generate negative floats
+# Generate with 1% NaN probability, 99% finite
+Gen.float(nan_prob=0.01)
+
+# Generate with 1% each inf, 98% finite
+Gen.float(posinf_prob=0.01, neginf_prob=0.01)
+
+# Custom mix: 10% NaN, 5% each inf, 80% finite
+Gen.float(nan_prob=0.1, posinf_prob=0.05, neginf_prob=0.05)
+
+# Generate negative floats (finite only)
 Gen.float(min_value=-10.0, max_value=-0.1)
 
-# Generate very small floats
-Gen.float(min_value=0.0, max_value=0.001)
+# Generate very small floats with some NaN
+Gen.float(min_value=0.0, max_value=0.001, nan_prob=0.05)
 ```
 
 **Use Cases:**
-- Testing floating-point arithmetic
+- Testing floating-point arithmetic (finite values)
+- Testing edge cases with NaN and infinity
 - Generating probabilities or percentages
 - Creating test measurements or coordinates
+- Testing error handling for special float values
+
+**Notes:**
+- By default, generates only finite values for practical testing
+- Finite value generation uses bit interpretation with rejection loop, covering the full finite float space including denormals
+- Special values (inf, NaN) are generated explicitly when probabilities are specified, providing predictable test coverage
+- When using explicit `min_value`/`max_value`, finite values are generated in that range
 
 **See Also:** [`Gen.int()`](#genintmin_value-max_value), [`Gen.bool()`](#genbooltrue_prob)
 

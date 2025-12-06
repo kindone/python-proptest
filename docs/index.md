@@ -80,7 +80,7 @@ python-proptest provides two main approaches for property-based testing:
 **Primitive Generators:**
 
 - `Gen.int(min_value, max_value)` - Random integers
-- `Gen.float(min_value, max_value)` - Random floats
+- `Gen.float(min_value, max_value, nan_prob, posinf_prob, neginf_prob)` - Random floats (finite by default, optional inf/NaN probabilities)
 - `Gen.bool(true_prob)` - Random booleans with configurable probability
 - `Gen.str(min_length, max_length)` - Random strings (ASCII)
 - `Gen.ascii_string(min_length, max_length)` - ASCII strings (0-127)

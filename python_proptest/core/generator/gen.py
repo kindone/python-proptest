@@ -64,18 +64,47 @@ class Gen:
 
     @staticmethod
     def float(
-        min_value: Optional[float] = None, max_value: Optional[float] = None
+        min_value: Optional[float] = None,
+        max_value: Optional[float] = None,
+        nan_prob: float = 0.0,
+        posinf_prob: float = 0.0,
+        neginf_prob: float = 0.0,
     ) -> "FloatGenerator":
         """Generate random floats in the specified range.
 
-        If min_value or max_value are not specified, uses the full float range
-        (from -sys.float_info.max to sys.float_info.max).
+        By default, generates only finite values. Can optionally generate
+        special values (NaN, +inf, -inf) with specified probabilities.
+
+        Args:
+            min_value: Minimum float value to generate. If not specified, uses
+                -sys.float_info.max (full finite float range).
+            max_value: Maximum float value to generate. If not specified, uses
+                sys.float_info.max (full finite float range).
+            nan_prob: Probability of generating NaN (0.0 to 1.0, default: 0.0).
+            posinf_prob: Probability of generating +inf (0.0 to 1.0, default: 0.0).
+            neginf_prob: Probability of generating -inf (0.0 to 1.0, default: 0.0).
+
+        The sum of nan_prob, posinf_prob, and neginf_prob must be <= 1.0.
+        The remaining probability (1.0 - sum) is used for finite values.
+
+        Examples:
+            # Finite values only (default)
+            Gen.float()
+
+            # 1% NaN, 99% finite
+            Gen.float(nan_prob=0.01)
+
+            # 1% each inf, 98% finite
+            Gen.float(posinf_prob=0.01, neginf_prob=0.01)
+
+            # Custom mix
+            Gen.float(nan_prob=0.1, posinf_prob=0.05, neginf_prob=0.05)
         """
         if min_value is None:
             min_value = -sys.float_info.max
         if max_value is None:
             max_value = sys.float_info.max
-        return FloatGenerator(min_value, max_value)
+        return FloatGenerator(min_value, max_value, nan_prob, posinf_prob, neginf_prob)
 
     @staticmethod
     def list(
