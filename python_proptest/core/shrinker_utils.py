@@ -5,7 +5,7 @@ This module provides helper functions for visualizing and analyzing shrink trees
 """
 
 import json
-from typing import Any, List, TypeVar
+from typing import Any, Dict, List, TypeVar
 
 from .shrinker import Shrinkable
 
@@ -69,7 +69,7 @@ def collect_tree_structured(
     depth: int = 0,
     max_depth: int = 10,
     breadth: int = 50,
-) -> dict[str, Any]:
+) -> Dict[str, Any]:
     """
     Collect a shrink tree into a structured dictionary format.
 
@@ -179,7 +179,7 @@ def check_duplicates(
     node: Shrinkable[T],
     max_depth: int = 10,
     breadth: int = 50,
-) -> dict[str, List[int]]:
+) -> Dict[str, List[int]]:
     """
     Check for duplicate values in a shrink tree.
 

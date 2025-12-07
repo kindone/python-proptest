@@ -7,7 +7,7 @@ to decompose floats into fraction and exponent.
 
 import math
 import sys
-from typing import TypeVar
+from typing import Tuple, TypeVar
 
 from python_proptest.core.stream import Stream
 
@@ -17,7 +17,7 @@ from .integral import shrink_integral
 FLOATTYPE = TypeVar("FLOATTYPE", float, float)
 
 
-def _decompose_float(value: float) -> tuple[float, int]:
+def _decompose_float(value: float) -> Tuple[float, int]:
     """
     Decompose a float into fraction and exponent using frexp.
 
