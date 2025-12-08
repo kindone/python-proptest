@@ -30,7 +30,7 @@ from .core.stateful import (
 from .core.stream import Stream
 from .core.try_ import Failure, Success, Try, attempt
 
-__version__ = "0.1.0"
+__version__ = "0.1.4"
 __author__ = "kindone"
 __email__ = "jradoo@gmail.com"
 
