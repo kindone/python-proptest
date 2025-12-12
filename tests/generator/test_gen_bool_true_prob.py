@@ -1,8 +1,9 @@
-"""Tests for Gen.bool() with true_prob parameter."""
+"""Tests for Gen.bool() and Gen.boolean() with true_prob parameter."""
 
 import unittest
 
 from python_proptest import Gen, run_for_all
+from python_proptest.core.decorators import for_all
 
 
 class TestGenBoolTrueProb(unittest.TestCase):
@@ -107,6 +108,25 @@ class TestGenBoolTrueProb(unittest.TestCase):
             return result
 
         test_property()
+
+
+class TestGenBooleanAlias(unittest.TestCase):
+    """Test Gen.boolean() alias matching cppproptest's gen::boolean."""
+
+    @for_all(Gen.boolean())
+    def test_boolean_generates_bool(self, value: bool):
+        """Property: Gen.boolean() generates boolean values."""
+        assert isinstance(value, bool)
+
+    def test_boolean_always_true(self):
+        """Test Gen.boolean(1.0) always generates True."""
+        result = run_for_all(lambda x: x is True, Gen.boolean(true_prob=1.0))
+        assert result
+
+    def test_boolean_always_false(self):
+        """Test Gen.boolean(0.0) always generates False."""
+        result = run_for_all(lambda x: x is False, Gen.boolean(true_prob=0.0))
+        assert result
 
 
 if __name__ == "__main__":

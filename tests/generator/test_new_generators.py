@@ -4,6 +4,7 @@ Tests for new generator types (Set, UnicodeString, Lazy, Construct, ChainTuple).
 
 import unittest
 
+from python_proptest.core.decorators import for_all
 from python_proptest.core.generator import (
     ChainTupleGenerator,
     ConstructGenerator,
@@ -313,13 +314,54 @@ class TestNewGenMethods(unittest.TestCase):
             assert 5 <= shrinkable.value <= 10
 
     def test_gen_integers(self):
-        """Test Gen.integers method (alias for interval)."""
-        gen = Gen.integers(5, 10)
+        """Test Gen.integers method (generates count integers starting from start)."""
+        gen = Gen.integers(5, 6)  # Generates [5, 11), i.e., 5, 6, 7, 8, 9, 10
         rng = __import__("random").Random(42)
 
         for _ in range(10):
             shrinkable = gen.generate(rng)
             assert 5 <= shrinkable.value <= 10
+
+    @for_all(Gen.natural(1000))
+    def test_natural_is_positive(self, value: int):
+        """Property: Gen.natural(max) generates positive integers in [1, max]."""
+        assert 1 <= value <= 1000
+
+    def test_natural_edge_cases(self):
+        """Test Gen.natural() validates input and handles edge cases."""
+        # Test with max_value = 1
+        gen = Gen.natural(1)
+        rng = __import__("random").Random(42)
+        shrinkable = gen.generate(rng)
+        assert shrinkable.value == 1
+
+        # Test invalid max_value
+        with self.assertRaises(ValueError):
+            Gen.natural(0)
+        with self.assertRaises(ValueError):
+            Gen.natural(-5)
+
+    @for_all(Gen.non_negative(1000))
+    def test_non_negative_is_non_negative(self, value: int):
+        """Property: Gen.non_negative(max) generates non-negative integers in [0, max]."""
+        assert 0 <= value <= 1000
+
+    def test_non_negative_edge_cases(self):
+        """Test Gen.non_negative() validates input and handles edge cases."""
+        # Test with max_value = 0 (should only generate 0)
+        gen = Gen.non_negative(0)
+        rng = __import__("random").Random(42)
+        shrinkable = gen.generate(rng)
+        assert shrinkable.value == 0
+
+        # Test invalid max_value
+        with self.assertRaises(ValueError):
+            Gen.non_negative(-1)
+
+    @for_all(Gen.interval(-50, 50))
+    def test_interval_in_range(self, value: int):
+        """Property: Gen.interval(min, max) generates values in [min, max]."""
+        assert -50 <= value <= 50
 
     def test_gen_weighted_value(self):
         """Test Gen.weighted_value method."""

@@ -3,7 +3,7 @@ Gen class with static factory methods for creating generators.
 """
 
 import sys
-from typing import Any, Callable, List, Optional, TypeVar
+from typing import Any, Callable, List, Optional, TypeVar, cast
 
 from ..combinator import (
     ConstructGenerator,
@@ -46,10 +46,43 @@ class Gen:
     def str(
         min_length: int = 0,
         max_length: int = 20,
-        charset: str = "abcdefghijklmnopqrstuvwxyz",
+        charset="abcdefghijklmnopqrstuvwxyz",
     ) -> "StringGenerator":
-        """Generate random strings with the specified constraints."""
+        """Generate random strings with the specified constraints.
+
+        Args:
+            min_length: Minimum string length (default: 0)
+            max_length: Maximum string length (default: 20)
+            charset: Either a string of characters to choose from, or a Generator
+                    that produces integer codepoints. Default is lowercase letters.
+                    Can also be special values "ascii" or "printable_ascii".
+
+        Examples:
+            Gen.str()  # lowercase letters
+            Gen.str(charset="abc")  # only a, b, c
+            Gen.str(charset=Gen.int(65, 90))  # A-Z via codepoints [65, 90]
+            Gen.str(charset=Gen.integers(65, 26))  # A-Z via codepoints [65, 91)
+        """
         return StringGenerator(min_length, max_length, charset)
+
+    @staticmethod
+    def string(
+        min_length: int = 0,
+        max_length: int = 20,
+        charset="abcdefghijklmnopqrstuvwxyz",
+    ) -> "StringGenerator":
+        """Alias for str() to match cppproptest naming.
+
+        Generate random strings with the specified constraints.
+
+        Args:
+            min_length: Minimum string length (default: 0)
+            max_length: Maximum string length (default: 20)
+            charset: Either a string of characters to choose from, or a Generator
+                    that produces integer codepoints. Default is lowercase letters.
+                    Can also be special values "ascii" or "printable_ascii".
+        """
+        return Gen.str(min_length, max_length, charset)
 
     @staticmethod
     def bool(true_prob: float = 0.5) -> "BoolGenerator":
@@ -61,6 +94,15 @@ class Gen:
         if not 0.0 <= true_prob <= 1.0:
             raise ValueError("true_prob must be between 0.0 and 1.0")
         return BoolGenerator(true_prob)
+
+    @staticmethod
+    def boolean(true_prob: float = 0.5) -> "BoolGenerator":
+        """Alias for Gen.bool() matching cppproptest's gen::boolean.
+
+        Args:
+            true_prob: Probability of generating True (0.0 to 1.0, default: 0.5)
+        """
+        return Gen.bool(true_prob)
 
     @staticmethod
     def float(
@@ -136,6 +178,11 @@ class Gen:
         return OneOfGenerator(list(generators))
 
     @staticmethod
+    def union_of(*generators):
+        """Alias for Gen.one_of() matching cppproptest's gen::unionOf."""
+        return Gen.one_of(*generators)
+
+    @staticmethod
     def element_of(*values):
         """Randomly choose from multiple values with optional weights."""
         if not values:
@@ -200,8 +247,49 @@ class Gen:
 
     @staticmethod
     def interval(min_value: int, max_value: int) -> "IntGenerator":
-        """Generate random integers in the specified range (inclusive)."""
+        """Generate random integers in the specified range (inclusive).
+
+        Matches cppproptest's gen::interval(min, max) which generates [min, max].
+        """
         return IntGenerator(min_value, max_value)
+
+    @staticmethod
+    def natural(max_value: int) -> "IntGenerator":
+        """Generate positive integers in range [1, max_value].
+
+        Matches cppproptest's gen::natural(max) behavior.
+
+        Args:
+            max_value: Maximum value (inclusive)
+
+        Returns:
+            Generator for integers in [1, max_value]
+
+        Example:
+            Gen.natural(100)  # generates {1, 2, ..., 100}
+        """
+        if max_value < 1:
+            raise ValueError(f"max_value must be at least 1, got {max_value}")
+        return IntGenerator(1, max_value)
+
+    @staticmethod
+    def non_negative(max_value: int) -> "IntGenerator":
+        """Generate non-negative integers in range [0, max_value].
+
+        Matches cppproptest's gen::nonNegative(max) behavior.
+
+        Args:
+            max_value: Maximum value (inclusive)
+
+        Returns:
+            Generator for integers in [0, max_value]
+
+        Example:
+            Gen.non_negative(100)  # generates {0, 1, 2, ..., 100}
+        """
+        if max_value < 0:
+            raise ValueError(f"max_value must be non-negative, got {max_value}")
+        return IntGenerator(0, max_value)
 
     @staticmethod
     def in_range(min_value: int, max_value: int) -> "IntGenerator":
@@ -213,9 +301,27 @@ class Gen:
         return IntGenerator(min_val, max_val - 1)
 
     @staticmethod
-    def integers(min_value: int, max_value: int) -> "IntGenerator":
-        """Alias for interval for compatibility."""
-        return IntGenerator(min_value, max_value)
+    def integers(start: int, count: int) -> "IntGenerator":
+        """Generate integers in the range [start, start+count).
+
+        This matches cppproptest's gen::integers(start, count) behavior.
+        The second parameter is the COUNT of values, not the maximum.
+
+        Args:
+            start: Starting value (inclusive)
+            count: Number of values to generate
+
+        Returns:
+            Generator producing integers in [start, start+count)
+
+        Examples:
+            Gen.integers(0, 100)   # generates {0, 1, ..., 99}
+            Gen.integers(65, 26)   # generates {65, 66, ..., 90} (A-Z)
+            Gen.integers(-10, 21)  # generates {-10, -9, ..., 10}
+        """
+        if count <= 0:
+            raise ValueError(f"count must be positive, got {count}")
+        return IntGenerator(cast(int, start), cast(int, start) + cast(int, count) - 1)
 
     @staticmethod
     def lazy(func):

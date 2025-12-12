@@ -2,7 +2,7 @@
 Generators for string types.
 """
 
-from typing import List
+from typing import List, Optional, Union
 
 from ..shrinker import Shrinkable
 from ..shrinker.integral import binary_search_shrinkable
@@ -13,15 +13,27 @@ from .base import Generator, Random
 class StringGenerator(Generator[str]):
     """Generator for strings."""
 
-    def __init__(self, min_length: int, max_length: int, charset: str):
+    def __init__(
+        self, min_length: int, max_length: int, charset: Union[str, Generator[int]]
+    ):
         self.min_length = min_length
         self.max_length = max_length
-        self.charset = self._get_charset(charset)
-        if not self.charset:
-            raise ValueError("Charset must contain at least one character")
-        # Preserve order but ensure uniqueness for deterministic shrinking
-        self._charset_list = list(dict.fromkeys(self.charset))
-        self._charset_len = len(self._charset_list)
+
+        # Support both string charset and Generator[int] for codepoints
+        if isinstance(charset, Generator):
+            # It's a codepoint generator
+            self._codepoint_gen: Optional[Generator[int]] = charset
+            self._charset_list: Optional[List[str]] = None
+            self._charset_len: Optional[int] = None
+        else:
+            # It's a string charset (backward compatibility)
+            self._codepoint_gen = None
+            charset_str = self._get_charset(charset)
+            if not charset_str:
+                raise ValueError("Charset must contain at least one character")
+            # Preserve order but ensure uniqueness for deterministic shrinking
+            self._charset_list = list(dict.fromkeys(charset_str))
+            self._charset_len = len(self._charset_list)
 
     def _get_charset(self, charset: str) -> str:
         """Convert charset specification to actual character set."""
@@ -36,24 +48,54 @@ class StringGenerator(Generator[str]):
             return charset
 
     def _build_indices(self, rng: Random, length: int) -> List[int]:
+        if self._charset_len is None:
+            raise RuntimeError("charset_len should be set for string charset mode")
         return [rng.randrange(self._charset_len) for _ in range(length)]
 
     def _indices_to_string(self, indices: List[int]) -> str:
+        if self._charset_list is None:
+            raise RuntimeError("charset_list should be set for string charset mode")
         return "".join(self._charset_list[idx] for idx in indices)
+
+    def _codepoints_to_string(self, codepoints: List[int]) -> str:
+        """Convert list of codepoints to string."""
+        result_chars = []
+        for cp in codepoints:
+            try:
+                result_chars.append(chr(cp))
+            except (ValueError, OverflowError):
+                # Invalid codepoint, skip or use replacement
+                result_chars.append("?")
+        return "".join(result_chars)
 
     def generate(self, rng: Random) -> Shrinkable[str]:
         length = rng.randint(self.min_length, self.max_length)
-        indices = self._build_indices(rng, length)
 
-        char_shrinkables = [binary_search_shrinkable(idx) for idx in indices]
-        array_shrinkable = shrinkable_array(
-            char_shrinkables,
-            min_size=self.min_length,
-            membership_wise=True,
-            element_wise=True,
-        )
+        if self._codepoint_gen is not None:
+            # Using codepoint generator
+            char_shrinkables = [
+                self._codepoint_gen.generate(rng) for _ in range(length)
+            ]
+            array_shrinkable = shrinkable_array(
+                char_shrinkables,
+                min_size=self.min_length,
+                membership_wise=True,
+                element_wise=True,
+            )
+            return array_shrinkable.map(self._codepoints_to_string)
+        else:
+            # Using string charset (backward compatible path)
+            indices = self._build_indices(rng, length)
 
-        return array_shrinkable.map(self._indices_to_string)
+            char_shrinkables = [binary_search_shrinkable(idx) for idx in indices]
+            array_shrinkable = shrinkable_array(
+                char_shrinkables,
+                min_size=self.min_length,
+                membership_wise=True,
+                element_wise=True,
+            )
+
+            return array_shrinkable.map(self._indices_to_string)
 
 
 class UnicodeStringGenerator(Generator[str]):
