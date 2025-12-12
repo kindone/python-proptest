@@ -5,6 +5,7 @@ This module provides the main Property class and for_all function
 for running property-based tests.
 """
 
+import inspect
 import random
 from typing import (
     Any,
@@ -57,13 +58,98 @@ class Property:
         property_func: Callable[..., bool],
         num_runs: int = 100,
         seed: Optional[Union[str, int]] = None,
-        examples: Optional[List[Tuple[Any, ...]]] = None,
+        examples: Optional[
+            List[Union[Tuple[Any, ...], Tuple[Tuple[Any, ...], Dict[str, Any]]]]
+        ] = None,
+        original_func: Optional[Callable[..., Any]] = None,
     ):
         self.property_func = property_func
         self.num_runs = num_runs
         self.seed = seed
         self.examples = examples or []
         self._rng = self._create_rng()
+        # Cache function signature for example resolution
+        # Use original_func for signature if provided (for wrapped functions)
+        sig_func = original_func if original_func is not None else property_func
+        self._func_sig = inspect.signature(sig_func)
+        self._param_names = [
+            p.name
+            for p in self._func_sig.parameters.values()
+            if p.kind in (p.POSITIONAL_OR_KEYWORD, p.POSITIONAL_ONLY, p.KEYWORD_ONLY)
+            and p.name != "self"  # Exclude 'self' for methods
+        ]
+
+    def _resolve_example(
+        self,
+        example_data: Union[Tuple[Any, ...], Tuple[Tuple[Any, ...], Dict[str, Any]]],
+        expected_count: int,
+    ) -> Optional[Tuple[Any, ...]]:
+        """Resolve example data (positional and/or named) to positional tuple.
+
+        Args:
+            example_data: Either a plain tuple (legacy) or (positional_tuple, named_dict)
+            expected_count: Expected number of arguments
+
+        Returns:
+            Resolved positional tuple, or None if argument count doesn't match
+        """
+        # Check if this is the new format: (positional_tuple, named_dict)
+        if (
+            isinstance(example_data, tuple)
+            and len(example_data) == 2
+            and isinstance(example_data[0], tuple)
+            and isinstance(example_data[1], dict)
+        ):
+            pos_values, named_values = example_data
+
+            # If no named values, just validate positional count
+            if not named_values:
+                if len(pos_values) != expected_count:
+                    return None
+                return pos_values
+
+            # Build final argument list by merging positional and named
+            result = [None] * expected_count
+
+            # Fill in positional arguments
+            for i, val in enumerate(pos_values):
+                if i >= expected_count:
+                    return None  # Too many positional args
+                result[i] = val
+
+            # Fill in named arguments
+            for param_name, value in named_values.items():
+                # Find the position of this parameter
+                if param_name not in self._param_names:
+                    # Unknown parameter name - raise error
+                    raise ValueError(
+                        f"Unknown parameter '{param_name}' in @example. "
+                        f"Available parameters: {self._param_names}"
+                    )
+
+                param_index = self._param_names.index(param_name)
+
+                # Check if already filled by positional arg
+                if param_index < len(pos_values):
+                    raise ValueError(
+                        f"Argument '{param_name}' specified both positionally and by name in @example"
+                    )
+
+                if param_index >= expected_count:
+                    return None  # Parameter index out of range
+
+                result[param_index] = value
+
+            # Check if all positions are filled
+            if None in result:
+                return None  # Missing some arguments
+
+            return tuple(result)
+        else:
+            # Legacy format: plain tuple of positional arguments
+            if len(example_data) != expected_count:
+                return None
+            return example_data
 
     def _create_rng(self) -> Random:
         """Create a random number generator."""
@@ -96,8 +182,10 @@ class Property:
             raise ValueError("At least one generator must be provided")
 
         # Test examples first
-        for example_inputs in self.examples:
-            if len(example_inputs) != len(generators):
+        for example_data in self.examples:
+            # Resolve example to positional arguments
+            example_inputs = self._resolve_example(example_data, len(generators))
+            if example_inputs is None:
                 continue  # Skip examples with wrong number of arguments
 
             try:

@@ -16,7 +16,7 @@ If you discover a security vulnerability in python-proptest, please report it re
 ### How to Report
 
 1. **Do not** create a public GitHub issue for security vulnerabilities
-2. Email the maintainers at: [INSERT SECURITY EMAIL]
+2. Email the maintainers
 3. Include the following information:
    - Description of the vulnerability
    - Steps to reproduce the issue
@@ -96,12 +96,5 @@ We use several tools to maintain security:
 - Security vulnerabilities will be disclosed after fixes are available
 - We will provide advance notice to users before public disclosure
 - Security advisories will be published on GitHub and PyPI
-
-## Contact
-
-For security-related questions or concerns, please contact:
-
-- **Security Email**: [INSERT SECURITY EMAIL]
-- **GitHub Security Advisories**: Use GitHub's private vulnerability reporting feature
 
 Thank you for helping keep python-proptest secure!

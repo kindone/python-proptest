@@ -181,6 +181,7 @@ def for_all(
                             num_runs=config_num_runs,
                             seed=config_seed,
                             examples=existing_examples,  # Examples shared across all configs
+                            original_func=func,  # Pass original function for signature
                         )
                         property_test.for_all(*config_generators)
 
@@ -190,6 +191,7 @@ def for_all(
                         num_runs=override_num_runs,
                         seed=override_seed,
                         examples=existing_examples,
+                        original_func=func,  # Pass original function for signature
                     )
                     property_test.for_all(*generators)
                     return None  # Test frameworks expect test functions to return
@@ -253,6 +255,7 @@ def for_all(
                             num_runs=config_num_runs,
                             seed=config_seed,
                             examples=existing_examples,  # Examples shared across all configs
+                            original_func=func,  # Pass original function for signature
                         )
                         property_test.for_all(*config_generators)
 
@@ -262,6 +265,7 @@ def for_all(
                         num_runs=override_num_runs,
                         seed=override_seed,
                         examples=existing_examples,
+                        original_func=func,  # Pass original function for signature
                     )
                     property_test.for_all(*generators)
                     return None  # Pytest expects test functions to return None
@@ -311,28 +315,42 @@ def for_all(
     return decorator
 
 
-def example(*values: Any):
+def example(*values: Any, **named_values: Any):
     """
     Decorator to provide example values for a property test.
 
+    Supports both positional and named arguments:
+
     Usage:
         @for_all(Gen.int(), Gen.str())
-        @example(42, "hello")
+        @example(42, "hello")          # Positional
+        @example(x=42, s="hello")      # Named
+        @example(42, s="hello")        # Mixed (positional then named)
         def test_property(x: int, s: str):
             assert x > 0 or len(s) > 0
 
     Args:
-        *values: Example values to test in addition to generated ones
+        *values: Positional example values
+        **named_values: Named example values
 
     Returns:
         Decorator function
     """
 
     def decorator(func: Callable) -> Callable:
-        # Store examples for later use
         if not hasattr(func, "_proptest_examples"):
             func._proptest_examples = []  # type: ignore
-        func._proptest_examples.append(values)  # type: ignore
+
+        # Use backward-compatible storage format:
+        # - If only positional args: store as plain tuple (legacy format)
+        # - If any named args: store as ((positional,), {named}) for resolution
+        if named_values:
+            # New format: store both positional and named
+            func._proptest_examples.append((values, named_values))  # type: ignore
+        else:
+            # Legacy format: store only positional tuple
+            func._proptest_examples.append(values)  # type: ignore
+
         return func
 
     return decorator
