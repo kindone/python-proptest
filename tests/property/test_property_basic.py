@@ -245,9 +245,7 @@ class TestPropertyBasic(unittest.TestCase):
 
         # Use Gen.just() to guarantee the exception is raised
         with self.assertRaises(PropertyTestError):
-            run_for_all(
-                property_func, Gen.just(-5), num_runs=10
-            )
+            run_for_all(property_func, Gen.just(-5), num_runs=10)
 
     def test_property_with_failing_condition(self):
         """Test property with failing condition."""
@@ -256,7 +254,9 @@ class TestPropertyBasic(unittest.TestCase):
             return x < 50  # This will fail for x >= 50
 
         with self.assertRaises(PropertyTestError) as exc_info:
-            run_for_all(property_func, Gen.int(min_value=50, max_value=100), num_runs=10)
+            run_for_all(
+                property_func, Gen.int(min_value=50, max_value=100), num_runs=10
+            )
 
         # Should have failing input information
         assert exc_info.exception.failing_inputs is not None
