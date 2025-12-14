@@ -479,4 +479,4 @@ make all-checks
 
 - Inspired by [QuickCheck](https://hackage.haskell.org/package/QuickCheck) for Haskell
 - Influenced by [Hypothesis](https://hypothesis.readthedocs.io/) for Python
-- Based on the original [jsproptest](https://github.com/kindone/jsproptest) TypeScript implementation
+- Based on the original [cppproptest](https://github.com/kindone/cppproptest2) C++ implementation

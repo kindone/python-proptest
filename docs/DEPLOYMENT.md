@@ -27,13 +27,10 @@ The documentation is automatically deployed to GitHub Pages using GitHub Actions
 1. **Trigger**: Push to `main` branch
 2. **Build**: Install dependencies and build documentation with `mkdocs build`
 3. **Deploy**: Use `mkdocs gh-deploy --force` to deploy to GitHub Pages
-4. **Result**: Documentation available at https://kindone.github.io/python-proptest/
 
 ### Key Configuration
 
 - **Theme**: Material theme with proper navigation
-- **Site URL**: https://kindone.github.io/python-proptest/
-- **Repository**: kindone/python-proptest
 - **Branch**: gh-pages (automatically created)
 
 ### Troubleshooting
