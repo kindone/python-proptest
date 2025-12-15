@@ -7,7 +7,7 @@ property-based testing with complex functions.
 
 import inspect
 import itertools
-from typing import Any, Callable, Dict, Iterable, List, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Union
 
 from .generator import Generator
 from .property import Property, PropertyTestError
@@ -180,7 +180,7 @@ def for_all(
                             test_property,
                             num_runs=config_num_runs,
                             seed=config_seed,
-                            examples=existing_examples,  # Examples shared across all configs
+                            examples=existing_examples,  # Examples shared across all configs # noqa: E501
                             original_func=func,  # Pass original function for signature
                         )
                         property_test.for_all(*config_generators)
@@ -254,7 +254,7 @@ def for_all(
                             assertion_property,
                             num_runs=config_num_runs,
                             seed=config_seed,
-                            examples=existing_examples,  # Examples shared across all configs
+                            examples=existing_examples,  # Examples shared across all configs # noqa: E501
                             original_func=func,  # Pass original function for signature
                         )
                         property_test.for_all(*config_generators)
@@ -308,20 +308,115 @@ def for_all(
             "num_runs": num_runs,
             "seed": seed,
         }
-        wrapper._proptest_for_all_configs = existing_for_all_configs + [new_config]  # type: ignore
+        wrapper._proptest_for_all_configs = existing_for_all_configs + [new_config]  # type: ignore # noqa: E501
 
         return wrapper
 
     return decorator
 
 
+def _create_standalone_wrapper(func: Callable, original_func: Callable) -> Callable:
+    """
+    Create a wrapper for standalone execution of @matrix/@example decorators.
+
+    This wrapper detects if the function is called with only 'self' (for methods)
+    or no arguments (for functions) and not wrapped by @for_all, then executes
+    any matrix and example cases.
+
+    Args:
+        func: The function to wrap (may already have metadata)
+        original_func: The original unwrapped function
+
+    Returns:
+        A wrapped function that can execute standalone test cases
+    """
+    import functools
+
+    sig = inspect.signature(original_func)
+    params = [
+        p.name for p in sig.parameters.values() if p.kind == p.POSITIONAL_OR_KEYWORD
+    ]
+    is_method = bool(params and params[0] == "self")
+
+    if is_method:
+
+        @functools.wraps(func)
+        def wrapper(self, *args, **kwargs):
+            # If called with only self, and not wrapped by
+            # @for_all, run standalone mode
+            if (
+                len(args) == 0
+                and len(kwargs) == 0
+                and not hasattr(wrapper, "_proptest_for_all_configs")
+            ):
+                # Standalone mode: run matrices and examples
+                if hasattr(wrapper, "_proptest_matrices"):
+                    for matrix_spec in wrapper._proptest_matrices:  # type: ignore
+                        _run_matrix_cases(original_func, self, matrix_spec)
+                if hasattr(wrapper, "_proptest_examples"):
+                    _run_example_cases(
+                        original_func,
+                        self,
+                        wrapper._proptest_examples,  # type: ignore
+                        sig,
+                    )
+            else:
+                # Normal mode: pass through
+                return original_func(self, *args, **kwargs)
+
+    else:
+
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            # If called with no args, and not wrapped by
+            # @for_all, run standalone mode
+            if (
+                len(args) == 0
+                and len(kwargs) == 0
+                and not hasattr(wrapper, "_proptest_for_all_configs")
+            ):
+                # Standalone mode: run matrices and examples
+                if hasattr(wrapper, "_proptest_matrices"):
+                    for matrix_spec in wrapper._proptest_matrices:  # type: ignore
+                        _run_matrix_cases(original_func, None, matrix_spec)
+                if hasattr(wrapper, "_proptest_examples"):
+                    _run_example_cases(
+                        original_func,
+                        None,
+                        wrapper._proptest_examples,  # type: ignore
+                        sig,
+                    )
+            else:
+                # Normal mode: pass through
+                return original_func(*args, **kwargs)
+
+    # Copy all attributes from original
+    if hasattr(func, "_proptest_examples"):
+        wrapper._proptest_examples = func._proptest_examples  # type: ignore
+    if hasattr(func, "_proptest_matrices"):
+        wrapper._proptest_matrices = func._proptest_matrices  # type: ignore
+    if hasattr(func, "_proptest_settings"):
+        wrapper._proptest_settings = func._proptest_settings  # type: ignore
+    wrapper._proptest_standalone_wrapper = True  # type: ignore
+    wrapper._proptest_original_func = original_func  # type: ignore
+
+    return wrapper
+
+
 def example(*values: Any, **named_values: Any):
     """
     Decorator to provide example values for a property test.
 
-    Supports both positional and named arguments:
+    Can be used standalone or with @for_all:
 
-    Usage:
+    Standalone usage (for unittest/pytest):
+        @example(0, "edge")
+        @example(x=42, s="hello")
+        def test_property(self, x, s):
+            # Will be called once for each example
+            ...
+
+    With @for_all:
         @for_all(Gen.int(), Gen.str())
         @example(42, "hello")          # Positional
         @example(x=42, s="hello")      # Named
@@ -335,6 +430,11 @@ def example(*values: Any, **named_values: Any):
 
     Returns:
         Decorator function
+
+    Notes:
+        - When used standalone, the decorated function signature is transformed to
+          accept only 'self' (for methods) or no arguments (for functions).
+        - Multiple @example decorators can be stacked to provide multiple test cases.
     """
 
     def decorator(func: Callable) -> Callable:
@@ -342,8 +442,10 @@ def example(*values: Any, **named_values: Any):
             func._proptest_examples = []  # type: ignore
 
         # Use backward-compatible storage format:
-        # - If only positional args: store as plain tuple (legacy format)
-        # - If any named args: store as ((positional,), {named}) for resolution
+        # - If only positional args: store as plain tuple
+        #   (legacy format)
+        # - If any named args: store as ((positional,), {named})
+        #   for resolution
         if named_values:
             # New format: store both positional and named
             func._proptest_examples.append((values, named_values))  # type: ignore
@@ -351,7 +453,13 @@ def example(*values: Any, **named_values: Any):
             # Legacy format: store only positional tuple
             func._proptest_examples.append(values)  # type: ignore
 
-        return func
+        # Check if already wrapped (to avoid double-wrapping)
+        if hasattr(func, "_proptest_standalone_wrapper"):
+            return func
+
+        # Create standalone wrapper
+        original_func = func
+        return _create_standalone_wrapper(func, original_func)
 
     return decorator
 
@@ -360,7 +468,15 @@ def matrix(**kwargs: Iterable[Any]):
     """
     Decorator to provide an exhaustive matrix (Cartesian product) of example values.
 
-    Usage:
+    Can be used standalone or with @for_all:
+
+    Standalone usage (for unittest/pytest):
+        @matrix(x=[0, 1], s=["a", "b"])
+        def test_property(self, x, s):
+            # Will be called 4 times with all combinations
+            ...
+
+    With @for_all:
         @for_all(Gen.int(), Gen.str())
         @matrix(x=[0, 1], s=["a", "b"])
         def test_property(x: int, s: str):
@@ -372,6 +488,8 @@ def matrix(**kwargs: Iterable[Any]):
         - Multiple @matrix decorators can be stacked. Each decorator creates separate
           matrix cases that run independently. If you want to merge values, combine
           them in a single @matrix decorator.
+        - When used standalone, the decorated function signature is transformed to
+          accept only 'self' (for methods) or no arguments (for functions).
     """
 
     def decorator(func: Callable) -> Callable:
@@ -380,7 +498,14 @@ def matrix(**kwargs: Iterable[Any]):
             func._proptest_matrices = []  # type: ignore
         # Append this matrix spec to the list
         func._proptest_matrices.append(dict(kwargs))  # type: ignore
-        return func
+
+        # Check if already wrapped (to avoid double-wrapping)
+        if hasattr(func, "_proptest_standalone_wrapper"):
+            return func
+
+        # Create standalone wrapper
+        original_func = getattr(func, "_proptest_original_func", func)
+        return _create_standalone_wrapper(func, original_func)
 
     return decorator
 
@@ -422,6 +547,66 @@ def _run_matrix_cases(
             # Handle assume() calls by checking for "Assumption failed"
             if "Assumption failed" in str(e):
                 continue  # Skip this matrix case
+            raise  # Re-raise other exceptions
+
+
+def _run_example_cases(
+    func: Callable, self_obj: Optional[Any], examples: List[Any], sig: inspect.Signature
+):
+    """
+    Helper function to run example test cases.
+
+    Args:
+        func: The test function to call
+        self_obj: The 'self' object for methods, None for functions
+        examples: List of example values (positional tuples or (tuple, dict) pairs)
+        sig: Function signature for parameter resolution
+    """
+    params = [
+        p.name for p in sig.parameters.values() if p.kind == p.POSITIONAL_OR_KEYWORD
+    ]
+    is_method = bool(params and params[0] == "self")
+    call_params = params[1:] if is_method else params
+
+    for example_data in examples:
+        # Parse example format
+        if (
+            isinstance(example_data, tuple)
+            and len(example_data) == 2
+            and isinstance(example_data[1], dict)
+        ):
+            # New format: (positional_tuple, named_dict)
+            positional_values, named_values = example_data
+        else:
+            # Legacy format: just positional tuple
+            positional_values = example_data
+            named_values = {}
+
+        # Resolve arguments based on function signature
+        args: List[Any] = []
+
+        # Fill positional arguments first
+        for i, param_name in enumerate(call_params):
+            if i < len(positional_values):
+                args.append(positional_values[i])
+            elif param_name in named_values:
+                args.append(named_values[param_name])
+            else:
+                # Parameter not provided in example
+                raise ValueError(
+                    f"Example does not provide value for parameter '{param_name}'"
+                )
+
+        # Execute the example
+        try:
+            if is_method:
+                func(self_obj, *args)
+            else:
+                func(*args)
+        except Exception as e:
+            # Handle assume() calls by checking for "Assumption failed"
+            if "Assumption failed" in str(e):
+                continue  # Skip this example case
             raise  # Re-raise other exceptions
 
 
