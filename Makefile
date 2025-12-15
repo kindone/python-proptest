@@ -51,6 +51,7 @@ install:
 test:
 	@echo "🧪 Running unittest tests..."
 	python -m unittest discover tests -v
+	python -m unittest discover tests_new -v
 	@echo "🧪 Running pytest tests..."
 	pytest --cov=python_proptest --cov-report=term-missing -v
 

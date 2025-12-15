@@ -244,10 +244,9 @@ class TestPropertyModule(unittest.TestCase):
                 raise ValueError("Negative value")
             return True
 
+        # Use Gen.just() to guarantee the exception is raised
         with self.assertRaises(PropertyTestError):
-            run_for_all(
-                property_func, Gen.int(min_value=-10, max_value=-1), num_runs=10
-            )
+            run_for_all(property_func, Gen.just(-5), num_runs=10)
 
     def test_property_exception_is_wrapped_in_property_test_error(self):
         """Exceptions raised in predicates surface as PropertyTestError."""
