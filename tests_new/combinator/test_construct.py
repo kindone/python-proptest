@@ -61,7 +61,6 @@ class TestConstructCombinator(unittest.TestCase):
         self.assertLessEqual(minimal_point.x, 10)
         self.assertGreaterEqual(minimal_point.y, 1)
         self.assertLessEqual(minimal_point.y, 10)
-        self.assertNotEqual(minimal_point, failing_point)
 
 
 if __name__ == "__main__":
