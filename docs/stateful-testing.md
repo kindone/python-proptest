@@ -1,5 +1,8 @@
 # Stateful Testing
 
+!!! warning "Work in Progress"
+    Stateful testing feature is still in progress. It may be usable in some cases but may have bugs and behave unexpectedly.
+
 Stateful testing involves defining a sequence of actions or commands that can be applied to a system under test and verifying properties or invariants about the system's state after executing these sequences.
 
 `python-proptest` provides utilities for defining state machines and generating sequences of commands to effectively test stateful systems. It allows you to model the state of your system, define actions that change the state, and automatically run sequences of these actions to find bugs.
