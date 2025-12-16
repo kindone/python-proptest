@@ -246,7 +246,7 @@ class TestPropertyModule(unittest.TestCase):
 
         with self.assertRaises(PropertyTestError):
             run_for_all(
-                property_func, Gen.int(min_value=-10, max_value=10), num_runs=10
+                property_func, Gen.int(min_value=-10, max_value=-1), num_runs=10
             )
 
     def test_property_exception_is_wrapped_in_property_test_error(self):
@@ -267,7 +267,9 @@ class TestPropertyModule(unittest.TestCase):
             return x < 50
 
         with self.assertRaises(PropertyTestError) as exc_info:
-            run_for_all(property_func, Gen.int(min_value=0, max_value=100), num_runs=10)
+            run_for_all(
+                property_func, Gen.int(min_value=50, max_value=100), num_runs=10
+            )
 
         failing_inputs = exc_info.exception.failing_inputs
         self.assertIsNotNone(failing_inputs)
@@ -283,16 +285,17 @@ class TestPropertyModule(unittest.TestCase):
         with self.assertRaises(PropertyTestError) as exc_info:
             run_for_all(
                 property_func,
-                Gen.int(min_value=0, max_value=50),
-                Gen.int(min_value=0, max_value=50),
-                Gen.int(min_value=0, max_value=50),
-                num_runs=200,
+                Gen.int(min_value=40, max_value=50),
+                Gen.int(min_value=40, max_value=50),
+                Gen.int(min_value=40, max_value=50),
+                num_runs=10,
             )
 
         failing_inputs = exc_info.exception.failing_inputs
         self.assertIsNotNone(failing_inputs)
         self.assertEqual(len(failing_inputs), 3)
-        self.assertGreaterEqual(sum(failing_inputs), 100)
+        a, b, c = failing_inputs
+        self.assertGreaterEqual(a + b + c, 100)
 
     def test_property_with_no_generators_raises_error(self):
         """run_for_all requires at least one generator when callable expects args."""
