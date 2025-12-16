@@ -137,6 +137,34 @@ class TestDecoratorAPI(unittest.TestCase):
         # Run the test
         test_with_custom_settings()
 
+    def test_settings_with_invalid_parameter(self):
+        """Test @settings rejects unsupported parameters."""
+
+        with self.assertRaises(ValueError) as context:
+
+            @settings(num_runs=50, max_iterations=1000)  # max_iterations is invalid
+            @for_all(Gen.int())
+            def test_invalid_setting(x: int):
+                assert isinstance(x, int)
+
+        self.assertIn("max_iterations", str(context.exception))
+        self.assertIn("Unsupported parameter", str(context.exception))
+
+    def test_settings_with_multiple_invalid_parameters(self):
+        """Test @settings rejects multiple unsupported parameters."""
+
+        with self.assertRaises(ValueError) as context:
+
+            @settings(num_runs=50, timeout=30, max_retries=5)  # multiple invalid
+            @for_all(Gen.int())
+            def test_invalid_settings(x: int):
+                assert isinstance(x, int)
+
+        error_msg = str(context.exception)
+        self.assertIn("Unsupported parameter", error_msg)
+        # Should mention at least one of the invalid params
+        self.assertTrue("timeout" in error_msg or "max_retries" in error_msg)
+
     def test_decorator_with_assume(self):
         """Test @for_all decorator with assume."""
 

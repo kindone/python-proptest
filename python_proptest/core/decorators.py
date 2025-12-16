@@ -621,11 +621,25 @@ def settings(**kwargs):
             assert x * 0 == 0
 
     Args:
-        **kwargs: Settings to override (num_runs, seed, etc.)
+        num_runs: Number of test runs (overrides @for_all default)
+        seed: Random seed for reproducibility (overrides @for_all default)
+
+    Raises:
+        ValueError: If unsupported parameters are provided
 
     Returns:
         Decorator function
     """
+    # Validate parameters
+    supported_params = {"num_runs", "seed"}
+    unsupported = set(kwargs.keys()) - supported_params
+    if unsupported:
+        unsupported_str = ", ".join(sorted(unsupported))
+        supported_str = ", ".join(sorted(supported_params))
+        raise ValueError(
+            f"Unsupported parameter(s) for @settings: {unsupported_str}. "
+            f"Supported parameters are: {supported_str}"
+        )
 
     def decorator(func: Callable) -> Callable:
         # Store settings for later use
