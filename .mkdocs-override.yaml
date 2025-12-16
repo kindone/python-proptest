@@ -1,0 +1,8 @@
+# MkDocs configuration file overrides
+INHERIT: mkdocs.yml
+
+site_author: 'Won Wook Hong'
+site_url: 'https://github.wdf.sap.corp/pages/i073940/python-proptest'
+
+repo_name: 'i073940/python-proptest'
+repo_url: 'https://github.wdf.sap.corp/i073940/python-proptest'

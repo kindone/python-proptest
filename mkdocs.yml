@@ -59,6 +59,7 @@ nav:
   - 'Combinators': combinators.md
   - 'Shrinking': shrinking.md
   - 'Stateful Testing': stateful-testing.md
-  - 'Pytest Integration': pytest-integration.md
-  - 'Unittest Integration': unittest-integration.md
-  - 'Pytest Best Practices': pytest-best-practices.md
+  - 'Test Framework Integration':
+    - 'Unittest Integration': unittest-integration.md
+    - 'Pytest Integration': pytest-integration.md
+    - 'Pytest Best Practices': pytest-best-practices.md
