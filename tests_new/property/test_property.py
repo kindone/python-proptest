@@ -2,7 +2,7 @@
 
 import unittest
 
-from python_proptest import Gen, Property, PropertyTestError, run_for_all
+from python_proptest import Gen, Property, PropertyTestError, for_all, run_for_all
 
 
 class TestPropertyModule(unittest.TestCase):
@@ -319,6 +319,12 @@ class TestPropertyModule(unittest.TestCase):
                 num_runs=10,
             )
 
+    @for_all(Gen.int(), Gen.int())
+    def test_property_fail_with_shrink(self, a, b):
+        # PROP_ASSERT(-10 < a && a < 100 && -20 < b && b < 200
+        self.assertTrue(-10 < a < 100 and -20 < b < 200)
+
+        # run_for_all(property_func, Gen.int(), Gen.int())
 
 if __name__ == "__main__":
     unittest.main()
