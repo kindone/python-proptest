@@ -55,6 +55,12 @@ test:
 	@echo "🧪 Running pytest tests..."
 	pytest --cov=python_proptest --cov-report=term-missing -v
 
+test-new:
+	@echo "🧪 Running unittest tests_new..."
+	python -m unittest discover tests_new -v
+	@echo "🧪 Running pytest tests_new..."
+	pytest --cov=python_proptest --cov-report=term-missing -v
+
 # Run linting
 lint:
 	@echo "🔍 Running flake8 linting..."

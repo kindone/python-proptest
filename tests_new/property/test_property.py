@@ -319,12 +319,28 @@ class TestPropertyModule(unittest.TestCase):
                 num_runs=10,
             )
 
-    @for_all(Gen.int(), Gen.int())
-    def test_property_fail_with_shrink(self, a, b):
-        # PROP_ASSERT(-10 < a && a < 100 && -20 < b && b < 200
-        self.assertTrue(-10 < a < 100 and -20 < b < 200)
+    def test_property_fail_with_shrink(self):
+        """Property with bounded ranges shrinks to minimal failing case."""
 
-        # run_for_all(property_func, Gen.int(), Gen.int())
+        def property_func(a: int, b: int):
+            # Fail when values are outside expected ranges
+            return -10 < a < 100 and -20 < b < 200
+
+        with self.assertRaises(PropertyTestError) as exc_info:
+            run_for_all(
+                property_func,
+                Gen.int(min_value=-50, max_value=150),  # Will generate values outside [-10, 100)
+                Gen.int(min_value=-50, max_value=250),  # Will generate values outside [-20, 200)
+                num_runs=10,
+            )
+
+        # Should have shrunk to minimal failing values
+        minimal_inputs = exc_info.exception.minimal_inputs
+        self.assertIsNotNone(minimal_inputs)
+        self.assertEqual(len(minimal_inputs), 2)
+        a, b = minimal_inputs
+        # At least one value should be outside the expected range
+        self.assertFalse(-10 < a < 100 and -20 < b < 200)
 
 if __name__ == "__main__":
     unittest.main()
