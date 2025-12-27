@@ -50,16 +50,22 @@ install:
 # Run all tests
 test:
 	@echo "🧪 Running unittest tests..."
-	python -m unittest discover tests -v
-	python -m unittest discover tests_new -v
+	python -m unittest discover tests_integration -v
+	python -m unittest discover tests_api -v
 	@echo "🧪 Running pytest tests..."
-	pytest --cov=python_proptest --cov-report=term-missing -v
+	pytest tests_api tests_integration -v
 
-test-new:
-	@echo "🧪 Running unittest tests_new..."
-	python -m unittest discover tests_new -v
-	@echo "🧪 Running pytest tests_new..."
-	pytest --cov=python_proptest --cov-report=term-missing -v
+test-api:
+	@echo "🧪 Running unittest tests_api..."
+	python -m unittest discover tests_api -v
+	@echo "🧪 Running pytest tests_api..."
+	pytest tests_api -v
+
+test-integration:
+	@echo "🧪 Running unittest tests_integration..."
+	python -m unittest discover tests_integration -v
+	@echo "🧪 Running pytest tests_integration..."
+	pytest tests_integration -v
 
 # Run linting
 lint:
@@ -70,9 +76,9 @@ lint:
 # Format code
 format:
 	@echo "🎨 Formatting code with black..."
-	black python_proptest/ tests/ *.py
+	black python_proptest/ tests_api/ tests_integration/ *.py
 	@echo "📋 Sorting imports with isort..."
-	isort python_proptest/ tests/ *.py
+	isort python_proptest/ tests_api/ tests_integration/ *.py
 
 # Type checking
 type-check:

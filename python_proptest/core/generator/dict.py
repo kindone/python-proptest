@@ -4,7 +4,6 @@ and element-wise strategies aligned with cppproptest's map shrinking."""
 from typing import Dict, List, TypeVar
 
 from ..shrinker import Shrinkable
-from ..shrinker.list import shrink_dict
 from .base import Generator, Random
 
 T = TypeVar("T")

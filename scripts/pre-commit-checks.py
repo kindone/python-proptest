@@ -140,18 +140,18 @@ def main():
 
     # Step 4: Black formatting check
     if not run_command(
-        "black --check python_proptest/ tests/",
+        "black --check python_proptest/ tests_api/ tests_integration/",
         "Black formatting check"
     ):
-        print_warning("Code formatting issues found. Run 'black python_proptest/ tests/' to fix")
+        print_warning("Code formatting issues found. Run 'black python_proptest/ tests_api/ tests_integration/' to fix")
         failed_checks.append("Black formatting")
 
     # Step 5: Import sorting check
     if not run_command(
-        "isort --check-only python_proptest/ tests/",
+        "isort --check-only python_proptest/ tests_api/ tests_integration/",
         "Import sorting check"
     ):
-        print_warning("Import sorting issues found. Run 'isort python_proptest/ tests/' to fix")
+        print_warning("Import sorting issues found. Run 'isort python_proptest/ tests_api/ tests_integration/' to fix")
         failed_checks.append("Import sorting")
 
     # Step 6: MyPy type checking
@@ -163,7 +163,7 @@ def main():
 
     # Step 7: Unittest tests
     if not run_command(
-        "python -m unittest discover tests -v",
+        "python -m unittest discover tests_integration -v && python -m unittest discover tests_api -v",
         "Unittest tests",
         capture_output=True
     ):

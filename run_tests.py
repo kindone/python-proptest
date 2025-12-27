@@ -16,7 +16,15 @@ def run_pytest_tests():
     """Run tests using pytest if available."""
     try:
         result = subprocess.run(
-            [sys.executable, "-m", "pytest", "tests/", "-v", "--tb=short"],
+            [
+                sys.executable,
+                "-m",
+                "pytest",
+                "tests_api/",
+                "tests_integration/",
+                "-v",
+                "--tb=short",
+            ],
             capture_output=True,
             text=True,
             cwd=Path(__file__).parent,
@@ -39,7 +47,15 @@ def run_custom_tests():
     """Run tests using unittest discovery as fallback."""
     try:
         result = subprocess.run(
-            [sys.executable, "-m", "unittest", "discover", "-s", "tests", "-v"],
+            [
+                sys.executable,
+                "-m",
+                "unittest",
+                "discover",
+                "-s",
+                "tests_integration",
+                "-v",
+            ],
             capture_output=True,
             text=True,
             cwd=Path(__file__).parent,
@@ -72,9 +88,9 @@ def main():
 
     print("\n🎉 All tests completed successfully!")
     print("\nTo run tests manually:")
-    print("1. With pytest: python -m pytest tests/ -v")
-    print("2. With unittest: python -m unittest discover -s tests -v")
-    print("3. Individual tests: python -m pytest tests/<category>/test_<name>.py")
+    print("1. With pytest: python -m pytest tests_api/ tests_integration/ -v")
+    print("2. With unittest: python -m unittest discover -s tests_integration -v")
+    print("3. Individual tests: python -m pytest tests_api/<category>/test_<name>.py")
 
 
 if __name__ == "__main__":

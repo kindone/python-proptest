@@ -10,14 +10,14 @@ with specified probabilities.
 import math
 import struct
 import sys
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Optional
 
 from ..shrinker import Shrinkable
 from ..shrinker.floating import shrink_float
 from .base import Generator, Random
 
 if TYPE_CHECKING:
-    from ..combinator.one_of import OneOfGenerator
+    from ..combinator.one_of import OneOfGenerator  # noqa: F401
 
 
 class FiniteFloatGenerator(Generator[float]):
@@ -121,7 +121,7 @@ class FloatGenerator(Generator[float]):
         else:
             # Use one_of internally with weighted generators
             from ..combinator.just import JustGenerator
-            from ..combinator.one_of import OneOfGenerator
+            from ..combinator.one_of import OneOfGenerator  # noqa: F811
             from .base import Weighted
 
             generators = []
