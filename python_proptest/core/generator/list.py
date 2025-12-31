@@ -4,7 +4,7 @@ Generators for list types.
 
 from typing import List, TypeVar
 
-from ..shrinker import Shrinkable
+from ..shrinker import Shrinkable, shrink_list
 from ..stream import Stream
 from .base import Generator, Random
 
@@ -24,9 +24,8 @@ class ListGenerator(Generator[List[T]]):
     def generate(self, rng: Random) -> Shrinkable[List[T]]:
         length = rng.randint(self.min_length, self.max_length)
         elements = [self.element_generator.generate(rng) for _ in range(length)]
-        value = [elem.value for elem in elements]
-        shrinks = self._generate_shrinks(elements)
-        return Shrinkable(value, lambda: Stream.many(shrinks))
+        # Use shrink_list which respects min_size constraint
+        return shrink_list(elements, min_size=self.min_length)
 
     def _generate_shrinks(
         self, elements: List[Shrinkable[T]]

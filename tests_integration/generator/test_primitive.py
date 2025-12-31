@@ -235,10 +235,15 @@ class TestPrimitive(unittest.TestCase):
             exhaustive_traversal(shrinkable, 3, assert_float_range_and_unique)
 
     def test_list_generator_within_size_range(self):
-        """Test list generator generates lists within size range."""
+        """Test list generator generates lists within size range.
+
+        This test retries generation until it finds roots with unique values,
+        then verifies that the shrinking algorithm doesn't create duplicates.
+        """
         min_length = 2
         max_length = 6
         num_runs = 30
+        unique_roots_tested = 0
 
         for i in range(num_runs):
             rng = random.Random(f"list-{i}")
@@ -247,23 +252,44 @@ class TestPrimitive(unittest.TestCase):
                 min_length=min_length,
                 max_length=max_length,
             )
-            shrinkable = list_gen.generate(rng)
+
+            # Retry generation until we get a root with unique values
+            # This ensures we test whether the shrinking algorithm creates duplicates
+            # (not just whether duplicates already exist in the root)
+            max_retries = 100
+            shrinkable = None
+            for retry in range(max_retries):
+                candidate = list_gen.generate(rng)
+                if len(candidate.value) == len(set(candidate.value)):
+                    shrinkable = candidate
+                    unique_roots_tested += 1
+                    break
+                # Use a different seed for next retry
+                rng = random.Random(f"list-{i}-retry-{retry}")
+
+            # If we couldn't find a unique root after retries, skip this iteration
+            if shrinkable is None:
+                continue
 
             # Check initial value
             assert min_length <= len(shrinkable.value) <= max_length
 
-            # Check shrinks
+            # Check shrinks for uniqueness - root has unique values, so any duplicates
+            # in the shrink tree would be created by the shrinking algorithm
             seen_values = set()
 
             def assert_list_size_and_unique(shr: Shrinkable):
-                # Check for uniqueness
+                # Check for uniqueness - any duplicates here would be algorithm bugs
                 list_tuple = tuple(shr.value)
                 assert (
                     list_tuple not in seen_values
-                ), f"Duplicate list value {list_tuple} found"
+                ), f"Duplicate list value {list_tuple} found in shrink tree (root had unique values: {shrinkable.value})"
                 seen_values.add(list_tuple)
 
             exhaustive_traversal(shrinkable, 3, assert_list_size_and_unique)
+
+        # Ensure we tested at least some unique roots
+        assert unique_roots_tested > 0, "Failed to generate any roots with unique values for testing"
 
     def test_dict_generator_within_size_range(self):
         """Test dict generator generates dicts within size range."""

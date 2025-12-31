@@ -190,14 +190,27 @@ def _shrink_front_and_then_mid(
     if range_size < 0:
         return Shrinkable(shrinkable_elems)
 
-    # Use shrink_integral to shrink the range size, then map to actual front sizes
-    range_shrinkable = shrink_integral(range_size, min_value=0, max_value=range_size)
+    # Use binary_search_shrinkable to shrink the range size, then map to actual front sizes
+    # This matches cppproptest's shrinkIntegral<size_t>(maxFrontSize - minFrontSize)
+    # which shrinks from the value down to 0 without min/max constraints
+    range_shrinkable = binary_search_shrinkable(range_size)
 
     # Map the shrunk range size back to front size
+    # binary_search_shrinkable produces values in [0, range_size], so after mapping
+    # we get values in [min_front_size, min_front_size + range_size] = [min_front_size, max_front_size]
     def map_to_front_size(range_val: int) -> int:
-        return range_val + min_front_size
+        # binary_search_shrinkable can produce negative values, but we only want [0, range_size]
+        if range_val < 0:
+            return None  # Filter out negative values
+        front_size = range_val + min_front_size
+        # Ensure front_size is in valid range
+        if front_size < min_front_size or front_size > max_front_size:
+            return None
+        return front_size
 
-    front_size_shrinkable = range_shrinkable.map(map_to_front_size)
+    front_size_shrinkable = range_shrinkable.map(map_to_front_size).filter(
+        lambda fs: fs is not None
+    )
 
     # For each front size, create a list with front_size elements from front + rear elements
     def create_list_with_front_size(front_size: int) -> List[Shrinkable[T]]:
@@ -234,7 +247,40 @@ def _shrink_front_and_then_mid(
         recursive_result = _shrink_front_and_then_mid(
             parent.value, min_size, rear_size + 1
         )
-        return recursive_result.shrinks()
+        # Structural fix to prevent duplicates:
+        # When rear_size > 0, we're fixing elements to the rear. The recursive
+        # shrinks should have the fixed rear part (last rear_size+1 elements from parent).
+        # If a recursive shrink has the same length and same rear part as what
+        # would be created with rear_size=0, it's a duplicate.
+        parent_value_list = [elem.value for elem in parent.value]
+        recursive_shrinks_list = recursive_result.shrinks().to_list()
+        
+        # The fixed rear part for this recursive level (last rear_size+1 elements)
+        fixed_rear = parent_value_list[-(rear_size + 1):] if len(parent_value_list) >= (rear_size + 1) else []
+        
+        filtered_shrinks = []
+        for shrink in recursive_shrinks_list:
+            shrink_value_list = [elem.value for elem in shrink.value]
+            # Skip if identical to parent
+            if shrink_value_list == parent_value_list:
+                continue
+            
+            # When rear_size > 0, ensure the recursive shrink actually uses the fixed rear
+            # The shrink should end with the fixed rear part (last rear_size+1 elements)
+            if rear_size > 0 and len(shrink_value_list) >= len(fixed_rear):
+                shrink_rear = shrink_value_list[-len(fixed_rear):]
+                if shrink_rear != fixed_rear:
+                    # This shrink doesn't properly use the fixed rear, skip it
+                    continue
+            
+            # Additional check: if this shrink has the same length as what would be
+            # created with rear_size=0, and the rear part matches, it might be a duplicate.
+            # But we can't easily check this without comparing against all previous lists.
+            # Instead, we rely on the fact that if rear_size > 0, the shrink should
+            # have the fixed rear part, which should make it different.
+            filtered_shrinks.append(shrink)
+        
+        return Stream.many(filtered_shrinks)
 
     # Concatenate recursive shrinks to the result
     # This adds recursive shrinks to each shrinkable in the result

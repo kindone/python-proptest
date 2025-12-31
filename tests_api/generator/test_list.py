@@ -47,7 +47,8 @@ class TestListGenerator(unittest.TestCase):
         minimal_list = ctx.exception.minimal_inputs[0]
         failing_list = ctx.exception.failing_inputs[0]
         self.assertLessEqual(len(minimal_list), len(failing_list))
-        self.assertEqual(minimal_list, [])
+        # With min_length=2, shrinking should respect the constraint and stop at length 2
+        self.assertEqual(len(minimal_list), 2)
 
     def test_zero_min_length_shrinks_to_empty_list(self):
         """Min length 0 shrinks failing examples down to the empty list."""

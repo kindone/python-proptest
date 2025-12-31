@@ -85,6 +85,50 @@ def gen_shrinkable_40213() -> Shrinkable[int]:
     )
 
 
+def gen_shrinkable_7531246() -> Shrinkable[int]:
+    """Generate a shrinkable with value 7 and shrinks [5->[3->1, 2], 4, 6]."""
+    return Shrinkable(7).with_shrinks(
+        lambda: Stream.many(
+            [
+                Shrinkable(5).with_shrinks(
+                    lambda: Stream.many(
+                        [
+                            Shrinkable(3).with_shrinks(
+                                lambda: Stream.one(Shrinkable(1))
+                            ),
+                            Shrinkable(2),
+                        ]
+                    )
+                ),
+                Shrinkable(4),
+                Shrinkable(6),
+            ]
+        )
+    )
+
+
+def gen_shrinkable_964285173() -> Shrinkable[int]:
+    """Generate a shrinkable with value 9 and shrinks [6->[4->2, 8], 5->1, 7->3]."""
+    return Shrinkable(9).with_shrinks(
+        lambda: Stream.many(
+            [
+                Shrinkable(6).with_shrinks(
+                    lambda: Stream.many(
+                        [
+                            Shrinkable(4).with_shrinks(
+                                lambda: Stream.one(Shrinkable(2))
+                            ),
+                            Shrinkable(8),
+                        ]
+                    )
+                ),
+                Shrinkable(5).with_shrinks(lambda: Stream.one(Shrinkable(1))),
+                Shrinkable(7).with_shrinks(lambda: Stream.one(Shrinkable(3))),
+            ]
+        )
+    )
+
+
 class TestShrinkerComprehensive(unittest.TestCase):
     """Comprehensive shrinker tests ported from dartproptest."""
 
@@ -97,6 +141,18 @@ class TestShrinkerComprehensive(unittest.TestCase):
         """Test complex shrinkable structure."""
         shr = gen_shrinkable_40213()
         expected = '{"value":4,"shrinks":[{"value":0},{"value":2,"shrinks":[{"value":1}]},{"value":3}]}'
+        assert serialize_shrinkable(shr) == expected
+
+    def test_shrinkable_7531246(self):
+        """Test larger shrinkable structure."""
+        shr = gen_shrinkable_7531246()
+        expected = '{"value":7,"shrinks":[{"value":5,"shrinks":[{"value":3,"shrinks":[{"value":1}]},{"value":2}]},{"value":4},{"value":6}]}'
+        assert serialize_shrinkable(shr) == expected
+
+    def test_shrinkable_964285173(self):
+        """Test largest shrinkable structure."""
+        shr = gen_shrinkable_964285173()
+        expected = '{"value":9,"shrinks":[{"value":6,"shrinks":[{"value":4,"shrinks":[{"value":2}]},{"value":8}]},{"value":5,"shrinks":[{"value":1}]},{"value":7,"shrinks":[{"value":3}]}]}'
         assert serialize_shrinkable(shr) == expected
 
     def test_shrinkable_concat_static(self):
