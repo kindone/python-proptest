@@ -44,11 +44,11 @@ jobs:
 
     - name: Check code formatting with black
       run: |
-        black --check python_proptest/ tests/
+        black --check python_proptest/ tests_api/ tests_integration/
 
     - name: Check import sorting with isort
       run: |
-        isort --check-only python_proptest/ tests/
+        isort --check-only python_proptest/ tests_api/ tests_integration/
 
     - name: Type check with mypy
       run: |
@@ -56,11 +56,12 @@ jobs:
 
     - name: Test with unittest
       run: |
-        python -m unittest discover tests -v
+        python -m unittest discover tests_api -v
+        python -m unittest discover tests_integration -v
 
     - name: Test with pytest
       run: |
-        pytest --cov=python_proptest --cov-branch --cov-report=xml --cov-report=term-missing
+        pytest tests_api/ tests_integration/ --cov=python_proptest --cov-branch --cov-report=xml --cov-report=term-missing
 
     - name: Upload coverage to Codecov
       if: matrix.python-version == '3.11'
