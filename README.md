@@ -255,56 +255,56 @@ def test_stack_operations():
 
 **Primitive Generators:**
 
-- `Gen.int(min_value, max_value)` - Random integers
-- `Gen.float(min_value, max_value)` - Random floats
-- `Gen.bool(true_prob)` - Random booleans with configurable probability
-- `Gen.str(min_length, max_length, charset)` - Random strings with customizable charset (default: lowercase letters, or use "ascii"/"printable_ascii", or a codepoint generator)
-- `Gen.ascii_string(min_length, max_length)` - ASCII strings (0-127)
-- `Gen.printable_ascii_string(min_length, max_length)` - Printable ASCII strings (32-126)
-- `Gen.unicode_string(min_length, max_length)` - Unicode strings
-- `Gen.ascii_char()` - ASCII character codes (0-127)
-- `Gen.unicode_char()` - Unicode character codes (avoiding surrogate pairs)
-- `Gen.printable_ascii_char()` - Printable ASCII character codes (32-126)
-- `Gen.in_range(min_value, max_value)` - Integers in range [min, max) (exclusive)
-- `Gen.interval(min_value, max_value)` - Integers in range [min, max] (inclusive)
-- `Gen.integers(start, count)` - Integers in range [start, start+count) (count parameter)
-- `Gen.natural(max_value)` - Positive integers [1, max_value]
-- `Gen.non_negative(max_value)` - Non-negative integers [0, max_value]
+- [`Gen.int(min_value, max_value)`](docs/generators.md#genintmin_value-max_value) - Random integers
+- [`Gen.float(min_value, max_value)`](docs/generators.md#genfloatmin_value-max_value-nan_prob-posinf_prob-neginf_prob) - Random floats
+- [`Gen.bool(true_prob)`](docs/generators.md#genbooltrue_prob) - Random booleans with configurable probability
+- [`Gen.str(min_length, max_length, charset)`](docs/generators.md#genstrmin_length-max_length-charset) - Random strings with customizable charset (default: lowercase letters, or use "ascii"/"printable_ascii", or a codepoint generator)
+- [`Gen.ascii_string(min_length, max_length)`](docs/generators.md#genascii_stringmin_length-max_length) - ASCII strings (0-127)
+- [`Gen.printable_ascii_string(min_length, max_length)`](docs/generators.md#genprintable_ascii_stringmin_length-max_length) - Printable ASCII strings (32-126)
+- [`Gen.unicode_string(min_length, max_length)`](docs/generators.md#genunicode_stringmin_length-max_length) - Unicode strings
+- [`Gen.ascii_char()`](docs/generators.md#genascii_char) - ASCII character codes (0-127)
+- [`Gen.unicode_char()`](docs/generators.md#genunicode_char) - Unicode character codes (avoiding surrogate pairs)
+- [`Gen.printable_ascii_char()`](docs/generators.md#genprintable_ascii_char) - Printable ASCII character codes (32-126)
+- [`Gen.in_range(min_value, max_value)`](docs/generators.md#genin_rangemin_value-max_value) - Integers in range [min, max) (exclusive)
+- [`Gen.interval(min_value, max_value)`](docs/generators.md#genintervalmin_value-max_value) - Integers in range [min, max] (inclusive)
+- [`Gen.integers(start, count)`](docs/generators.md#genintegersstart-count) - Integers in range [start, start+count) (count parameter)
+- [`Gen.natural(max_value)`](docs/generators.md#gennaturalmax_value) - Positive integers [1, max_value]
+- [`Gen.non_negative(max_value)`](docs/generators.md#gennon_negativemax_value) - Non-negative integers [0, max_value]
 
 **Container Generators:**
-- `Gen.list(element_gen, min_length, max_length)` - Lists
-- `Gen.unique_list(element_gen, min_length, max_length)` - Lists with unique elements (sorted)
-- `Gen.set(element_gen, min_size, max_size)` - Sets
-- `Gen.dict(key_gen, value_gen, min_size, max_size)` - Dictionaries
-- `Gen.tuple(*generators)` - Fixed-size tuples
+- [`Gen.list(element_gen, min_length, max_length)`](docs/generators.md#genlistelement_gen-min_length-max_length) - Lists
+- [`Gen.unique_list(element_gen, min_length, max_length)`](docs/generators.md#genunique_listelement_gen-min_length-max_length) - Lists with unique elements (sorted)
+- [`Gen.set(element_gen, min_size, max_size)`](docs/generators.md#gensetelement_gen-min_size-max_size) - Sets
+- [`Gen.dict(key_gen, value_gen, min_size, max_size)`](docs/generators.md#gendictkey_gen-value_gen-min_size-max_size) - Dictionaries
+- [`Gen.tuple(*generators)`](docs/generators.md#gentuplegenerators) - Fixed-size tuples
 
 **Special Generators:**
-- `Gen.just(value)` - Always generates the same value
-- `Gen.lazy(func)` - Defers evaluation until generation
-- `Gen.construct(Type, *generators)` - Creates class instances
+- [`Gen.just(value)`](docs/generators.md#genjustvalue) - Always generates the same value
+- [`Gen.lazy(func)`](docs/generators.md#genlazyfunc) - Defers evaluation until generation
+- [`Gen.construct(Type, *generators)`](docs/combinators.md#genconstructtype-generators) - Creates class instances
 
 **Dependent Generation Combinators:**
-- `Gen.chain(base_gen, gen_factory)` / `generator.chain(gen_factory)` - Creates dependent tuples
-- `Gen.aggregate(initial_gen, gen_factory, min_size, max_size)` / `generator.aggregate(...)` - Generates list with dependent elements
-- `Gen.accumulate(initial_gen, gen_factory, min_size, max_size)` / `generator.accumulate(...)` - Generates final value after dependent steps
+- [`Gen.chain(base_gen, gen_factory)` / `generator.chain(gen_factory)`](docs/combinators.md#genchainbase_gen-gen_factory-generatorchaingen_factory) - Creates dependent tuples
+- [`Gen.aggregate(initial_gen, gen_factory, min_size, max_size)` / `generator.aggregate(...)`](docs/combinators.md#genaggregateinitial_gen-gen_factory-min_size-max_size-generatoraggregate) - Generates list with dependent elements
+- [`Gen.accumulate(initial_gen, gen_factory, min_size, max_size)` / `generator.accumulate(...)`](docs/combinators.md#genaccumulateinitial_gen-gen_factory-min_size-max_size-generatoraccumulate) - Generates final value after dependent steps
 
 **Selection Combinators:**
-- `Gen.one_of(*generators)` - Randomly chooses from multiple generators
-- `Gen.element_of(*values)` - Randomly chooses from multiple values
-- `Gen.weighted_gen(generator, weight)` - Wraps generator with weight for one_of
-- `Gen.weighted_value(value, weight)` - Wraps value with weight for element_of
+- [`Gen.one_of(*generators)`](docs/combinators.md#genone_ofgenerators) - Randomly chooses from multiple generators
+- [`Gen.element_of(*values)`](docs/combinators.md#genelement_ofvalues) - Randomly chooses from multiple values
+- [`Gen.weighted_gen(generator, weight)`](docs/combinators.md#genweighted_gengenerator-weight) - Wraps generator with weight for one_of
+- [`Gen.weighted_value(value, weight)`](docs/combinators.md#genweighted_valuevalue-weight) - Wraps value with weight for element_of
 
 **Transformation Combinators:**
-- `generator.map(func)` - Transforms generated values
-- `generator.filter(predicate)` - Filters values by predicate
-- `generator.flat_map(func)` - Creates dependent generators
+- [`generator.map(func)`](docs/combinators.md#generatormapfunc) - Transforms generated values
+- [`generator.filter(predicate)`](docs/combinators.md#generatorfilterpredicate) - Filters values by predicate
+- [`generator.flat_map(func)`](docs/combinators.md#generatorflat_mapfunc) - Creates dependent generators
 
 **Decorators:**
-- `@for_all(*generators, num_runs, seed)` - Core property-based testing decorator (unpacks arguments)
-- `@run_for_all(*generators, num_runs, seed)` - Versatile decorator for complex generators (chain, aggregate, accumulate)
-- `@example(*values)` - Provides specific example values to test
-- `@settings(num_runs, seed)` - Configures test parameters
-- `@matrix(**kwargs)` - Provides exhaustive Cartesian product testing
+- [`@for_all(*generators, num_runs, seed)`](docs/decorators.md#for_all) - Core property-based testing decorator (unpacks arguments)
+- [`@run_for_all(*generators, num_runs, seed)`](docs/decorators.md#run_for_all) - Versatile decorator for complex generators (chain, aggregate, accumulate)
+- [`@example(*values)`](docs/decorators.md#example) - Provides specific example values to test
+- [`@settings(num_runs, seed)`](docs/decorators.md#settings) - Configures test parameters
+- [`@matrix(**kwargs)`](docs/decorators.md#matrix) - Provides exhaustive Cartesian product testing
 
 ### Property Testing Approaches
 
@@ -340,3 +340,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Inspired by [QuickCheck](https://hackage.haskell.org/package/QuickCheck) for Haskell
 - Influenced by [Hypothesis](https://hypothesis.readthedocs.io/) for Python
 - Based on the original [cppproptest](https://github.com/kindone/cppproptest2) C++ implementation
+  - See [jsproptest](https://github.com/kindone/jsproptest) for Javascript testing
+  - See [dartproptest](https://github.com/kindone/dartproptest) for Dart/Flutter testing
