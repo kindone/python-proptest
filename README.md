@@ -258,7 +258,7 @@ def test_stack_operations():
 - `Gen.int(min_value, max_value)` - Random integers
 - `Gen.float(min_value, max_value)` - Random floats
 - `Gen.bool(true_prob)` - Random booleans with configurable probability
-- `Gen.str(min_length, max_length)` - Random strings (ASCII)
+- `Gen.str(min_length, max_length, charset)` - Random strings with customizable charset (default: lowercase letters, or use "ascii"/"printable_ascii", or a codepoint generator)
 - `Gen.ascii_string(min_length, max_length)` - ASCII strings (0-127)
 - `Gen.printable_ascii_string(min_length, max_length)` - Printable ASCII strings (32-126)
 - `Gen.unicode_string(min_length, max_length)` - Unicode strings
@@ -267,7 +267,9 @@ def test_stack_operations():
 - `Gen.printable_ascii_char()` - Printable ASCII character codes (32-126)
 - `Gen.in_range(min_value, max_value)` - Integers in range [min, max) (exclusive)
 - `Gen.interval(min_value, max_value)` - Integers in range [min, max] (inclusive)
-- `Gen.integers(min_value, max_value)` - Alias for interval
+- `Gen.integers(start, count)` - Integers in range [start, start+count) (count parameter)
+- `Gen.natural(max_value)` - Positive integers [1, max_value]
+- `Gen.non_negative(max_value)` - Non-negative integers [0, max_value]
 
 **Container Generators:**
 - `Gen.list(element_gen, min_length, max_length)` - Lists

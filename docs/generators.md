@@ -10,7 +10,7 @@ Generators are the foundation of property-based testing in `python-proptest`. Th
 | [`Gen.bool()`](#genbooltrue_prob)             | Generates `True` or `False` with configurable probability.     | `true_prob` (def: 0.5)                              | `Gen.bool(true_prob=0.8)`                                       |
 | [`Gen.float()`](#genfloatmin_value-max_value-nan_prob-posinf_prob-neginf_prob)             | Generates floating-point numbers. By default generates only finite values. Can optionally generate `inf`, `-inf`, `nan` with specified probabilities.     | `min_value`, `max_value`, `nan_prob`, `posinf_prob`, `neginf_prob`                              | `Gen.float(min_value=0.0, max_value=1.0, nan_prob=0.01)`                                         |
 | [`Gen.int()`](#genintmin_value-max_value)  | Generates integers in the range `[min_value, max_value]`.                   | `min_value`, `max_value`                                       | `Gen.int(min_value=0, max_value=10)`                                 |
-| [`Gen.str()`](#genstrmin_length-max_length)  | Generates strings (defaults to ASCII).                          | `min_length` (def: 0), `max_length` (def: 10)        | `Gen.str(min_length=0, max_length=5)`                                    |
+| [`Gen.str()`](#genstrmin_length-max_length-charset)  | Generates strings with customizable charset.                          | `min_length` (def: 0), `max_length` (def: 20), `charset` (def: lowercase letters)        | `Gen.str(min_length=0, max_length=5, charset="abc")`                                    |
 | [`Gen.ascii_string(...)`](#genascii_stringmin_length-max_length)    | Generates strings containing only ASCII chars (0-127).          | `min_length` (def: 0), `max_length` (def: 10)        | `Gen.ascii_string(min_length=1, max_length=8)`                               |
 | [`Gen.unicode_string(...)`](#genunicode_stringmin_length-max_length)  | Generates strings containing Unicode chars.                     | `min_length` (def: 0), `max_length` (def: 10)        | `Gen.unicode_string(min_length=1, max_length=8)`                             |
 | [`Gen.printable_ascii_string(...)`](#genprintable_ascii_stringmin_length-max_length) | Generates strings containing only printable ASCII chars.  | `min_length` (def: 0), `max_length` (def: 10)        | `Gen.printable_ascii_string(min_length=5, max_length=5)`                      |
@@ -18,6 +18,10 @@ Generators are the foundation of property-based testing in `python-proptest`. Th
 | [`Gen.unicode_char()`](#genunicode_char)      | Generates Unicode character codes (avoiding surrogate pairs). | None                                                | `Gen.unicode_char()`                                                           |
 | [`Gen.printable_ascii_char()`](#genprintable_ascii_char) | Generates printable ASCII character codes (32-126).    | None                                                | `Gen.printable_ascii_char()`                                                   |
 | [`Gen.in_range(min, max)`](#genin_rangemin_value-max_value)  | Generates integers in range [min, max) (exclusive).      | `min_value`, `max_value`                            | `Gen.in_range(0, 10)`                                                         |
+| [`Gen.interval(min, max)`](#genintervalmin_value-max_value)  | Generates integers in range [min, max] (inclusive).      | `min_value`, `max_value`                            | `Gen.interval(0, 10)`                                                         |
+| [`Gen.integers(start, count)`](#genintegersstart-count)  | Generates integers in range [start, start+count).      | `start`, `count`                            | `Gen.integers(0, 100)`                                                         |
+| [`Gen.natural(max)`](#gennaturalmax_value)  | Generates positive integers [1, max].      | `max_value`                            | `Gen.natural(100)`                                                         |
+| [`Gen.non_negative(max)`](#gennon_negativemax_value)  | Generates non-negative integers [0, max].      | `max_value`                            | `Gen.non_negative(100)`                                                         |
 | [`Gen.unique_list(elem, ...)`](#genunique_listelement_gen-min_length-max_length) | Generates lists with unique elements, sorted. | `element_gen`, `min_length` (def: 0), `max_length` (def: 10) | `Gen.unique_list(Gen.int(min_value=1, max_value=5), min_length=1, max_length=3)` |
 | **Containers**            |                                                                 |                                                    |                                                       |
 | [`Gen.list(elem, ...)`](#genlistelement_gen-min_length-max_length) | Generates lists with elements from `elem`.                   | `element_gen`, `min_length` (def: 0), `max_length` (def: 10) | `Gen.list(Gen.bool(), min_length=2, max_length=4)`                      |
@@ -154,17 +158,22 @@ Gen.list(Gen.bool(true_prob=0.3), min_length=1, max_length=5)
 
 **See Also:** [`Gen.just()`](#genjustvalue) for constant values, [`Gen.list()`](#genlistelement_gen-min_length-max_length) for lists of booleans
 
-### `Gen.str(min_length, max_length)`
+### `Gen.str(min_length, max_length, charset)`
 
-Generates random strings with ASCII characters.
+Generates random strings with customizable character sets.
 
 **Parameters:**
 - `min_length` (int, default: 0): Minimum string length
 - `max_length` (int, default: 20): Maximum string length
+- `charset` (str or Generator[int], default: "abcdefghijklmnopqrstuvwxyz"): Character set to use. Can be:
+  - A string of characters: `"abc"` generates strings using only 'a', 'b', 'c'
+  - Special string `"ascii"`: Uses all ASCII characters (0-127)
+  - Special string `"printable_ascii"`: Uses printable ASCII characters (32-126)
+  - A codepoint generator: `Gen.int(65, 90)` generates strings using codepoints in range [65, 90] (A-Z)
 
 **Examples:**
 ```python
-# Generate strings of length 5 to 10
+# Generate strings of length 5 to 10 (default: lowercase letters)
 Gen.str(min_length=5, max_length=10)
 
 # Generate single character strings
@@ -172,12 +181,25 @@ Gen.str(min_length=1, max_length=1)
 
 # Generate empty strings (min_length=0)
 Gen.str(min_length=0, max_length=0)
+
+# Use custom character set
+Gen.str(charset="abc")  # Only 'a', 'b', 'c'
+
+# Use ASCII character set
+Gen.str(charset="ascii")
+
+# Use printable ASCII character set
+Gen.str(charset="printable_ascii")
+
+# Use codepoint generator for A-Z
+Gen.str(charset=Gen.int(65, 90))  # A-Z via codepoints [65, 90]
 ```
 
 **Use Cases:**
 - Testing string operations
 - Generating usernames or identifiers
 - Creating test data for text processing
+- Testing with specific character sets (e.g., only digits, only uppercase)
 
 **See Also:** [`Gen.ascii_string()`](#genascii_stringmin_length-max_length), [`Gen.unicode_string()`](#genunicode_stringmin_length-max_length), [`Gen.printable_ascii_string()`](#genprintable_ascii_stringmin_length-max_length)
 
@@ -370,19 +392,78 @@ Gen.interval(1, 6)
 
 **See Also:** [`Gen.int()`](#genintmin_value-max_value), [`Gen.in_range()`](#genin_rangemin_value-max_value), [`Gen.integers()`](#genintegersmin_value-max_value)
 
-### `Gen.integers(min_value, max_value)`
+### `Gen.integers(start, count)`
 
-Alias for `Gen.interval()` for compatibility.
+Generates integers in the range [start, start+count). The second parameter is the **count** of values to generate, not the maximum value.
 
 **Parameters:**
-- `min_value` (int): Minimum integer value (inclusive)
-- `max_value` (int): Maximum integer value (inclusive)
+- `start` (int): Starting value (inclusive)
+- `count` (int): Number of values to generate (must be positive)
 
 **Examples:**
 ```python
-# Same as Gen.interval(0, 10)
-Gen.integers(0, 10)
+# Generate integers from 0 to 99 (100 values)
+Gen.integers(0, 100)   # generates {0, 1, ..., 99}
+
+# Generate A-Z codepoints (26 values)
+Gen.integers(65, 26)   # generates {65, 66, ..., 90} (A-Z)
+
+# Generate integers from -10 to 10 (21 values)
+Gen.integers(-10, 21)  # generates {-10, -9, ..., 10}
 ```
+
+**Use Cases:**
+- Generating sequences with a specific count
+- Creating character code ranges (like A-Z)
+- Testing with exact number of values
+
+**See Also:** [`Gen.int()`](#genintmin_value-max_value), [`Gen.interval()`](#genintervalmin_value-max_value), [`Gen.in_range()`](#genin_rangemin_value-max_value)
+
+### `Gen.natural(max_value)`
+
+Generates positive integers in range [1, max_value] (inclusive).
+
+**Parameters:**
+- `max_value` (int): Maximum value (inclusive, must be at least 1)
+
+**Examples:**
+```python
+# Generate natural numbers from 1 to 100
+Gen.natural(100)  # generates {1, 2, ..., 100}
+
+# Generate dice rolls (1 to 6)
+Gen.natural(6)    # generates {1, 2, 3, 4, 5, 6}
+```
+
+**Use Cases:**
+- Generating positive counts or indices
+- Creating dice rolls or random selections from 1
+- Testing with strictly positive values
+
+**See Also:** [`Gen.int()`](#genintmin_value-max_value), [`Gen.non_negative()`](#gennon_negativemax_value)
+
+### `Gen.non_negative(max_value)`
+
+Generates non-negative integers in range [0, max_value] (inclusive).
+
+**Parameters:**
+- `max_value` (int): Maximum value (inclusive, must be non-negative)
+
+**Examples:**
+```python
+# Generate non-negative integers from 0 to 100
+Gen.non_negative(100)  # generates {0, 1, 2, ..., 100}
+
+# Generate array indices
+Gen.non_negative(len(my_array) - 1)
+```
+
+**Use Cases:**
+- Generating array indices
+- Creating counts that can be zero
+- Testing with non-negative values
+
+**See Also:** [`Gen.int()`](#genintmin_value-max_value), [`Gen.natural()`](#gennaturalmax_value)
 
 ## Container Generators
 
