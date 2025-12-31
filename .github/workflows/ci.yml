@@ -48,7 +48,19 @@ jobs:
 
     - name: Check import sorting with isort
       run: |
-        isort --check-only python_proptest/ tests_api/ tests_integration/
+        echo "isort version:"
+        isort --version
+        echo ""
+        echo "Checking import sorting..."
+        isort --check-only --diff --verbose python_proptest/ tests_api/ tests_integration/ || {
+          echo ""
+          echo "=== Files with import issues ==="
+          isort --check-only --show-files python_proptest/ tests_api/ tests_integration/
+          echo ""
+          echo "=== Detailed diff for problematic files ==="
+          isort --check-only --diff python_proptest/ tests_api/ tests_integration/
+          exit 1
+        }
 
     - name: Type check with mypy
       run: |
