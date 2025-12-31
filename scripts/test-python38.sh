@@ -111,7 +111,7 @@ fi
 
 # Test 3: Run a few unittest tests
 print_status "Test 3: Running unittest tests..."
-if $PYTHON38_CMD -m unittest discover tests -q 2>/dev/null; then
+if $PYTHON38_CMD -m unittest discover tests_api tests_integration -q 2>/dev/null; then
     print_success "Unittest tests passed"
 else
     print_error "Unittest tests failed"
@@ -120,7 +120,7 @@ fi
 
 # Test 4: Run a few pytest tests
 print_status "Test 4: Running pytest tests..."
-if $PYTHON38_CMD -m pytest tests/generator/test_basic_generators.py -q 2>/dev/null; then
+if $PYTHON38_CMD -m pytest tests_api/ tests_integration/ -q 2>/dev/null; then
     print_success "Pytest tests passed"
 else
     print_error "Pytest tests failed"
@@ -129,7 +129,7 @@ fi
 
 # Test 5: Type checking with mypy
 print_status "Test 5: Type checking with mypy..."
-if $PYTHON38_CMD -m mypy python_proptest/ --ignore-missing-imports 2>/dev/null; then
+if $PYTHON38_CMD -m mypy python_proptest/ tests_api/ tests_integration/ --ignore-missing-imports 2>/dev/null; then
     print_success "Type checking passed"
 else
     print_warning "Type checking had issues (this is expected for Python 3.8)"
