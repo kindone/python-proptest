@@ -320,160 +320,18 @@ def test_stack_operations():
 - [Shrinking](docs/shrinking.md)
 - [Stateful Testing](docs/stateful-testing.md)
 
-## Development
+## Contributing
 
-The project includes a comprehensive Makefile with useful development commands:
-
-### Quick Commands
-
-```bash
-# Show all available commands
-make help
-
-# Quick pre-commit checks (fast)
-make quick-check
-
-# Full pre-commit checks
-make pre-commit
-
-# Run all CI checks
-make all-checks
-```
-
-### Individual Development Tasks
-
-```bash
-# Install dependencies
-make install
-
-# Run all tests (unittest + pytest with coverage)
-make test
-
-# Code quality checks
-make lint           # Run flake8 linting
-make format         # Format code with black and isort
-make type-check     # Run mypy type checking
-make security       # Run security analysis
-
-# Documentation
-make docs           # Build and serve documentation locally
-make docs-build     # Build documentation to ./site
-make docs-serve     # Serve documentation at http://127.0.0.1:8000
-make docs-deploy    # Deploy documentation to GitHub Pages
-
-# Quick documentation setup
-./scripts/setup-docs.sh  # Set up documentation environment
-
-# Python version testing
-make test-python38  # Test Python 3.8 compatibility
-make test-all-python # Test all available Python versions
-
-# PyPI publishing
-make build-package  # Build package for PyPI distribution
-make test-package   # Test built package locally
-make upload-testpypi # Upload to TestPyPI
-make upload-pypi    # Upload to production PyPI
-
-# Utilities
-make clean          # Clean up generated files
-make clean-whitespace # Clean trailing whitespaces from all files
-```
-
-### Development Workflow
-
-```bash
-# Quick check (fast, for frequent commits)
-make quick-check
-
-# Full check (comprehensive, before pushing)
-make pre-commit
-
-# All CI checks (before submitting PR)
-make all-checks
-```
+Contributions are welcome! Please see our [Contributing Guide](CONTRIBUTING.md) for details on:
+- Setting up your development environment
+- Available development commands and workflows
+- Code style guidelines
+- Testing guidelines
+- Release process and CI/CD information
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## CI/CD and Publishing
-
-### Automated Testing
-- **CI Pipeline**: Runs on every push and PR with Python 3.8-3.12
-- **Test Frameworks**: Both `unittest` and `pytest` are supported
-- **Code Quality**: Automated linting, formatting, type checking, and security analysis
-
-### Publishing to PyPI
-
-#### TestPyPI Uploads
-To upload to TestPyPI (for testing), you can:
-
-1. **Manual trigger**: Use GitHub Actions workflow dispatch
-2. **Local upload**: Use `make upload-testpypi`
-
-#### Production PyPI Uploads
-Production uploads happen automatically when you:
-1. Create a version tag: `git tag v1.0.0`
-2. Push the tag: `git push origin v1.0.0`
-
-### Version Management
-- Use `make bump-version` to bump versions (patch/minor/major)
-- Production PyPI uses semantic versioning from git tags
-
-## Contributing
-
-Contributions are welcome. Please see our [Contributing Guide](CONTRIBUTING.md) for details on how to get started.
-
-### Quick Start for Contributors
-
-1. Fork the repository
-2. Clone your fork: `git clone https://github.com/your-username/python-proptest.git`
-3. Create a feature branch: `git checkout -b feature/new-feature`
-4. Set up development environment: `make install`
-5. Make your changes and add tests
-6. Run quality checks: `make pre-commit`
-7. Ensure all tests pass: `make all-checks`
-8. Commit your changes: `git commit -m 'feat: add new feature'`
-9. Push to your branch: `git push origin feature/new-feature`
-10. Open a Pull Request
-
-For major changes, please open an issue first to discuss what you would like to change.
-
-### Development Setup
-
-```bash
-# Clone the repository
-git clone https://github.com/your-username/python-proptest.git
-cd python-proptest
-
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install in development mode with all dependencies
-make install
-
-# Run quick checks
-make quick-check
-
-# Run comprehensive checks
-make all-checks
-```
-
-### Pre-commit Workflow
-
-Before committing, run the pre-commit checks to ensure code quality:
-
-```bash
-# Quick check (fast, for frequent commits)
-make quick-check
-
-# Full check (comprehensive, before pushing)
-make pre-commit
-
-# All CI checks (before submitting PR)
-make all-checks
-```
 
 ## Acknowledgments
 

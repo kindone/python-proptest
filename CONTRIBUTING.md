@@ -30,33 +30,60 @@ Thank you for your interest in contributing to python-proptest! This document pr
    make install
    ```
 
+5. Run quick checks to verify setup:
+   ```bash
+   make quick-check
+   ```
+
 ## Available Commands
 
 The project includes a comprehensive Makefile with useful development commands:
+
+### Quick Commands
 
 ```bash
 # Show all available commands
 make help
 
-# Quick Commands
-make quick-check    # Run quick pre-commit checks (fast)
-make pre-commit     # Run full pre-commit checks
-make all-checks     # Run all CI checks
+# Quick pre-commit checks (fast)
+make quick-check
 
-# Individual Checks
-make install        # Install dependencies
-make test           # Run all tests (unittest + pytest)
+# Full pre-commit checks
+make pre-commit
+
+# Run all CI checks
+make all-checks
+```
+
+### Individual Development Tasks
+
+```bash
+# Install dependencies
+make install
+
+# Run all tests (unittest + pytest with coverage)
+make test
+
+# Code quality checks
 make lint           # Run flake8 linting
 make format         # Format code with black and isort
 make type-check     # Run mypy type checking
 make security       # Run security analysis
 
-# Python Version Testing
+# Documentation
+make docs           # Build and serve documentation locally
+make docs-build     # Build documentation to ./site
+make docs-serve     # Serve documentation at http://127.0.0.1:8000
+make docs-deploy    # Deploy documentation to GitHub Pages
+
+# Quick documentation setup
+./scripts/setup-docs.sh  # Set up documentation environment
+
+# Python version testing
 make test-python38  # Test Python 3.8 compatibility
 make test-all-python # Test all available Python versions
 
-# PyPI Publishing
-make bump-version   # Bump version (patch/minor/major)
+# PyPI publishing
 make build-package  # Build package for PyPI distribution
 make test-package   # Test built package locally
 make upload-testpypi # Upload to TestPyPI
@@ -235,17 +262,41 @@ class TestStringOperations:
 - Add examples to documentation
 - Keep documentation in sync with code changes
 
-## Release Process
+## CI/CD and Publishing
+
+### Automated Testing
+- **CI Pipeline**: Runs on every push and PR with Python 3.8-3.12
+- **Test Frameworks**: Both `unittest` and `pytest` are supported
+- **Code Quality**: Automated linting, formatting, type checking, and security analysis
+
+### Publishing to PyPI
+
+#### TestPyPI Uploads
+To upload to TestPyPI (for testing), you can:
+
+1. **Manual trigger**: Use GitHub Actions workflow dispatch
+2. **Local upload**: Use `make upload-testpypi`
+
+#### Production PyPI Uploads
+Production uploads happen automatically when you:
+1. Create a version tag: `git tag v1.0.0`
+2. Push the tag: `git push origin v1.0.0`
+
+### Version Management
+- Use `make bump-version` to bump versions (patch/minor/major)
+- Production PyPI uses semantic versioning from git tags
+
+### Release Process
 
 Releases can be managed through GitHub Actions or manually using the Makefile commands:
 
-### Automated Release (Recommended)
+#### Automated Release (Recommended)
 1. Update version in `pyproject.toml`
 2. Create a git tag: `git tag v0.1.1`
 3. Push the tag: `git push origin v0.1.1`
 4. GitHub Actions will automatically build and publish to PyPI
 
-### Manual Release
+#### Manual Release
 ```bash
 # Bump version (patch/minor/major)
 make bump-version
