@@ -7,15 +7,7 @@ These tests verify that utility classes (Option, Either, Try) work correctly.
 import random
 import unittest
 
-from python_proptest import (
-    Failure,
-    Left,
-    None_,
-    Right,
-    Some,
-    Success,
-    attempt,
-)
+from python_proptest import Failure, Left, None_, Right, Some, Success, attempt
 
 
 class TestOption(unittest.TestCase):
