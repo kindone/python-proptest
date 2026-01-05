@@ -1,0 +1,2071 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Python Property-Based Testing Library">
+      
+      
+        <meta name="author" content="kindone">
+      
+      
+        <link rel="canonical" href="https://kindone.github.io/python-proptest/generators/">
+      
+      
+        <link rel="prev" href="../properties/">
+      
+      
+        <link rel="next" href="../combinators/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Generators - python-proptest</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CSpline+Sans+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"Spline Sans Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="light-green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#generators" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="python-proptest" class="md-header__button md-logo" aria-label="python-proptest" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            python-proptest
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Generators
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/kindone/python-proptest" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    kindone/python-proptest
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="python-proptest" class="md-nav__button md-logo" aria-label="python-proptest" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    python-proptest
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/kindone/python-proptest" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    kindone/python-proptest
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../decorators/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decorators
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../properties/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Properties
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Generators
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Generators
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#generator-summary-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Generator Summary Table
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#primitive-generators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Primitive Generators
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Primitive Generators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#genintmin_value-max_value" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.int(min_value, max_value)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genfloatmin_value-max_value-nan_prob-posinf_prob-neginf_prob" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.float(min_value, max_value, nan_prob, posinf_prob, neginf_prob)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genbooltrue_prob" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.bool(true_prob)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genstrmin_length-max_length-charset" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.str(min_length, max_length, charset)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genascii_stringmin_length-max_length" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.ascii_string(min_length, max_length)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genprintable_ascii_stringmin_length-max_length" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.printable_ascii_string(min_length, max_length)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genunicode_stringmin_length-max_length" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.unicode_string(min_length, max_length)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genascii_char" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.ascii_char()
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genunicode_char" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.unicode_char()
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genprintable_ascii_char" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.printable_ascii_char()
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genin_rangemin_value-max_value" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.in_range(min_value, max_value)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genintervalmin_value-max_value" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.interval(min_value, max_value)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genintegersstart-count" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.integers(start, count)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gennaturalmax_value" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.natural(max_value)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gennon_negativemax_value" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.non_negative(max_value)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#container-generators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Container Generators
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Container Generators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#genlistelement_gen-min_length-max_length" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.list(element_gen, min_length, max_length)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genunique_listelement_gen-min_length-max_length" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.unique_list(element_gen, min_length, max_length)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gensetelement_gen-min_size-max_size" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.set(element_gen, min_size, max_size)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gendictkey_gen-value_gen-min_size-max_size" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.dict(key_gen, value_gen, min_size, max_size)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gentuplegenerators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.tuple(*generators)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#special-generators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Special Generators
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Special Generators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#genjustvalue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.just(value)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genlazyfunc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.lazy(func)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genconstructtype-generators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.construct(Type, *generators)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dependent-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dependent Generation
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../combinators/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Combinators
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../shrinking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Shrinking
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stateful-testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stateful Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Test Framework Integration
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Test Framework Integration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../unittest-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Unittest Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pytest-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pytest Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pytest-best-practices/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pytest Best Practices
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#generator-summary-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Generator Summary Table
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#primitive-generators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Primitive Generators
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Primitive Generators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#genintmin_value-max_value" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.int(min_value, max_value)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genfloatmin_value-max_value-nan_prob-posinf_prob-neginf_prob" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.float(min_value, max_value, nan_prob, posinf_prob, neginf_prob)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genbooltrue_prob" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.bool(true_prob)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genstrmin_length-max_length-charset" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.str(min_length, max_length, charset)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genascii_stringmin_length-max_length" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.ascii_string(min_length, max_length)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genprintable_ascii_stringmin_length-max_length" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.printable_ascii_string(min_length, max_length)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genunicode_stringmin_length-max_length" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.unicode_string(min_length, max_length)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genascii_char" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.ascii_char()
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genunicode_char" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.unicode_char()
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genprintable_ascii_char" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.printable_ascii_char()
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genin_rangemin_value-max_value" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.in_range(min_value, max_value)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genintervalmin_value-max_value" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.interval(min_value, max_value)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genintegersstart-count" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.integers(start, count)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gennaturalmax_value" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.natural(max_value)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gennon_negativemax_value" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.non_negative(max_value)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#container-generators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Container Generators
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Container Generators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#genlistelement_gen-min_length-max_length" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.list(element_gen, min_length, max_length)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genunique_listelement_gen-min_length-max_length" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.unique_list(element_gen, min_length, max_length)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gensetelement_gen-min_size-max_size" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.set(element_gen, min_size, max_size)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gendictkey_gen-value_gen-min_size-max_size" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.dict(key_gen, value_gen, min_size, max_size)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gentuplegenerators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.tuple(*generators)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#special-generators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Special Generators
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Special Generators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#genjustvalue" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.just(value)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genlazyfunc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.lazy(func)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genconstructtype-generators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gen.construct(Type, *generators)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dependent-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dependent Generation
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="generators">Generators<a class="headerlink" href="#generators" title="Permanent link">&para;</a></h1>
+<p>Generators are the foundation of property-based testing in <code>python-proptest</code>. They are responsible for creating the diverse range of random (or sometimes specific) input data that is fed into your properties during testing. By defining how data should be generated – its type, constraints, and structure – generators allow <code>python-proptest</code> to explore the input space of your functions effectively, searching for edge cases and potential bugs that manually chosen examples might miss. Generators can range from simple primitives like booleans and numbers to complex, nested data structures built by combining other generators.</p>
+<h2 id="generator-summary-table">Generator Summary Table<a class="headerlink" href="#generator-summary-table" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Generator</th>
+<th style="text-align: left;">Description</th>
+<th style="text-align: left;">Key Parameters</th>
+<th style="text-align: left;">Example Usage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Primitives</strong></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="#genbooltrue_prob"><code>Gen.bool()</code></a></td>
+<td style="text-align: left;">Generates <code>True</code> or <code>False</code> with configurable probability.</td>
+<td style="text-align: left;"><code>true_prob</code> (def: 0.5)</td>
+<td style="text-align: left;"><code>Gen.bool(true_prob=0.8)</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="#genfloatmin_value-max_value-nan_prob-posinf_prob-neginf_prob"><code>Gen.float()</code></a></td>
+<td style="text-align: left;">Generates floating-point numbers. By default generates only finite values. Can optionally generate <code>inf</code>, <code>-inf</code>, <code>nan</code> with specified probabilities.</td>
+<td style="text-align: left;"><code>min_value</code>, <code>max_value</code>, <code>nan_prob</code>, <code>posinf_prob</code>, <code>neginf_prob</code></td>
+<td style="text-align: left;"><code>Gen.float(min_value=0.0, max_value=1.0, nan_prob=0.01)</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="#genintmin_value-max_value"><code>Gen.int()</code></a></td>
+<td style="text-align: left;">Generates integers in the range <code>[min_value, max_value]</code>.</td>
+<td style="text-align: left;"><code>min_value</code>, <code>max_value</code></td>
+<td style="text-align: left;"><code>Gen.int(min_value=0, max_value=10)</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="#genstrmin_length-max_length-charset"><code>Gen.str()</code></a></td>
+<td style="text-align: left;">Generates strings with customizable charset.</td>
+<td style="text-align: left;"><code>min_length</code> (def: 0), <code>max_length</code> (def: 20), <code>charset</code> (def: lowercase letters)</td>
+<td style="text-align: left;"><code>Gen.str(min_length=0, max_length=5, charset="abc")</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="#genascii_stringmin_length-max_length"><code>Gen.ascii_string(...)</code></a></td>
+<td style="text-align: left;">Generates strings containing only ASCII chars (0-127).</td>
+<td style="text-align: left;"><code>min_length</code> (def: 0), <code>max_length</code> (def: 10)</td>
+<td style="text-align: left;"><code>Gen.ascii_string(min_length=1, max_length=8)</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="#genunicode_stringmin_length-max_length"><code>Gen.unicode_string(...)</code></a></td>
+<td style="text-align: left;">Generates strings containing Unicode chars.</td>
+<td style="text-align: left;"><code>min_length</code> (def: 0), <code>max_length</code> (def: 10)</td>
+<td style="text-align: left;"><code>Gen.unicode_string(min_length=1, max_length=8)</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="#genprintable_ascii_stringmin_length-max_length"><code>Gen.printable_ascii_string(...)</code></a></td>
+<td style="text-align: left;">Generates strings containing only printable ASCII chars.</td>
+<td style="text-align: left;"><code>min_length</code> (def: 0), <code>max_length</code> (def: 10)</td>
+<td style="text-align: left;"><code>Gen.printable_ascii_string(min_length=5, max_length=5)</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="#genascii_char"><code>Gen.ascii_char()</code></a></td>
+<td style="text-align: left;">Generates ASCII character codes (0-127).</td>
+<td style="text-align: left;">None</td>
+<td style="text-align: left;"><code>Gen.ascii_char()</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="#genunicode_char"><code>Gen.unicode_char()</code></a></td>
+<td style="text-align: left;">Generates Unicode character codes (avoiding surrogate pairs).</td>
+<td style="text-align: left;">None</td>
+<td style="text-align: left;"><code>Gen.unicode_char()</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="#genprintable_ascii_char"><code>Gen.printable_ascii_char()</code></a></td>
+<td style="text-align: left;">Generates printable ASCII character codes (32-126).</td>
+<td style="text-align: left;">None</td>
+<td style="text-align: left;"><code>Gen.printable_ascii_char()</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="#genin_rangemin_value-max_value"><code>Gen.in_range(min, max)</code></a></td>
+<td style="text-align: left;">Generates integers in range [min, max) (exclusive).</td>
+<td style="text-align: left;"><code>min_value</code>, <code>max_value</code></td>
+<td style="text-align: left;"><code>Gen.in_range(0, 10)</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="#genintervalmin_value-max_value"><code>Gen.interval(min, max)</code></a></td>
+<td style="text-align: left;">Generates integers in range [min, max] (inclusive).</td>
+<td style="text-align: left;"><code>min_value</code>, <code>max_value</code></td>
+<td style="text-align: left;"><code>Gen.interval(0, 10)</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="#genintegersstart-count"><code>Gen.integers(start, count)</code></a></td>
+<td style="text-align: left;">Generates integers in range [start, start+count).</td>
+<td style="text-align: left;"><code>start</code>, <code>count</code></td>
+<td style="text-align: left;"><code>Gen.integers(0, 100)</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="#gennaturalmax_value"><code>Gen.natural(max)</code></a></td>
+<td style="text-align: left;">Generates positive integers [1, max].</td>
+<td style="text-align: left;"><code>max_value</code></td>
+<td style="text-align: left;"><code>Gen.natural(100)</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="#gennon_negativemax_value"><code>Gen.non_negative(max)</code></a></td>
+<td style="text-align: left;">Generates non-negative integers [0, max].</td>
+<td style="text-align: left;"><code>max_value</code></td>
+<td style="text-align: left;"><code>Gen.non_negative(100)</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="#genunique_listelement_gen-min_length-max_length"><code>Gen.unique_list(elem, ...)</code></a></td>
+<td style="text-align: left;">Generates lists with unique elements, sorted.</td>
+<td style="text-align: left;"><code>element_gen</code>, <code>min_length</code> (def: 0), <code>max_length</code> (def: 10)</td>
+<td style="text-align: left;"><code>Gen.unique_list(Gen.int(min_value=1, max_value=5), min_length=1, max_length=3)</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Containers</strong></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="#genlistelement_gen-min_length-max_length"><code>Gen.list(elem, ...)</code></a></td>
+<td style="text-align: left;">Generates lists with elements from <code>elem</code>.</td>
+<td style="text-align: left;"><code>element_gen</code>, <code>min_length</code> (def: 0), <code>max_length</code> (def: 10)</td>
+<td style="text-align: left;"><code>Gen.list(Gen.bool(), min_length=2, max_length=4)</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="#gensetelement_gen-min_size-max_size"><code>Gen.set(elem, ...)</code></a></td>
+<td style="text-align: left;">Generates <code>set</code> objects with elements from <code>elem</code>.</td>
+<td style="text-align: left;"><code>element_gen</code>, <code>min_size</code> (def: 0), <code>max_size</code> (def: 10)</td>
+<td style="text-align: left;"><code>Gen.set(Gen.int(min_value=1, max_value=3), min_size=1, max_size=3)</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="#gendictkey_gen-value_gen-min_size-max_size"><code>Gen.dict(key_gen, val_gen, ...)</code></a></td>
+<td style="text-align: left;">Generates dictionaries with keys from <code>key_gen</code> and values from <code>val_gen</code>.</td>
+<td style="text-align: left;"><code>key_gen</code>, <code>value_gen</code>, <code>min_size</code> (def: 0), <code>max_size</code> (def: 10)</td>
+<td style="text-align: left;"><code>Gen.dict(Gen.str(min_length=1, max_length=2), Gen.int(min_value=0, max_value=5), min_size=2, max_size=5)</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="#gentuplegenerators"><code>Gen.tuple(...gens)</code></a></td>
+<td style="text-align: left;">Generates fixed-size tuples from <code>gens</code>.</td>
+<td style="text-align: left;"><code>...element_gens</code></td>
+<td style="text-align: left;"><code>Gen.tuple(Gen.float(), Gen.str())</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Special</strong></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="#genjustvalue"><code>Gen.just(value)</code></a></td>
+<td style="text-align: left;">Always generates the provided <code>value</code>.</td>
+<td style="text-align: left;"><code>value</code></td>
+<td style="text-align: left;"><code>Gen.just(None)</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="#genlazyfunc"><code>Gen.lazy(value_factory)</code></a></td>
+<td style="text-align: left;">Defers execution of a function to produce <code>value</code> until needed.</td>
+<td style="text-align: left;"><code>value_factory: Callable[[], T]</code></td>
+<td style="text-align: left;"><code>Gen.lazy(lambda: expensive_calculation())</code></td>
+</tr>
+</tbody>
+</table>
+<p><em>(Defaults for length/size are typically 0 and 10, but check implementation for specifics)</em></p>
+<h2 id="primitive-generators">Primitive Generators<a class="headerlink" href="#primitive-generators" title="Permanent link">&para;</a></h2>
+<h3 id="genintmin_value-max_value"><code>Gen.int(min_value, max_value)</code><a class="headerlink" href="#genintmin_value-max_value" title="Permanent link">&para;</a></h3>
+<p>Generates random integers within the specified range (inclusive).</p>
+<p><strong>Parameters:</strong>
+- <code>min_value</code> (int, optional): Minimum integer value to generate. If not specified, uses <code>-sys.maxsize - 1</code> (full integer range)
+- <code>max_value</code> (int, optional): Maximum integer value to generate. If not specified, uses <code>sys.maxsize</code> (full integer range)</p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># Generate integers from 0 to 100</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+
+<span class="c1"># Generate negative integers</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">min_value</span><span class="o">=-</span><span class="mi">50</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Generate single value (when min_value == max_value)</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Use Cases:</strong>
+- Testing mathematical operations
+- Generating array indices
+- Creating test IDs or counts</p>
+<p><strong>See Also:</strong> <a href="#genin_rangemin_value-max_value"><code>Gen.in_range()</code></a>, <a href="#genintervalmin_value-max_value"><code>Gen.interval()</code></a>, <a href="#genfloatmin_value-max_value-nan_prob-posinf_prob-neginf_prob"><code>Gen.float()</code></a></p>
+<h3 id="genfloatmin_value-max_value-nan_prob-posinf_prob-neginf_prob"><code>Gen.float(min_value, max_value, nan_prob, posinf_prob, neginf_prob)</code><a class="headerlink" href="#genfloatmin_value-max_value-nan_prob-posinf_prob-neginf_prob" title="Permanent link">&para;</a></h3>
+<p>Generates random floating-point numbers within the specified range. By default, generates only finite values. Can optionally generate special values (NaN, +inf, -inf) with specified probabilities.</p>
+<p><strong>Parameters:</strong>
+- <code>min_value</code> (float, optional): Minimum float value to generate. If not specified, uses <code>-sys.float_info.max</code> (full finite float range)
+- <code>max_value</code> (float, optional): Maximum float value to generate. If not specified, uses <code>sys.float_info.max</code> (full finite float range)
+- <code>nan_prob</code> (float, default: 0.0): Probability of generating NaN. Must be between 0.0 and 1.0
+- <code>posinf_prob</code> (float, default: 0.0): Probability of generating +inf. Must be between 0.0 and 1.0
+- <code>neginf_prob</code> (float, default: 0.0): Probability of generating -inf. Must be between 0.0 and 1.0</p>
+<p><strong>Constraints:</strong>
+- The sum of <code>nan_prob</code>, <code>posinf_prob</code>, and <code>neginf_prob</code> must be &lt;= 1.0
+- The remaining probability (1.0 - sum) is used for finite values
+- Each probability must be between 0.0 and 1.0 (inclusive)</p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># Generate finite floats only (default)</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+
+<span class="c1"># Generate floats from 0.0 to 1.0 (finite only)</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">float</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+
+<span class="c1"># Generate with 1% NaN probability, 99% finite</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">float</span><span class="p">(</span><span class="n">nan_prob</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+
+<span class="c1"># Generate with 1% each inf, 98% finite</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">float</span><span class="p">(</span><span class="n">posinf_prob</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">neginf_prob</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+
+<span class="c1"># Custom mix: 10% NaN, 5% each inf, 80% finite</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">float</span><span class="p">(</span><span class="n">nan_prob</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">posinf_prob</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">neginf_prob</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+
+<span class="c1"># Generate negative floats (finite only)</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">float</span><span class="p">(</span><span class="n">min_value</span><span class="o">=-</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=-</span><span class="mf">0.1</span><span class="p">)</span>
+
+<span class="c1"># Generate very small floats with some NaN</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">float</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">nan_prob</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Use Cases:</strong>
+- Testing floating-point arithmetic (finite values)
+- Testing edge cases with NaN and infinity
+- Generating probabilities or percentages
+- Creating test measurements or coordinates
+- Testing error handling for special float values</p>
+<p><strong>Notes:</strong>
+- By default, generates only finite values for practical testing
+- Finite value generation uses bit interpretation with rejection loop, covering the full finite float space including denormals
+- Special values (inf, NaN) are generated explicitly when probabilities are specified, providing predictable test coverage
+- When using explicit <code>min_value</code>/<code>max_value</code>, finite values are generated in that range</p>
+<p><strong>See Also:</strong> <a href="#genintmin_value-max_value"><code>Gen.int()</code></a>, <a href="#genbooltrue_prob"><code>Gen.bool()</code></a></p>
+<h3 id="genbooltrue_prob"><code>Gen.bool(true_prob)</code><a class="headerlink" href="#genbooltrue_prob" title="Permanent link">&para;</a></h3>
+<p>Generates random boolean values (<code>True</code> or <code>False</code>) with configurable probability.</p>
+<p><strong>Parameters:</strong>
+- <code>true_prob</code> (float, default: 0.5): Probability of generating <code>True</code> (0.0 to 1.0)</p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># Generate random booleans (50% True, 50% False)</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">bool</span><span class="p">()</span>
+
+<span class="c1"># Generate mostly True values (80% True, 20% False)</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">bool</span><span class="p">(</span><span class="n">true_prob</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+
+<span class="c1"># Generate mostly False values (10% True, 90% False)</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">bool</span><span class="p">(</span><span class="n">true_prob</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+
+<span class="c1"># Always generate True</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">bool</span><span class="p">(</span><span class="n">true_prob</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+
+<span class="c1"># Always generate False</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">bool</span><span class="p">(</span><span class="n">true_prob</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+
+<span class="c1"># Use with other generators</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">tuple</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">bool</span><span class="p">(</span><span class="n">true_prob</span><span class="o">=</span><span class="mf">0.7</span><span class="p">),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">())</span>
+
+<span class="c1"># Generate lists of biased booleans</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">bool</span><span class="p">(</span><span class="n">true_prob</span><span class="o">=</span><span class="mf">0.3</span><span class="p">),</span> <span class="n">min_length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Use Cases:</strong>
+- Testing conditional logic with biased inputs
+- Generating feature flags with realistic distributions
+- Creating binary choices with weighted probabilities
+- Testing boolean operations with edge cases
+- Simulating real-world boolean distributions</p>
+<p><strong>See Also:</strong> <a href="#genjustvalue"><code>Gen.just()</code></a> for constant values, <a href="#genlistelement_gen-min_length-max_length"><code>Gen.list()</code></a> for lists of booleans</p>
+<h3 id="genstrmin_length-max_length-charset"><code>Gen.str(min_length, max_length, charset)</code><a class="headerlink" href="#genstrmin_length-max_length-charset" title="Permanent link">&para;</a></h3>
+<p>Generates random strings with customizable character sets.</p>
+<p><strong>Parameters:</strong>
+- <code>min_length</code> (int, default: 0): Minimum string length
+- <code>max_length</code> (int, default: 20): Maximum string length
+- <code>charset</code> (str or Generator[int], default: "abcdefghijklmnopqrstuvwxyz"): Character set to use. Can be:
+  - A string of characters: <code>"abc"</code> generates strings using only 'a', 'b', 'c'
+  - Special string <code>"ascii"</code>: Uses all ASCII characters (0-127)
+  - Special string <code>"printable_ascii"</code>: Uses printable ASCII characters (32-126)
+  - A codepoint generator: <code>Gen.int(65, 90)</code> generates strings using codepoints in range [65, 90] (A-Z)</p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># Generate strings of length 5 to 10 (default: lowercase letters)</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">str</span><span class="p">(</span><span class="n">min_length</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="c1"># Generate single character strings</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">str</span><span class="p">(</span><span class="n">min_length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Generate empty strings (min_length=0)</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">str</span><span class="p">(</span><span class="n">min_length</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="c1"># Use custom character set</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">str</span><span class="p">(</span><span class="n">charset</span><span class="o">=</span><span class="s2">&quot;abc&quot;</span><span class="p">)</span>  <span class="c1"># Only &#39;a&#39;, &#39;b&#39;, &#39;c&#39;</span>
+
+<span class="c1"># Use ASCII character set</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">str</span><span class="p">(</span><span class="n">charset</span><span class="o">=</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
+
+<span class="c1"># Use printable ASCII character set</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">str</span><span class="p">(</span><span class="n">charset</span><span class="o">=</span><span class="s2">&quot;printable_ascii&quot;</span><span class="p">)</span>
+
+<span class="c1"># Use codepoint generator for A-Z</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">str</span><span class="p">(</span><span class="n">charset</span><span class="o">=</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="mi">65</span><span class="p">,</span> <span class="mi">90</span><span class="p">))</span>  <span class="c1"># A-Z via codepoints [65, 90]</span>
+</code></pre></div></p>
+<p><strong>Use Cases:</strong>
+- Testing string operations
+- Generating usernames or identifiers
+- Creating test data for text processing
+- Testing with specific character sets (e.g., only digits, only uppercase)</p>
+<p><strong>See Also:</strong> <a href="#genascii_stringmin_length-max_length"><code>Gen.ascii_string()</code></a>, <a href="#genunicode_stringmin_length-max_length"><code>Gen.unicode_string()</code></a>, <a href="#genprintable_ascii_stringmin_length-max_length"><code>Gen.printable_ascii_string()</code></a></p>
+<h3 id="genascii_stringmin_length-max_length"><code>Gen.ascii_string(min_length, max_length)</code><a class="headerlink" href="#genascii_stringmin_length-max_length" title="Permanent link">&para;</a></h3>
+<p>Generates random strings containing only ASCII characters (0-127).</p>
+<p><strong>Parameters:</strong>
+- <code>min_length</code> (int, default: 0): Minimum string length
+- <code>max_length</code> (int, default: 20): Maximum string length</p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># Generate ASCII strings of length 1 to 8</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">ascii_string</span><span class="p">(</span><span class="n">min_length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+
+<span class="c1"># Generate fixed-length ASCII strings</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">ascii_string</span><span class="p">(</span><span class="n">min_length</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Use Cases:</strong>
+- Testing ASCII-only systems
+- Generating legacy-compatible strings
+- Creating test data for systems with ASCII restrictions</p>
+<p><strong>See Also:</strong> <a href="#genstrmin_length-max_length"><code>Gen.str()</code></a>, <a href="#genprintable_ascii_stringmin_length-max_length"><code>Gen.printable_ascii_string()</code></a>, <a href="#genascii_char"><code>Gen.ascii_char()</code></a></p>
+<h3 id="genprintable_ascii_stringmin_length-max_length"><code>Gen.printable_ascii_string(min_length, max_length)</code><a class="headerlink" href="#genprintable_ascii_stringmin_length-max_length" title="Permanent link">&para;</a></h3>
+<p>Generates random strings containing only printable ASCII characters (32-126).</p>
+<p><strong>Parameters:</strong>
+- <code>min_length</code> (int, default: 0): Minimum string length
+- <code>max_length</code> (int, default: 20): Maximum string length</p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># Generate printable ASCII strings</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">printable_ascii_string</span><span class="p">(</span><span class="n">min_length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="c1"># Generate fixed-length printable strings</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">printable_ascii_string</span><span class="p">(</span><span class="n">min_length</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Use Cases:</strong>
+- Testing user input validation
+- Generating displayable text
+- Creating test data for human-readable strings</p>
+<p><strong>See Also:</strong> <a href="#genascii_stringmin_length-max_length"><code>Gen.ascii_string()</code></a>, <a href="#genprintable_ascii_char"><code>Gen.printable_ascii_char()</code></a></p>
+<h3 id="genunicode_stringmin_length-max_length"><code>Gen.unicode_string(min_length, max_length)</code><a class="headerlink" href="#genunicode_stringmin_length-max_length" title="Permanent link">&para;</a></h3>
+<p>Generates random strings containing Unicode characters.</p>
+<p><strong>Parameters:</strong>
+- <code>min_length</code> (int, default: 0): Minimum string length
+- <code>max_length</code> (int, default: 20): Maximum string length</p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># Generate Unicode strings</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">unicode_string</span><span class="p">(</span><span class="n">min_length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="c1"># Generate short Unicode strings</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">unicode_string</span><span class="p">(</span><span class="n">min_length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Use Cases:</strong>
+- Testing internationalization
+- Generating multi-language text
+- Creating test data for Unicode-aware systems</p>
+<p><strong>See Also:</strong> <a href="#genstrmin_length-max_length"><code>Gen.str()</code></a>, <a href="#genunicode_char"><code>Gen.unicode_char()</code></a></p>
+<h3 id="genascii_char"><code>Gen.ascii_char()</code><a class="headerlink" href="#genascii_char" title="Permanent link">&para;</a></h3>
+<p>Generates single ASCII character codes (0-127).</p>
+<p><strong>Parameters:</strong>
+- None</p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># Generate ASCII character codes</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">ascii_char</span><span class="p">()</span>
+
+<span class="c1"># Use with map to get actual characters</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">ascii_char</span><span class="p">()</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="nb">chr</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Use Cases:</strong>
+- Testing character processing
+- Generating single character inputs
+- Creating test data for character-based operations</p>
+<p><strong>See Also:</strong> <a href="#genascii_stringmin_length-max_length"><code>Gen.ascii_string()</code></a>, <a href="#genunicode_char"><code>Gen.unicode_char()</code></a>, <a href="#genprintable_ascii_char"><code>Gen.printable_ascii_char()</code></a>, <a href="../combinators/#generatormapfunc"><code>generator.map()</code></a></p>
+<h3 id="genunicode_char"><code>Gen.unicode_char()</code><a class="headerlink" href="#genunicode_char" title="Permanent link">&para;</a></h3>
+<p>Generates single Unicode character codes (avoiding surrogate pairs).</p>
+<p><strong>Parameters:</strong>
+- None</p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># Generate Unicode character codes</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">unicode_char</span><span class="p">()</span>
+
+<span class="c1"># Use with map to get actual characters</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">unicode_char</span><span class="p">()</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="nb">chr</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Use Cases:</strong>
+- Testing Unicode character handling
+- Generating international characters
+- Creating test data for Unicode-aware systems</p>
+<p><strong>See Also:</strong> <a href="#genunicode_stringmin_length-max_length"><code>Gen.unicode_string()</code></a>, <a href="#genascii_char"><code>Gen.ascii_char()</code></a>, <a href="../combinators/#generatormapfunc"><code>generator.map()</code></a></p>
+<h3 id="genprintable_ascii_char"><code>Gen.printable_ascii_char()</code><a class="headerlink" href="#genprintable_ascii_char" title="Permanent link">&para;</a></h3>
+<p>Generates single printable ASCII character codes (32-126).</p>
+<p><strong>Parameters:</strong>
+- None</p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># Generate printable ASCII character codes</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">printable_ascii_char</span><span class="p">()</span>
+
+<span class="c1"># Use with map to get actual characters</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">printable_ascii_char</span><span class="p">()</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="nb">chr</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Use Cases:</strong>
+- Testing printable character processing
+- Generating displayable characters
+- Creating test data for user-visible text</p>
+<p><strong>See Also:</strong> <a href="#genprintable_ascii_stringmin_length-max_length"><code>Gen.printable_ascii_string()</code></a>, <a href="#genascii_char"><code>Gen.ascii_char()</code></a>, <a href="../combinators/#generatormapfunc"><code>generator.map()</code></a></p>
+<h3 id="genin_rangemin_value-max_value"><code>Gen.in_range(min_value, max_value)</code><a class="headerlink" href="#genin_rangemin_value-max_value" title="Permanent link">&para;</a></h3>
+<p>Generates random integers in range [min_value, max_value) (exclusive of max_value).</p>
+<p><strong>Parameters:</strong>
+- <code>min_value</code> (int): Minimum integer value (inclusive)
+- <code>max_value</code> (int): Maximum integer value (exclusive)</p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># Generate integers from 0 to 9 (exclusive of 10)</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">in_range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+
+<span class="c1"># Generate array indices</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">in_range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">my_array</span><span class="p">))</span>
+</code></pre></div></p>
+<p><strong>Use Cases:</strong>
+- Generating array indices
+- Creating ranges for iteration
+- Testing boundary conditions</p>
+<p><strong>See Also:</strong> <a href="#genintmin_value-max_value"><code>Gen.int()</code></a>, <a href="#genintervalmin_value-max_value"><code>Gen.interval()</code></a></p>
+<h3 id="genintervalmin_value-max_value"><code>Gen.interval(min_value, max_value)</code><a class="headerlink" href="#genintervalmin_value-max_value" title="Permanent link">&para;</a></h3>
+<p>Generates random integers in range [min_value, max_value] (inclusive of both bounds).</p>
+<p><strong>Parameters:</strong>
+- <code>min_value</code> (int): Minimum integer value (inclusive)
+- <code>max_value</code> (int): Maximum integer value (inclusive)</p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># Generate integers from 0 to 10 (inclusive)</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">interval</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+
+<span class="c1"># Generate dice rolls (1 to 6)</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">interval</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Use Cases:</strong>
+- Testing inclusive ranges
+- Generating dice rolls or random selections
+- Creating bounded integer values</p>
+<p><strong>See Also:</strong> <a href="#genintmin_value-max_value"><code>Gen.int()</code></a>, <a href="#genin_rangemin_value-max_value"><code>Gen.in_range()</code></a>, <a href="#genintegersmin_value-max_value"><code>Gen.integers()</code></a></p>
+<h3 id="genintegersstart-count"><code>Gen.integers(start, count)</code><a class="headerlink" href="#genintegersstart-count" title="Permanent link">&para;</a></h3>
+<p>Generates integers in the range [start, start+count). The second parameter is the <strong>count</strong> of values to generate, not the maximum value.</p>
+<p><strong>Parameters:</strong>
+- <code>start</code> (int): Starting value (inclusive)
+- <code>count</code> (int): Number of values to generate (must be positive)</p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># Generate integers from 0 to 99 (100 values)</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>   <span class="c1"># generates {0, 1, ..., 99}</span>
+
+<span class="c1"># Generate A-Z codepoints (26 values)</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="mi">65</span><span class="p">,</span> <span class="mi">26</span><span class="p">)</span>   <span class="c1"># generates {65, 66, ..., 90} (A-Z)</span>
+
+<span class="c1"># Generate integers from -10 to 10 (21 values)</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">integers</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">21</span><span class="p">)</span>  <span class="c1"># generates {-10, -9, ..., 10}</span>
+</code></pre></div></p>
+<p><strong>Use Cases:</strong>
+- Generating sequences with a specific count
+- Creating character code ranges (like A-Z)
+- Testing with exact number of values</p>
+<p><strong>See Also:</strong> <a href="#genintmin_value-max_value"><code>Gen.int()</code></a>, <a href="#genintervalmin_value-max_value"><code>Gen.interval()</code></a>, <a href="#genin_rangemin_value-max_value"><code>Gen.in_range()</code></a></p>
+<h3 id="gennaturalmax_value"><code>Gen.natural(max_value)</code><a class="headerlink" href="#gennaturalmax_value" title="Permanent link">&para;</a></h3>
+<p>Generates positive integers in range [1, max_value] (inclusive).</p>
+<p><strong>Parameters:</strong>
+- <code>max_value</code> (int): Maximum value (inclusive, must be at least 1)</p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># Generate natural numbers from 1 to 100</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">natural</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>  <span class="c1"># generates {1, 2, ..., 100}</span>
+
+<span class="c1"># Generate dice rolls (1 to 6)</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">natural</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>    <span class="c1"># generates {1, 2, 3, 4, 5, 6}</span>
+</code></pre></div></p>
+<p><strong>Use Cases:</strong>
+- Generating positive counts or indices
+- Creating dice rolls or random selections from 1
+- Testing with strictly positive values</p>
+<p><strong>See Also:</strong> <a href="#genintmin_value-max_value"><code>Gen.int()</code></a>, <a href="#gennon_negativemax_value"><code>Gen.non_negative()</code></a></p>
+<h3 id="gennon_negativemax_value"><code>Gen.non_negative(max_value)</code><a class="headerlink" href="#gennon_negativemax_value" title="Permanent link">&para;</a></h3>
+<p>Generates non-negative integers in range [0, max_value] (inclusive).</p>
+<p><strong>Parameters:</strong>
+- <code>max_value</code> (int): Maximum value (inclusive, must be non-negative)</p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># Generate non-negative integers from 0 to 100</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">non_negative</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>  <span class="c1"># generates {0, 1, 2, ..., 100}</span>
+
+<span class="c1"># Generate array indices</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">non_negative</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">my_array</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Use Cases:</strong>
+- Generating array indices
+- Creating counts that can be zero
+- Testing with non-negative values</p>
+<p><strong>See Also:</strong> <a href="#genintmin_value-max_value"><code>Gen.int()</code></a>, <a href="#gennaturalmax_value"><code>Gen.natural()</code></a></p>
+<h2 id="container-generators">Container Generators<a class="headerlink" href="#container-generators" title="Permanent link">&para;</a></h2>
+<h3 id="genlistelement_gen-min_length-max_length"><code>Gen.list(element_gen, min_length, max_length)</code><a class="headerlink" href="#genlistelement_gen-min_length-max_length" title="Permanent link">&para;</a></h3>
+<p>Generates random lists with elements from the specified generator.</p>
+<p><strong>Parameters:</strong>
+- <code>element_gen</code> (Generator): Generator for list elements
+- <code>min_length</code> (int, default: 0): Minimum list length
+- <code>max_length</code> (int, default: 10): Maximum list length</p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># Generate lists of 2 to 5 booleans</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">bool</span><span class="p">(),</span> <span class="n">min_length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+
+<span class="c1"># Generate lists of integers</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">100</span><span class="p">),</span> <span class="n">min_length</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="c1"># Generate lists of strings</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">str</span><span class="p">(</span><span class="n">min_length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">5</span><span class="p">),</span> <span class="n">min_length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Use Cases:</strong>
+- Testing list operations
+- Generating test data collections
+- Creating sequences for processing</p>
+<p><strong>See Also:</strong> <a href="#genunique_listelement_gen-min_length-max_length"><code>Gen.unique_list()</code></a>, <a href="#gensetelement_gen-min_size-max_size"><code>Gen.set()</code></a>, <a href="#gentuplegenerators"><code>Gen.tuple()</code></a>, <a href="../combinators/#generatormapfunc"><code>generator.map()</code></a></p>
+<h3 id="genunique_listelement_gen-min_length-max_length"><code>Gen.unique_list(element_gen, min_length, max_length)</code><a class="headerlink" href="#genunique_listelement_gen-min_length-max_length" title="Permanent link">&para;</a></h3>
+<p>Generates random lists with unique elements, sorted.</p>
+<p><strong>Parameters:</strong>
+- <code>element_gen</code> (Generator): Generator for list elements
+- <code>min_length</code> (int, default: 0): Minimum list length
+- <code>max_length</code> (int, default: 10): Maximum list length</p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># Generate unique integer lists</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">unique_list</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span> <span class="n">min_length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+
+<span class="c1"># Generate unique string lists</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">unique_list</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">str</span><span class="p">(</span><span class="n">min_length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">3</span><span class="p">),</span> <span class="n">min_length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Use Cases:</strong>
+- Testing unique value processing
+- Generating sorted test data
+- Creating sets represented as lists</p>
+<p><strong>See Also:</strong> <a href="#genlistelement_gen-min_length-max_length"><code>Gen.list()</code></a>, <a href="#gensetelement_gen-min_size-max_size"><code>Gen.set()</code></a></p>
+<h3 id="gensetelement_gen-min_size-max_size"><code>Gen.set(element_gen, min_size, max_size)</code><a class="headerlink" href="#gensetelement_gen-min_size-max_size" title="Permanent link">&para;</a></h3>
+<p>Generates random sets with elements from the specified generator.</p>
+<p><strong>Parameters:</strong>
+- <code>element_gen</code> (Generator): Generator for set elements
+- <code>min_size</code> (int, default: 0): Minimum set size
+- <code>max_size</code> (int, default: 10): Maximum set size</p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># Generate sets of integers</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span> <span class="n">min_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_size</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+
+<span class="c1"># Generate sets of strings</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">str</span><span class="p">(</span><span class="n">min_length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">3</span><span class="p">),</span> <span class="n">min_size</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">max_size</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Use Cases:</strong>
+- Testing set operations
+- Generating unique collections
+- Creating test data for set-based algorithms</p>
+<p><strong>See Also:</strong> <a href="#genlistelement_gen-min_length-max_length"><code>Gen.list()</code></a>, <a href="#genunique_listelement_gen-min_length-max_length"><code>Gen.unique_list()</code></a></p>
+<h3 id="gendictkey_gen-value_gen-min_size-max_size"><code>Gen.dict(key_gen, value_gen, min_size, max_size)</code><a class="headerlink" href="#gendictkey_gen-value_gen-min_size-max_size" title="Permanent link">&para;</a></h3>
+<p>Generates random dictionaries with keys and values from specified generators.</p>
+<p><strong>Parameters:</strong>
+- <code>key_gen</code> (Generator): Generator for dictionary keys
+- <code>value_gen</code> (Generator): Generator for dictionary values
+- <code>min_size</code> (int, default: 0): Minimum dictionary size
+- <code>max_size</code> (int, default: 10): Maximum dictionary size</p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># Generate string-to-int dictionaries</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">dict</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">str</span><span class="p">(</span><span class="n">min_length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">3</span><span class="p">),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span> <span class="n">min_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_size</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+
+<span class="c1"># Generate int-to-string dictionaries</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">dict</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">str</span><span class="p">(</span><span class="n">min_length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">5</span><span class="p">))</span>
+</code></pre></div></p>
+<p><strong>Use Cases:</strong>
+- Testing dictionary operations
+- Generating configuration data
+- Creating test data for key-value processing</p>
+<p><strong>See Also:</strong> <a href="#genlistelement_gen-min_length-max_length"><code>Gen.list()</code></a>, <a href="#gensetelement_gen-min_size-max_size"><code>Gen.set()</code></a>, <a href="#gentuplegenerators"><code>Gen.tuple()</code></a></p>
+<h3 id="gentuplegenerators"><code>Gen.tuple(*generators)</code><a class="headerlink" href="#gentuplegenerators" title="Permanent link">&para;</a></h3>
+<p>Generates fixed-size tuples with elements from the specified generators.</p>
+<p><strong>Parameters:</strong>
+- <code>*generators</code> (Generator): Variable number of generators for tuple elements</p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># Generate pairs of (bool, int)</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">tuple</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">bool</span><span class="p">(),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">())</span>
+
+<span class="c1"># Generate triples of (str, int, float)</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">tuple</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">str</span><span class="p">(),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">float</span><span class="p">())</span>
+
+<span class="c1"># Generate single-element tuples</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">tuple</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">str</span><span class="p">())</span>
+</code></pre></div></p>
+<p><strong>Use Cases:</strong>
+- Testing tuple operations
+- Generating coordinate pairs
+- Creating structured test data</p>
+<p><strong>See Also:</strong> <a href="#genlistelement_gen-min_length-max_length"><code>Gen.list()</code></a>, <a href="#genconstructtype-generators"><code>Gen.construct()</code></a>, <a href="../combinators/#genchainbase_gen-gen_factory-generatorchaingen_factory"><code>Gen.chain()</code></a></p>
+<h2 id="special-generators">Special Generators<a class="headerlink" href="#special-generators" title="Permanent link">&para;</a></h2>
+<h3 id="genjustvalue"><code>Gen.just(value)</code><a class="headerlink" href="#genjustvalue" title="Permanent link">&para;</a></h3>
+<p>Always generates the exact value provided.</p>
+<p><strong>Parameters:</strong>
+- <code>value</code> (Any): The value to always generate</p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># Always generate 42</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">just</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+
+<span class="c1"># Always generate None</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">just</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+<span class="c1"># Always generate a specific string</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">just</span><span class="p">(</span><span class="s2">&quot;hello&quot;</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Use Cases:</strong>
+- Including specific edge cases
+- Creating constants in test data
+- Combining with <code>Gen.one_of()</code> for mixed generation</p>
+<p><strong>See Also:</strong> <a href="../combinators/#genone_ofgenerators"><code>Gen.one_of()</code></a>, <a href="../combinators/#genelement_ofvalues"><code>Gen.element_of()</code></a></p>
+<h3 id="genlazyfunc"><code>Gen.lazy(func)</code><a class="headerlink" href="#genlazyfunc" title="Permanent link">&para;</a></h3>
+<p>Defers execution of a function until generation time.</p>
+<p><strong>Parameters:</strong>
+- <code>func</code> (Callable[[], T]): Function that returns a value when called</p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># Defer expensive calculation</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">expensive_calculation</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">complex_computation</span><span class="p">()</span>
+
+<span class="n">Gen</span><span class="o">.</span><span class="n">lazy</span><span class="p">(</span><span class="n">expensive_calculation</span><span class="p">)</span>
+
+<span class="c1"># Defer current time</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">lazy</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span>
+</code></pre></div></p>
+<p><strong>Use Cases:</strong>
+- Delaying expensive computations
+- Breaking circular dependencies
+- Generating time-sensitive values</p>
+<p><strong>See Also:</strong> <a href="#genconstructtype-generators"><code>Gen.construct()</code></a>, recursive generation patterns in <a href="../combinators/#recursive-generation">Combinators</a></p>
+<h3 id="genconstructtype-generators"><code>Gen.construct(Type, *generators)</code><a class="headerlink" href="#genconstructtype-generators" title="Permanent link">&para;</a></h3>
+<p>Creates instances of a class using the specified generators for constructor arguments.</p>
+<p><strong>Parameters:</strong>
+- <code>Type</code> (type): Class to instantiate
+- <code>*generators</code> (Generator): Generators for constructor arguments</p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Point</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span>
+
+<span class="c1"># Generate Point instances</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">construct</span><span class="p">(</span><span class="n">Point</span><span class="p">,</span> <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">())</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Person</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">age</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">age</span> <span class="o">=</span> <span class="n">age</span>
+
+<span class="c1"># Generate Person instances</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">construct</span><span class="p">(</span><span class="n">Person</span><span class="p">,</span> <span class="n">Gen</span><span class="o">.</span><span class="n">str</span><span class="p">(</span><span class="n">min_length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">120</span><span class="p">))</span>
+</code></pre></div></p>
+<p><strong>Use Cases:</strong>
+- Testing custom classes
+- Generating domain objects
+- Creating structured test data</p>
+<p><strong>See Also:</strong> <a href="#gentuplegenerators"><code>Gen.tuple()</code></a>, <a href="#genlazyfunc"><code>Gen.lazy()</code></a>, <a href="../combinators/#genconstructtype-generators"><code>Gen.construct()</code> in Combinators</a></p>
+<h2 id="dependent-generation">Dependent Generation<a class="headerlink" href="#dependent-generation" title="Permanent link">&para;</a></h2>
+<p>For generators where values depend on each other, <code>python-proptest</code> provides powerful combinators like <a href="../combinators/#genchainbase_gen-gen_factory-generatorchaingen_factory"><code>chain</code></a>, <a href="../combinators/#genaggregateinitial_gen-gen_factory-min_size-max_size-generatoraggregate"><code>aggregate</code></a>, and <a href="../combinators/#genaccumulateinitial_gen-gen_factory-min_size-max_size-generatoraccumulate"><code>accumulate</code></a>. These are covered in detail in the <a href="../combinators/">Combinators</a> documentation under "Dependent Generation Combinators".</p>
+<p><strong>Quick Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># Chain: Create dependent tuple (month, day)</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">12</span><span class="p">),</span> <span class="k">lambda</span> <span class="n">month</span><span class="p">:</span> <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">days_in_month</span><span class="p">(</span><span class="n">month</span><span class="p">)))</span>
+
+<span class="c1"># Aggregate: Create list where each element depends on previous</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="k">lambda</span> <span class="n">n</span><span class="p">:</span> <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">5</span><span class="p">),</span> <span class="n">min_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">max_size</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="c1"># Accumulate: Get final value after dependent steps</span>
+<span class="n">Gen</span><span class="o">.</span><span class="n">accumulate</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">50</span><span class="p">),</span> <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">p</span><span class="o">-</span><span class="mi">10</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="n">p</span><span class="o">+</span><span class="mi">10</span><span class="p">)),</span> <span class="n">min_size</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>See Also:</strong> <a href="../combinators/">Combinators documentation</a> for transformation combinators (<a href="../combinators/#generatormapfunc"><code>map</code></a>, <a href="../combinators/#generatorfilterpredicate"><code>filter</code></a>, <a href="../combinators/#generatorflat_mapfunc"><code>flat_map</code></a>) and <a href="../decorators/">Decorators documentation</a> for using generators in tests with <a href="../decorators/#for_all"><code>@for_all</code></a> and <a href="../decorators/#run_for_all"><code>@run_for_all</code></a>.</p>
+<p>Beyond the built-in generators, <code>python-proptest</code> provides <strong>combinators</strong>: functions that transform or combine existing generators to create new, more complex ones. This is how you build generators for your specific data types and constraints.</p>
+<p>These combinators are essential tools for tailoring data generation precisely to your testing needs. For a comprehensive guide on how to use them, see the <a href="../combinators/">Combinators</a> documentation.</p>
+
+
+
+
+
+
+
+  
+    
+  
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="January 5, 2026 13:00:43 UTC">January 5, 2026</span>
+  </span>
+
+    
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tracking", "navigation.tabs.sticky", "navigation.indexes", "navigation.path", "toc.follow", "navigation.top", "search.highlight", "search.suggest", "navigation.expand"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

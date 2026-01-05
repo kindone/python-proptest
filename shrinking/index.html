@@ -1,0 +1,1312 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Python Property-Based Testing Library">
+      
+      
+        <meta name="author" content="kindone">
+      
+      
+        <link rel="canonical" href="https://kindone.github.io/python-proptest/shrinking/">
+      
+      
+        <link rel="prev" href="../combinators/">
+      
+      
+        <link rel="next" href="../stateful-testing/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Shrinking - python-proptest</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CSpline+Sans+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"Spline Sans Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="light-green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#shrinking" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="python-proptest" class="md-header__button md-logo" aria-label="python-proptest" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            python-proptest
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Shrinking
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/kindone/python-proptest" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    kindone/python-proptest
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="python-proptest" class="md-nav__button md-logo" aria-label="python-proptest" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    python-proptest
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/kindone/python-proptest" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    kindone/python-proptest
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../decorators/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decorators
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../properties/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Properties
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../generators/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Generators
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../combinators/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Combinators
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Shrinking
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Shrinking
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#how-shrinking-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Shrinking Works
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#shrinking-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shrinking Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Shrinking Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#integer-shrinking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Integer Shrinking
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#string-shrinking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        String Shrinking
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#list-shrinking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        List Shrinking
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#complex-structure-shrinking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Complex Structure Shrinking
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-shrinking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Advanced Shrinking
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Shrinking">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#element-wise-shrinking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Element-wise Shrinking
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#membership-wise-shrinking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Membership-wise Shrinking
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#custom-shrinking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom Shrinking
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Custom Shrinking">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#using-genjust-for-fixed-values" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using Gen.just() for Fixed Values
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-genelement_of-for-specific-values" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using Gen.element_of() for Specific Values
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#shrinking-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shrinking Configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices-for-shrinking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Best Practices for Shrinking
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stateful-testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stateful Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Test Framework Integration
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Test Framework Integration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../unittest-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Unittest Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pytest-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pytest Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pytest-best-practices/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pytest Best Practices
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#how-shrinking-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How Shrinking Works
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#shrinking-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shrinking Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Shrinking Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#integer-shrinking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Integer Shrinking
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#string-shrinking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        String Shrinking
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#list-shrinking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        List Shrinking
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#complex-structure-shrinking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Complex Structure Shrinking
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-shrinking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Advanced Shrinking
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Shrinking">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#element-wise-shrinking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Element-wise Shrinking
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#membership-wise-shrinking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Membership-wise Shrinking
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#custom-shrinking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom Shrinking
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Custom Shrinking">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#using-genjust-for-fixed-values" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using Gen.just() for Fixed Values
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-genelement_of-for-specific-values" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Using Gen.element_of() for Specific Values
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#shrinking-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shrinking Configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices-for-shrinking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Best Practices for Shrinking
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="shrinking">Shrinking<a class="headerlink" href="#shrinking" title="Permanent link">&para;</a></h1>
+<p>When <code>run_for_all</code> (either standalone or called on a <code>Property</code> instance) detects a failing test case, it automatically tries to "shrink" the failing input to a simpler version that still causes the failure. This helps pinpoint the root cause.</p>
+<ul>
+<li>Shrinking explores smaller integers, shorter strings/lists, subsets of sets, and simpler structures based on how the generators were defined and combined.</li>
+<li>The error message thrown by <code>run_for_all</code> on failure typically includes the original failing input and the final, shrunk failing input.</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">python_proptest</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_for_all</span><span class="p">,</span> <span class="n">Gen</span><span class="p">,</span> <span class="n">PropertyTestError</span>
+
+<span class="c1"># Example where shrinking is useful (using standalone run_for_all)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_failing_property</span><span class="p">():</span>
+    <span class="c1"># Generator for pairs [a, b] where a &lt;= b</span>
+    <span class="n">pair_gen</span> <span class="o">=</span> <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span><span class="o">.</span><span class="n">flat_map</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">a</span><span class="p">:</span> <span class="n">Gen</span><span class="o">.</span><span class="n">tuple</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">just</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="n">a</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">1000</span><span class="p">))</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">property_func</span><span class="p">(</span><span class="n">tup</span><span class="p">):</span>
+        <span class="c1"># This property fails if the difference is large</span>
+        <span class="k">return</span> <span class="n">tup</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">tup</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">5</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">run_for_all</span><span class="p">(</span><span class="n">property_func</span><span class="p">,</span> <span class="n">pair_gen</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">PropertyTestError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="c1"># The error message will likely show a shrunk example,</span>
+        <span class="c1"># e.g., &quot;property failed (simplest args found by shrinking): ...&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Property failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="c1"># The shrunk example will be much simpler than the original failing input</span>
+</code></pre></div>
+<h2 id="how-shrinking-works">How Shrinking Works<a class="headerlink" href="#how-shrinking-works" title="Permanent link">&para;</a></h2>
+<p>python-proptest's shrinking process follows these principles:</p>
+<ol>
+<li>
+<p><strong>Start with the failing input</strong>: When a property fails, the system records the exact input that caused the failure.</p>
+</li>
+<li>
+<p><strong>Generate shrink candidates</strong>: For each type of input, python-proptest generates simpler versions:</p>
+</li>
+<li><strong>Integers</strong>: Shrinks towards 0 (e.g., 100 → 50 → 25 → 12 → 6 → 3 → 1 → 0)</li>
+<li><strong>Strings</strong>: Shrinks by removing characters (e.g., "hello" → "hell" → "hel" → "he" → "h" → "")</li>
+<li><strong>Lists</strong>: Shrinks by removing elements and making elements simpler</li>
+<li>
+<p><strong>Dictionaries</strong>: Shrinks by removing key-value pairs and simplifying values</p>
+</li>
+<li>
+<p><strong>Test each candidate</strong>: Each shrink candidate is tested against the property to see if it still fails.</p>
+</li>
+<li>
+<p><strong>Keep the simplest failing case</strong>: The shrinking process continues until no simpler input can be found that still causes the failure.</p>
+</li>
+</ol>
+<h2 id="shrinking-examples">Shrinking Examples<a class="headerlink" href="#shrinking-examples" title="Permanent link">&para;</a></h2>
+<h3 id="integer-shrinking">Integer Shrinking<a class="headerlink" href="#integer-shrinking" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">python_proptest</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_for_all</span><span class="p">,</span> <span class="n">Gen</span><span class="p">,</span> <span class="n">PropertyTestError</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_integer_shrinking</span><span class="p">():</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">property_func</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="c1"># This will fail for x &gt;= 100</span>
+        <span class="k">return</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">100</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">run_for_all</span><span class="p">(</span><span class="n">property_func</span><span class="p">,</span> <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">1000</span><span class="p">))</span>
+    <span class="k">except</span> <span class="n">PropertyTestError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed with input: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="c1"># The shrunk input will likely be exactly 100, the minimal failing case</span>
+</code></pre></div>
+<h3 id="string-shrinking">String Shrinking<a class="headerlink" href="#string-shrinking" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">python_proptest</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_for_all</span><span class="p">,</span> <span class="n">Gen</span><span class="p">,</span> <span class="n">PropertyTestError</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_string_shrinking</span><span class="p">():</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">property_func</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="c1"># This will fail for strings containing &#39;x&#39;</span>
+        <span class="k">return</span> <span class="s1">&#39;x&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">s</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">run_for_all</span><span class="p">(</span><span class="n">property_func</span><span class="p">,</span> <span class="n">Gen</span><span class="o">.</span><span class="n">str</span><span class="p">(</span><span class="n">min_length</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">10</span><span class="p">))</span>
+    <span class="k">except</span> <span class="n">PropertyTestError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed with input: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="c1"># The shrunk input will likely be just &quot;x&quot;, the minimal failing case</span>
+</code></pre></div>
+<h3 id="list-shrinking">List Shrinking<a class="headerlink" href="#list-shrinking" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">python_proptest</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_for_all</span><span class="p">,</span> <span class="n">Gen</span><span class="p">,</span> <span class="n">PropertyTestError</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_list_shrinking</span><span class="p">():</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">property_func</span><span class="p">(</span><span class="n">lst</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="c1"># This will fail for lists with more than 3 elements</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">3</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">run_for_all</span><span class="p">(</span><span class="n">property_func</span><span class="p">,</span> <span class="n">Gen</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span> <span class="n">min_length</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">10</span><span class="p">))</span>
+    <span class="k">except</span> <span class="n">PropertyTestError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed with input: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="c1"># The shrunk input will likely be a list with exactly 4 elements</span>
+</code></pre></div>
+<h3 id="complex-structure-shrinking">Complex Structure Shrinking<a class="headerlink" href="#complex-structure-shrinking" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">python_proptest</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_for_all</span><span class="p">,</span> <span class="n">Gen</span><span class="p">,</span> <span class="n">PropertyTestError</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_complex_shrinking</span><span class="p">():</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">property_func</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+        <span class="c1"># This will fail for dictionaries with &#39;error&#39; key</span>
+        <span class="k">return</span> <span class="s1">&#39;error&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span>
+
+    <span class="c1"># Generate complex nested data</span>
+    <span class="n">complex_gen</span> <span class="o">=</span> <span class="n">Gen</span><span class="o">.</span><span class="n">dict</span><span class="p">(</span>
+        <span class="n">Gen</span><span class="o">.</span><span class="n">str</span><span class="p">(</span><span class="n">min_length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">5</span><span class="p">),</span>
+        <span class="n">Gen</span><span class="o">.</span><span class="n">one_of</span><span class="p">(</span>
+            <span class="n">Gen</span><span class="o">.</span><span class="n">str</span><span class="p">(),</span>
+            <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span>
+            <span class="n">Gen</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">str</span><span class="p">(),</span> <span class="n">min_length</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+        <span class="p">),</span>
+        <span class="n">min_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">max_size</span><span class="o">=</span><span class="mi">5</span>
+    <span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">run_for_all</span><span class="p">(</span><span class="n">property_func</span><span class="p">,</span> <span class="n">complex_gen</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">PropertyTestError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed with input: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="c1"># The shrunk input will be the simplest dictionary that still contains &#39;error&#39;</span>
+</code></pre></div>
+<h2 id="advanced-shrinking">Advanced Shrinking<a class="headerlink" href="#advanced-shrinking" title="Permanent link">&para;</a></h2>
+<p>python-proptest includes advanced shrinking strategies for more complex scenarios:</p>
+<h3 id="element-wise-shrinking">Element-wise Shrinking<a class="headerlink" href="#element-wise-shrinking" title="Permanent link">&para;</a></h3>
+<p>For collections, python-proptest can shrink individual elements while keeping the structure:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">python_proptest</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_for_all</span><span class="p">,</span> <span class="n">Gen</span><span class="p">,</span> <span class="n">PropertyTestError</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_element_wise_shrinking</span><span class="p">():</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">property_func</span><span class="p">(</span><span class="n">numbers</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="c1"># This will fail if any number is &gt;= 100</span>
+        <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="n">n</span> <span class="o">&lt;</span> <span class="mi">100</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">numbers</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">run_for_all</span><span class="p">(</span><span class="n">property_func</span><span class="p">,</span> <span class="n">Gen</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">200</span><span class="p">),</span> <span class="n">min_length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">5</span><span class="p">))</span>
+    <span class="k">except</span> <span class="n">PropertyTestError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed with input: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="c1"># The shrunk input will have the minimal number that causes failure</span>
+</code></pre></div>
+<h3 id="membership-wise-shrinking">Membership-wise Shrinking<a class="headerlink" href="#membership-wise-shrinking" title="Permanent link">&para;</a></h3>
+<p>For sets and dictionaries, python-proptest can remove elements to find the minimal failing subset:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">python_proptest</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_for_all</span><span class="p">,</span> <span class="n">Gen</span><span class="p">,</span> <span class="n">PropertyTestError</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_membership_shrinking</span><span class="p">():</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">property_func</span><span class="p">(</span><span class="n">items</span><span class="p">:</span> <span class="nb">set</span><span class="p">):</span>
+        <span class="c1"># This will fail if the set contains 42</span>
+        <span class="k">return</span> <span class="mi">42</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">items</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">run_for_all</span><span class="p">(</span><span class="n">property_func</span><span class="p">,</span> <span class="n">Gen</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">100</span><span class="p">),</span> <span class="n">min_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_size</span><span class="o">=</span><span class="mi">10</span><span class="p">))</span>
+    <span class="k">except</span> <span class="n">PropertyTestError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed with input: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="c1"># The shrunk input will likely be just {42}</span>
+</code></pre></div>
+<h2 id="custom-shrinking">Custom Shrinking<a class="headerlink" href="#custom-shrinking" title="Permanent link">&para;</a></h2>
+<p>You can influence the shrinking behavior by using specific generators or combinators:</p>
+<h3 id="using-genjust-for-fixed-values">Using <code>Gen.just()</code> for Fixed Values<a class="headerlink" href="#using-genjust-for-fixed-values" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">python_proptest</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_for_all</span><span class="p">,</span> <span class="n">Gen</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_with_fixed_values</span><span class="p">():</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">property_func</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">x</span> <span class="o">!=</span> <span class="mi">42</span>  <span class="c1"># This will always fail for x=42</span>
+
+    <span class="c1"># Using Gen.just() ensures the value 42 is always generated</span>
+    <span class="n">run_for_all</span><span class="p">(</span><span class="n">property_func</span><span class="p">,</span> <span class="n">Gen</span><span class="o">.</span><span class="n">just</span><span class="p">(</span><span class="mi">42</span><span class="p">))</span>
+    <span class="c1"># The shrunk input will be exactly 42</span>
+</code></pre></div>
+<h3 id="using-genelement_of-for-specific-values">Using <code>Gen.element_of()</code> for Specific Values<a class="headerlink" href="#using-genelement_of-for-specific-values" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">python_proptest</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_for_all</span><span class="p">,</span> <span class="n">Gen</span><span class="p">,</span> <span class="n">PropertyTestError</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_with_specific_values</span><span class="p">():</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">property_func</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">]</span>  <span class="c1"># This will fail for these values</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">run_for_all</span><span class="p">(</span><span class="n">property_func</span><span class="p">,</span> <span class="n">Gen</span><span class="o">.</span><span class="n">element_of</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">50</span><span class="p">))</span>
+    <span class="k">except</span> <span class="n">PropertyTestError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed with input: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="c1"># The shrunk input will be one of the failing values: 10, 20, or 30</span>
+</code></pre></div>
+<h2 id="shrinking-configuration">Shrinking Configuration<a class="headerlink" href="#shrinking-configuration" title="Permanent link">&para;</a></h2>
+<p>You can control shrinking behavior through the <code>Property</code> class:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">python_proptest</span><span class="w"> </span><span class="kn">import</span> <span class="n">Property</span><span class="p">,</span> <span class="n">Gen</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">my_property</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">100</span>
+
+<span class="c1"># Create a property with custom shrinking settings</span>
+<span class="n">prop</span> <span class="o">=</span> <span class="n">Property</span><span class="p">(</span><span class="n">my_property</span><span class="p">)</span>
+<span class="n">prop</span><span class="o">.</span><span class="n">set_num_runs</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>  <span class="c1"># Number of test runs</span>
+<span class="n">prop</span><span class="o">.</span><span class="n">for_all</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">1000</span><span class="p">))</span>
+
+<span class="c1"># The shrinking process is automatic and cannot be disabled,</span>
+<span class="c1"># but you can influence it by choosing appropriate generators</span>
+</code></pre></div>
+<h2 id="best-practices-for-shrinking">Best Practices for Shrinking<a class="headerlink" href="#best-practices-for-shrinking" title="Permanent link">&para;</a></h2>
+<ol>
+<li>
+<p><strong>Use appropriate generators</strong>: Choose generators that produce values close to the boundaries you want to test.</p>
+</li>
+<li>
+<p><strong>Avoid overly complex predicates</strong>: Simple predicates shrink better than complex ones.</p>
+</li>
+<li>
+<p><strong>Test edge cases explicitly</strong>: Use <code>Gen.just()</code> or <code>Gen.element_of()</code> to test specific values.</p>
+</li>
+<li>
+<p><strong>Consider the shrinking path</strong>: Think about what the minimal failing case should be when designing your properties.</p>
+</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="c1"># Good: Simple predicate that shrinks well</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">good_property</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">100</span>
+
+<span class="c1"># Less ideal: Complex predicate that might not shrink as effectively</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">complex_property</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">100</span> <span class="ow">and</span> <span class="n">x</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">&#39;1&#39;</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span>
+</code></pre></div>
+<p>The shrinking process is one of the most powerful features of property-based testing, as it helps you understand exactly what conditions cause your code to fail, making debugging much more effective.</p>
+
+
+
+
+
+
+
+  
+    
+  
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="January 5, 2026 13:00:43 UTC">January 5, 2026</span>
+  </span>
+
+    
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tracking", "navigation.tabs.sticky", "navigation.indexes", "navigation.path", "toc.follow", "navigation.top", "search.highlight", "search.suggest", "navigation.expand"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

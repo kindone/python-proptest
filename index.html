@@ -1,0 +1,1336 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Python Property-Based Testing Library">
+      
+      
+        <meta name="author" content="kindone">
+      
+      
+        <link rel="canonical" href="https://kindone.github.io/python-proptest/">
+      
+      
+      
+        <link rel="next" href="decorators/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="assets/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>python-proptest</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CSpline+Sans+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"Spline Sans Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="light-green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#python-proptest" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="." title="python-proptest" class="md-header__button md-logo" aria-label="python-proptest" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            python-proptest
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Introduction
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/kindone/python-proptest" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    kindone/python-proptest
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="." title="python-proptest" class="md-nav__button md-logo" aria-label="python-proptest" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    python-proptest
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/kindone/python-proptest" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    kindone/python-proptest
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Introduction
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="." class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#getting-started" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Getting Started
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Getting Started">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#core-concepts-and-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core Concepts and Features
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API Overview
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="API Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#available-generators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Available Generators
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#1-function-based-approach-works-with-both-pytest-and-unittest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Function-based Approach (Works with both pytest and unittest)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-decorator-based-approach" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Decorator-based Approach
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-framework-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Framework Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#choosing-the-right-approach" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Choosing the Right Approach
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Choosing the Right Approach">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#use-run_for_all-function-for-simple-lambda-based-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use run_for_all Function for Simple Lambda-Based Tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-run_for_all-decorator-for-named-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use @run_for_all Decorator for Named Functions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-for_all-for-test-frameworks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use @for_all for Test Frameworks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#guidelines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Guidelines
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="decorators/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decorators
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="properties/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Properties
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="generators/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Generators
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="combinators/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Combinators
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="shrinking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Shrinking
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="stateful-testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stateful Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Test Framework Integration
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Test Framework Integration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="unittest-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Unittest Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="pytest-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pytest Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="pytest-best-practices/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pytest Best Practices
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#getting-started" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Getting Started
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Getting Started">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Installation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#core-concepts-and-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core Concepts and Features
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        API Overview
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="API Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#available-generators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Available Generators
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#1-function-based-approach-works-with-both-pytest-and-unittest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Function-based Approach (Works with both pytest and unittest)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-decorator-based-approach" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Decorator-based Approach
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-framework-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Framework Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#choosing-the-right-approach" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Choosing the Right Approach
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Choosing the Right Approach">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#use-run_for_all-function-for-simple-lambda-based-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use run_for_all Function for Simple Lambda-Based Tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-run_for_all-decorator-for-named-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use @run_for_all Decorator for Named Functions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-for_all-for-test-frameworks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use @for_all for Test Frameworks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#guidelines" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Guidelines
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="python-proptest">python-proptest<a class="headerlink" href="#python-proptest" title="Permanent link">&para;</a></h1>
+<p><code>python-proptest</code> is a property-based testing (PBT) framework ported from for <code>cppproptest</code>, drawing inspiration from libraries such as Haskell's QuickCheck and Python's Hypothesis. Property-based testing shifts the focus from example-based verification to defining universal <em>properties</em> or <em>invariants</em> that must hold true for an input domain.</p>
+<p>python-proptest provides seamless integration with <code>unittest</code> or <code>pytest</code> through the convenient decorators like <code>@for_all</code>, automatically detecting pytest context and adapting behavior accordingly.</p>
+<p>Instead of manually crafting test cases for specific inputs, PBT allows you to describe the <em>domain</em> of inputs your function expects and the <em>general characteristics</em> of the output (e.g., <code>add(a, b)</code> should always be greater than or equal to <code>a</code> and <code>b</code> if they are non-negative). PBT then generates hundreds or thousands of varied inputs, searching for edge cases or unexpected behaviors that violate your defined properties. This approach significantly increases test coverage and the likelihood of finding subtle bugs.</p>
+<p>The core workflow involves:</p>
+<ol>
+<li><strong>Defining a property:</strong> A function that takes generated inputs and asserts an expected invariant. See <a href="properties/">Properties</a>.</li>
+<li><strong>Specifying generators:</strong> Mechanisms for creating random data conforming to certain types or constraints, often built by composing simpler generators using <strong>combinators</strong>. See <a href="generators/">Generators</a> and <a href="combinators/">Combinators</a>.</li>
+<li><strong>Execution:</strong> <code>python-proptest</code> automatically runs the property function against numerous generated inputs (typically 100+).</li>
+<li><strong>Shrinking:</strong> If a test case fails (the property returns <code>false</code> or throws), <code>python-proptest</code> attempts to find a minimal counterexample by simplifying the failing input. See <a href="shrinking/">Shrinking</a>.</li>
+<li><strong>Enhanced testing:</strong> Use decorators like <code>@example</code>, <code>@settings</code>, and <code>@matrix</code> for specific test cases, configuration, and exhaustive testing. See <a href="decorators/">Decorators</a>.</li>
+</ol>
+<p>Consider verifying a round-trip property for a custom parser/serializer:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">python_proptest</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_for_all</span><span class="p">,</span> <span class="n">Gen</span>
+
+<span class="sd">&quot;&quot;&quot;Test that serializing and parsing preserves data.&quot;&quot;&quot;</span>
+<span class="c1"># Generator for keys (non-empty strings without special characters)</span>
+<span class="n">key_gen</span> <span class="o">=</span> <span class="n">Gen</span><span class="o">.</span><span class="n">str</span><span class="p">(</span><span class="n">min_length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+    <span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span> <span class="ow">and</span> <span class="s1">&#39;&amp;&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">s</span> <span class="ow">and</span> <span class="s1">&#39;=&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">s</span>
+<span class="p">)</span>
+<span class="c1"># Generator for arbitrary string values</span>
+<span class="n">value_gen</span> <span class="o">=</span> <span class="n">Gen</span><span class="o">.</span><span class="n">str</span><span class="p">(</span><span class="n">min_length</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="c1"># Generator for dictionaries with our specific keys and values</span>
+<span class="n">data_object_gen</span> <span class="o">=</span> <span class="n">Gen</span><span class="o">.</span><span class="n">dict</span><span class="p">(</span><span class="n">key_gen</span><span class="p">,</span> <span class="n">value_gen</span><span class="p">,</span> <span class="n">min_size</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_size</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="c1"># Simple lambda-based property is suitable for run_for_all</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">run_for_all</span><span class="p">(</span>
+    <span class="k">lambda</span> <span class="n">original_data</span><span class="p">:</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">original_data</span><span class="p">))</span> <span class="o">==</span> <span class="n">original_data</span><span class="p">,</span>
+    <span class="n">data_object_gen</span>
+<span class="p">)</span>
+<span class="k">assert</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">True</span>
+</code></pre></div>
+<p>This PBT approach facilitates the discovery of edge cases and intricate bugs that might be neglected by traditional, example-driven testing methodologies.</p>
+<h2 id="getting-started">Getting Started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h2>
+<h3 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h3>
+<p>To add <code>python-proptest</code> to your project, run the following command:</p>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>python-proptest
+</code></pre></div>
+<p>For development dependencies:</p>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>python-proptest<span class="o">[</span>dev<span class="o">]</span>
+</code></pre></div>
+<h2 id="core-concepts-and-features">Core Concepts and Features<a class="headerlink" href="#core-concepts-and-features" title="Permanent link">&para;</a></h2>
+<p>Understanding these key components will help you use <code>python-proptest</code> effectively:</p>
+<ul>
+<li>
+<p><strong><a href="generators/">Generators</a></strong>: Produce random data of various types (primitives, containers) according to specified constraints (e.g., <code>Gen.int()</code>, <code>Gen.list(...)</code>). Learn how to create the basic building blocks of your test data.</p>
+</li>
+<li>
+<p><strong><a href="combinators/">Combinators</a></strong>: Modify or combine existing generators to create new ones. Discover techniques to constraint, combine, and transform generators for complex data structures.</p>
+</li>
+<li>
+<p><strong><a href="properties/">Properties (<code>Property</code>, <code>run_for_all</code>)</a></strong>: Express conditions or invariants that should hold true for generated data. <code>python-proptest</code> runs these properties against many generated examples using the <code>run_for_all</code> function or <code>Property</code> class methods. Understand how to define the invariants your code should satisfy and how to run tests.</p>
+</li>
+<li>
+<p><strong><a href="shrinking/">Shrinking</a></strong>: When a property fails, <code>python-proptest</code> attempts to find a minimal counterexample by simplifying the failing input using logic associated with the generated value (often via a <code>Shrinkable</code> structure). See how <code>python-proptest</code> helps pinpoint failures.</p>
+</li>
+<li>
+<p><strong><a href="stateful-testing/">Stateful Testing</a></strong>: Go beyond simple input-output functions and test systems with internal state by generating sequences of operations or commands. Learn how to model and verify stateful behaviors.</p>
+</li>
+</ul>
+<h2 id="api-overview">API Overview<a class="headerlink" href="#api-overview" title="Permanent link">&para;</a></h2>
+<p>python-proptest provides two main approaches for property-based testing:</p>
+<h3 id="available-generators">Available Generators<a class="headerlink" href="#available-generators" title="Permanent link">&para;</a></h3>
+<p><strong>Primitive Generators:</strong></p>
+<ul>
+<li><a href="generators/#genintmin_value-max_value"><code>Gen.int(min_value, max_value)</code></a> - Random integers</li>
+<li><a href="generators/#genfloatmin_value-max_value-nan_prob-posinf_prob-neginf_prob"><code>Gen.float(min_value, max_value, nan_prob, posinf_prob, neginf_prob)</code></a> - Random floats (finite by default, optional inf/NaN probabilities)</li>
+<li><a href="generators/#genbooltrue_prob"><code>Gen.bool(true_prob)</code></a> - Random booleans with configurable probability</li>
+<li><a href="generators/#genstrmin_length-max_length-charset"><code>Gen.str(min_length, max_length, charset)</code></a> - Random strings with customizable charset (default: lowercase letters, or use "ascii"/"printable_ascii", or a codepoint generator)</li>
+<li><a href="generators/#genascii_stringmin_length-max_length"><code>Gen.ascii_string(min_length, max_length)</code></a> - ASCII strings (0-127)</li>
+<li><a href="generators/#genprintable_ascii_stringmin_length-max_length"><code>Gen.printable_ascii_string(min_length, max_length)</code></a> - Printable ASCII strings (32-126)</li>
+<li><a href="generators/#genunicode_stringmin_length-max_length"><code>Gen.unicode_string(min_length, max_length)</code></a> - Unicode strings</li>
+<li><a href="generators/#genascii_char"><code>Gen.ascii_char()</code></a> - ASCII character codes (0-127)</li>
+<li><a href="generators/#genunicode_char"><code>Gen.unicode_char()</code></a> - Unicode character codes (avoiding surrogate pairs)</li>
+<li><a href="generators/#genprintable_ascii_char"><code>Gen.printable_ascii_char()</code></a> - Printable ASCII character codes (32-126)</li>
+<li><a href="generators/#genin_rangemin_value-max_value"><code>Gen.in_range(min_value, max_value)</code></a> - Integers in range [min, max) (exclusive)</li>
+<li><a href="generators/#genintervalmin_value-max_value"><code>Gen.interval(min_value, max_value)</code></a> - Integers in range [min, max] (inclusive)</li>
+<li><a href="generators/#genintegersstart-count"><code>Gen.integers(start, count)</code></a> - Integers in range [start, start+count) (count parameter)</li>
+<li><a href="generators/#gennaturalmax_value"><code>Gen.natural(max_value)</code></a> - Positive integers [1, max_value]</li>
+<li><a href="generators/#gennon_negativemax_value"><code>Gen.non_negative(max_value)</code></a> - Non-negative integers [0, max_value]</li>
+</ul>
+<p><strong>Container Generators:</strong></p>
+<ul>
+<li><a href="generators/#genlistelement_gen-min_length-max_length"><code>Gen.list(element_gen, min_length, max_length)</code></a> - Lists</li>
+<li><a href="generators/#genunique_listelement_gen-min_length-max_length"><code>Gen.unique_list(element_gen, min_length, max_length)</code></a> - Lists with unique elements (sorted)</li>
+<li><a href="generators/#gensetelement_gen-min_size-max_size"><code>Gen.set(element_gen, min_size, max_size)</code></a> - Sets</li>
+<li><a href="generators/#gendictkey_gen-value_gen-min_size-max_size"><code>Gen.dict(key_gen, value_gen, min_size, max_size)</code></a> - Dictionaries</li>
+<li><a href="generators/#gentuplegenerators"><code>Gen.tuple(*generators)</code></a> - Fixed-size tuples</li>
+</ul>
+<p><strong>Special Generators:</strong></p>
+<ul>
+<li><a href="generators/#genjustvalue"><code>Gen.just(value)</code></a> - Always generates the same value</li>
+<li><a href="generators/#genlazyfunc"><code>Gen.lazy(func)</code></a> - Defers evaluation until generation</li>
+<li><a href="combinators/#genconstructtype-generators"><code>Gen.construct(Type, *generators)</code></a> - Creates class instances</li>
+</ul>
+<p><strong>Dependent Generation Combinators:</strong></p>
+<ul>
+<li><a href="combinators/#genchainbase_gen-gen_factory-generatorchaingen_factory"><code>Gen.chain(base_gen, gen_factory)</code> / <code>generator.chain(gen_factory)</code></a> - Creates dependent tuples</li>
+<li><a href="combinators/#genaggregateinitial_gen-gen_factory-min_size-max_size-generatoraggregate"><code>Gen.aggregate(initial_gen, gen_factory, min_size, max_size)</code> / <code>generator.aggregate(...)</code></a> - Generates list with dependent elements</li>
+<li><a href="combinators/#genaccumulateinitial_gen-gen_factory-min_size-max_size-generatoraccumulate"><code>Gen.accumulate(initial_gen, gen_factory, min_size, max_size)</code> / <code>generator.accumulate(...)</code></a> - Generates final value after dependent steps</li>
+</ul>
+<p><strong>Selection Combinators:</strong></p>
+<ul>
+<li><a href="combinators/#genone_ofgenerators"><code>Gen.one_of(*generators)</code></a> - Randomly chooses from multiple generators</li>
+<li><a href="combinators/#genelement_ofvalues"><code>Gen.element_of(*values)</code></a> - Randomly chooses from multiple values</li>
+<li><a href="combinators/#genweighted_gengenerator-weight"><code>Gen.weighted_gen(generator, weight)</code></a> - Wraps generator with weight for one_of</li>
+<li><a href="combinators/#genweighted_valuevalue-weight"><code>Gen.weighted_value(value, weight)</code></a> - Wraps value with weight for element_of</li>
+</ul>
+<p><strong>Transformation Combinators:</strong></p>
+<ul>
+<li><a href="combinators/#generatormapfunc"><code>generator.map(func)</code></a> - Transforms generated values</li>
+<li><a href="combinators/#generatorfilterpredicate"><code>generator.filter(predicate)</code></a> - Filters values by predicate</li>
+<li><a href="combinators/#generatorflat_mapfunc"><code>generator.flat_map(func)</code></a> - Creates dependent generators</li>
+</ul>
+<p><strong>Decorators:</strong></p>
+<ul>
+<li><a href="decorators/#for_all"><code>@for_all(*generators, num_runs, seed)</code></a> - Core property-based testing decorator</li>
+<li><a href="decorators/#run_for_all"><code>@run_for_all(*generators, num_runs, seed)</code></a> - Versatile decorator for complex generators (chain, aggregate, accumulate)</li>
+<li><a href="decorators/#example"><code>@example(*values)</code></a> - Provides specific example values to test</li>
+<li><a href="decorators/#settings"><code>@settings(num_runs, seed)</code></a> - Configures test parameters</li>
+<li><a href="decorators/#matrix"><code>@matrix(**kwargs)</code></a> - Provides exhaustive Cartesian product testing</li>
+</ul>
+<h3 id="1-function-based-approach-works-with-both-pytest-and-unittest">1. Function-based Approach (Works with both pytest and unittest)<a class="headerlink" href="#1-function-based-approach-works-with-both-pytest-and-unittest" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">python_proptest</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_for_all</span><span class="p">,</span> <span class="n">Gen</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_addition_commutativity</span><span class="p">():</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">property_func</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">==</span> <span class="n">y</span> <span class="o">+</span> <span class="n">x</span>
+
+    <span class="n">run_for_all</span><span class="p">(</span><span class="n">property_func</span><span class="p">,</span> <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">())</span>
+</code></pre></div>
+<h3 id="2-decorator-based-approach">2. Decorator-based Approach<a class="headerlink" href="#2-decorator-based-approach" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">python_proptest</span><span class="w"> </span><span class="kn">import</span> <span class="n">for_all</span><span class="p">,</span> <span class="n">Gen</span><span class="p">,</span> <span class="n">example</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">matrix</span>
+
+<span class="nd">@for_all</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">())</span>   <span class="c1"># Test domain with random generated values</span>
+<span class="nd">@matrix</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>      <span class="c1"># Test combination of edge cases exhaustively</span>
+<span class="nd">@example</span><span class="p">(</span><span class="mi">42</span><span class="p">,</span> <span class="mi">24</span><span class="p">)</span>                 <span class="c1"># Test specific known values</span>
+<span class="nd">@settings</span><span class="p">(</span><span class="n">num_runs</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>  <span class="c1"># Configure test parameters</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_addition_commutativity</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">==</span> <span class="n">y</span> <span class="o">+</span> <span class="n">x</span>
+
+<span class="c1"># Run the test</span>
+<span class="n">test_addition_commutativity</span><span class="p">()</span>
+</code></pre></div>
+<h3 id="3-framework-integration">3. Framework Integration<a class="headerlink" href="#3-framework-integration" title="Permanent link">&para;</a></h3>
+<p>The <code>@for_all</code> decorator integrates with both <code>unittest</code> and <code>pytest</code> using direct decoration:</p>
+<p><strong>Unittest Integration:</strong>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">unittest</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">python_proptest</span><span class="w"> </span><span class="kn">import</span> <span class="n">for_all</span><span class="p">,</span> <span class="n">Gen</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestMathProperties</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="nd">@for_all</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">())</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_addition_commutativity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test that addition is commutative - direct decoration.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="n">x</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Pytest Integration:</strong>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">python_proptest</span><span class="w"> </span><span class="kn">import</span> <span class="n">for_all</span><span class="p">,</span> <span class="n">Gen</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestMathProperties</span><span class="p">:</span>
+    <span class="nd">@for_all</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">())</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_addition_commutativity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test that addition is commutative - direct decoration.&quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">==</span> <span class="n">y</span> <span class="o">+</span> <span class="n">x</span>
+</code></pre></div></p>
+<h2 id="choosing-the-right-approach">Choosing the Right Approach<a class="headerlink" href="#choosing-the-right-approach" title="Permanent link">&para;</a></h2>
+<p>python-proptest provides multiple approaches for defining property tests. Choose based on your needs:</p>
+<h3 id="use-run_for_all-function-for-simple-lambda-based-tests">Use <code>run_for_all</code> Function for Simple Lambda-Based Tests<a class="headerlink" href="#use-run_for_all-function-for-simple-lambda-based-tests" title="Permanent link">&para;</a></h3>
+<p>Suitable for simple property checks that can be expressed as lambdas:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">python_proptest</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_for_all</span><span class="p">,</span> <span class="n">Gen</span>
+
+<span class="c1"># Type checks</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">run_for_all</span><span class="p">(</span>
+    <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
+    <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1"># Range validations</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">run_for_all</span><span class="p">(</span>
+    <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="mi">100</span><span class="p">,</span>
+    <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">min_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_value</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1"># Simple assertions</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">run_for_all</span><span class="p">(</span>
+    <span class="k">lambda</span> <span class="n">lst</span><span class="p">:</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">lst</span><span class="p">),</span>
+    <span class="n">Gen</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">())</span>
+<span class="p">)</span>
+</code></pre></div>
+<h3 id="use-run_for_all-decorator-for-named-functions">Use <code>@run_for_all</code> Decorator for Named Functions<a class="headerlink" href="#use-run_for_all-decorator-for-named-functions" title="Permanent link">&para;</a></h3>
+<p>While standalone <code>run_for_all</code> function can only work on lambdas,
+<code>@run_for_all</code> decorator can work on a named function.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">python_proptest</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_for_all</span><span class="p">,</span> <span class="n">Gen</span>
+
+<span class="n">gen</span> <span class="o">=</span> <span class="n">Gen</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">10</span><span class="p">))</span>
+
+<span class="nd">@run_for_all</span><span class="p">(</span><span class="n">gen</span><span class="p">,</span> <span class="n">num_runs</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_dependency</span><span class="p">(</span><span class="n">pair</span><span class="p">):</span>
+    <span class="n">base</span><span class="p">,</span> <span class="n">dependent</span> <span class="o">=</span> <span class="n">pair</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertGreaterEqual</span><span class="p">(</span><span class="n">dependent</span><span class="p">,</span> <span class="n">base</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertLessEqual</span><span class="p">(</span><span class="n">dependent</span><span class="p">,</span> <span class="n">base</span> <span class="o">+</span> <span class="mi">10</span><span class="p">)</span>
+<span class="c1"># Auto-executes when decorated!</span>
+
+
+<span class="n">gen</span> <span class="o">=</span> <span class="n">Gen</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span>
+    <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+    <span class="k">lambda</span> <span class="n">n</span><span class="p">:</span> <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">5</span><span class="p">),</span>
+    <span class="n">min_size</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">max_size</span><span class="o">=</span><span class="mi">10</span>
+<span class="p">)</span>
+
+<span class="nd">@run_for_all</span><span class="p">(</span><span class="n">gen</span><span class="p">,</span> <span class="n">num_runs</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_increasing</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertGreaterEqual</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">values</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
+</code></pre></div>
+<h3 id="use-for_all-for-test-frameworks">Use <code>@for_all</code> for Test Frameworks<a class="headerlink" href="#use-for_all-for-test-frameworks" title="Permanent link">&para;</a></h3>
+<p><code>@for_all</code> decorator can be used to create a property-based test in a test frameworks like <code>unittest</code> or <code>pytest</code>.
+Method parameters are randomized according to the specified generators and the method body is wrapped within a property-based test loop.
+As a result, the method becomes a conforming test case of the test framework.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">unittest</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">python_proptest</span><span class="w"> </span><span class="kn">import</span> <span class="n">for_all</span><span class="p">,</span> <span class="n">Gen</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestStringProperties</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="nd">@for_all</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">str</span><span class="p">(),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">str</span><span class="p">())</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_string_concatenation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">s2</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test string concatenation properties.&quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">s1</span> <span class="o">+</span> <span class="n">s2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">s1</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">s2</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">s1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">s2</span><span class="p">))</span>
+</code></pre></div>
+<p>Note that <code>@for_all</code> decorator does not itself executes the test and let it execute by the containing framework whereas <code>@run_for_all</code> does the execution as well.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">python_proptest</span><span class="w"> </span><span class="kn">import</span> <span class="n">for_all</span><span class="p">,</span> <span class="n">Gen</span>
+
+<span class="nd">@for_all</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">())</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_complex_math_property</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test complex mathematical property with multiple conditions.&quot;&quot;&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="n">y</span> <span class="o">+</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span>
+    <span class="k">assert</span> <span class="n">result</span> <span class="o">&gt;=</span> <span class="n">x</span>
+    <span class="k">assert</span> <span class="n">result</span> <span class="o">&gt;=</span> <span class="n">y</span>
+    <span class="k">assert</span> <span class="n">result</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span>
+
+<span class="c1"># need to call the function explicitly to execute the property test</span>
+<span class="n">test_complex_math_property</span><span class="p">()</span>
+
+<span class="c1"># this one does not need explicit call</span>
+<span class="nd">@run_for_all</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">str</span><span class="p">(),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">str</span><span class="p">())</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_string_operations</span><span class="p">(</span><span class="n">s1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">s2</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test string operations with multiple assertions.&quot;&quot;&quot;</span>
+    <span class="n">combined</span> <span class="o">=</span> <span class="n">s1</span> <span class="o">+</span> <span class="n">s2</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">combined</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">s1</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">s2</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">combined</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">s1</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">combined</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">s2</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="guidelines">Guidelines<a class="headerlink" href="#guidelines" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Use <code>run_for_all</code> function</strong> for immediately testing a property with a lambda with single statement</li>
+<li><strong>Use <code>@run_for_all</code> decorator</strong> for immediately testing a property with a named functions with longer body</li>
+<li><strong>Use <code>@for_all</code></strong> for use in test frameworks like <code>unittest</code> or <code>pytest</code>.</li>
+</ul>
+<p>All approaches reach the same goal - choose based on your testing framework and preferences. For more details on decorators, see <a href="decorators/">Decorators</a>. For framework integration, see <a href="pytest-integration/">Pytest Integration</a>, <a href="unittest-integration/">Unittest Integration</a>, and <a href="pytest-best-practices/">Pytest Best Practices</a>.</p>
+
+
+
+
+
+
+
+  
+    
+  
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="January 5, 2026 13:00:43 UTC">January 5, 2026</span>
+  </span>
+
+    
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.tracking", "navigation.tabs.sticky", "navigation.indexes", "navigation.path", "toc.follow", "navigation.top", "search.highlight", "search.suggest", "navigation.expand"], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

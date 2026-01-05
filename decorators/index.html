@@ -1,0 +1,2436 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Python Property-Based Testing Library">
+      
+      
+        <meta name="author" content="kindone">
+      
+      
+        <link rel="canonical" href="https://kindone.github.io/python-proptest/decorators/">
+      
+      
+        <link rel="prev" href="..">
+      
+      
+        <link rel="next" href="../properties/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Decorators - python-proptest</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CSpline+Sans+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"Spline Sans Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="light-green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#decorators" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="python-proptest" class="md-header__button md-logo" aria-label="python-proptest" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            python-proptest
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Decorators
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/kindone/python-proptest" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    kindone/python-proptest
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="python-proptest" class="md-nav__button md-logo" aria-label="python-proptest" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    python-proptest
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/kindone/python-proptest" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    kindone/python-proptest
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Introduction
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decorators
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decorators
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#for_all" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        @for_all
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="@for_all">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic Usage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#with-pytest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        With pytest
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#with-unittest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        With unittest
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run_for_all" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        @run_for_all
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="@run_for_all">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mode-1-function-call-traditional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mode 1: Function Call (Traditional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mode-2-test-method-decorator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mode 2: Test Method Decorator
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mode-3-nested-function-decorator-auto-execute" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mode 3: Nested Function Decorator (Auto-Execute)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#working-with-complex-generators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Working with Complex Generators
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Working with Complex Generators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#with-chain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        With chain
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#with-aggregate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        With aggregate
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#with-accumulate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        With accumulate
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#comparison-for_all-vs-run_for_all" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Comparison: @for_all vs @run_for_all
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parameters_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#when-to-use-run_for_all" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When to Use @run_for_all
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        @example
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="@example">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-usage_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic Usage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multiple-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multiple Examples
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#examples-with-different-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples with Different Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parameters_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        @settings
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="@settings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-usage_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic Usage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#seed-for-reproducibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Seed for Reproducibility
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multiple-settings-last-wins" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multiple Settings (Last Wins)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parameters_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        @matrix
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="@matrix">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-usage_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic Usage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multiple-matrix-decorators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multiple Matrix Decorators
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#matrix-with-different-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Matrix with Different Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#matrix-with-complex-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Matrix with Complex Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parameters_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#decorator-composition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decorator Composition
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Decorator Composition">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#complete-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Complete Example
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decorator-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decorator Order
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#integration-with-testing-frameworks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Integration with Testing Frameworks
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Integration with Testing Frameworks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pytest-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pytest Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unittest-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Unittest Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#programmatic-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Programmatic Usage
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Programmatic Usage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parameters_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Best Practices
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-use-examples-for-edge-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Use Examples for Edge Cases
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-use-matrix-for-exhaustive-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Use Matrix for Exhaustive Testing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-use-settings-for-reproducibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Use Settings for Reproducibility
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-combine-decorators-strategically" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Combine Decorators Strategically
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#error-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Error Handling
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Error Handling">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#matrix-parameter-coverage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Matrix Parameter Coverage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-parameter-count" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example Parameter Count
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#settings-override" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Settings Override
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related Documentation
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../properties/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Properties
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../generators/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Generators
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../combinators/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Combinators
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../shrinking/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Shrinking
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stateful-testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Stateful Testing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Test Framework Integration
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Test Framework Integration
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../unittest-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Unittest Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pytest-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pytest Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pytest-best-practices/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pytest Best Practices
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#for_all" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        @for_all
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="@for_all">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic Usage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#with-pytest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        With pytest
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#with-unittest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        With unittest
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run_for_all" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        @run_for_all
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="@run_for_all">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mode-1-function-call-traditional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mode 1: Function Call (Traditional)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mode-2-test-method-decorator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mode 2: Test Method Decorator
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mode-3-nested-function-decorator-auto-execute" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mode 3: Nested Function Decorator (Auto-Execute)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#working-with-complex-generators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Working with Complex Generators
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Working with Complex Generators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#with-chain" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        With chain
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#with-aggregate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        With aggregate
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#with-accumulate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        With accumulate
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#comparison-for_all-vs-run_for_all" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Comparison: @for_all vs @run_for_all
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parameters_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#when-to-use-run_for_all" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When to Use @run_for_all
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        @example
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="@example">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-usage_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic Usage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multiple-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multiple Examples
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#examples-with-different-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples with Different Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parameters_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        @settings
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="@settings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-usage_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic Usage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#seed-for-reproducibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Seed for Reproducibility
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multiple-settings-last-wins" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multiple Settings (Last Wins)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parameters_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        @matrix
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="@matrix">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-usage_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic Usage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multiple-matrix-decorators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multiple Matrix Decorators
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#matrix-with-different-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Matrix with Different Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#matrix-with-complex-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Matrix with Complex Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parameters_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#decorator-composition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decorator Composition
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Decorator Composition">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#complete-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Complete Example
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decorator-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decorator Order
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#integration-with-testing-frameworks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Integration with Testing Frameworks
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Integration with Testing Frameworks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pytest-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pytest Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unittest-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Unittest Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#programmatic-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Programmatic Usage
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Programmatic Usage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parameters_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Best Practices
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-use-examples-for-edge-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Use Examples for Edge Cases
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-use-matrix-for-exhaustive-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Use Matrix for Exhaustive Testing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-use-settings-for-reproducibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Use Settings for Reproducibility
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-combine-decorators-strategically" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Combine Decorators Strategically
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#error-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Error Handling
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Error Handling">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#matrix-parameter-coverage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Matrix Parameter Coverage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-parameter-count" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example Parameter Count
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#settings-override" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Settings Override
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related Documentation
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+  
+
+
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="decorators">Decorators<a class="headerlink" href="#decorators" title="Permanent link">&para;</a></h1>
+<p>python-proptest provides several decorators to enhance property-based testing with additional features like examples, settings, and matrix testing.</p>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>The decorators work together to provide a flexible and powerful testing experience:</p>
+<ul>
+<li><a href="#for_all"><code>@for_all</code></a> - Core property-based testing decorator</li>
+<li><a href="#run_for_all"><code>@run_for_all</code></a> - Versatile decorator for dependent generators</li>
+<li><a href="#example"><code>@example</code></a> - Provides specific example values to test</li>
+<li><a href="#settings"><code>@settings</code></a> - Configures test parameters like number of runs and seed</li>
+<li><a href="#matrix"><code>@matrix</code></a> - Provides exhaustive Cartesian product testing of fixed inputs</li>
+</ul>
+<p>For information on generators to use with these decorators, see the <a href="../generators/">Generators</a> documentation.</p>
+<h2 id="for_all">@for_all<a class="headerlink" href="#for_all" title="Permanent link">&para;</a></h2>
+<p>The core decorator for property-based testing. It automatically detects the testing framework (pytest, unittest, or standalone) and adapts accordingly.</p>
+<h3 id="basic-usage">Basic Usage<a class="headerlink" href="#basic-usage" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">python_proptest</span><span class="w"> </span><span class="kn">import</span> <span class="n">for_all</span><span class="p">,</span> <span class="n">Gen</span>
+
+<span class="nd">@for_all</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">str</span><span class="p">())</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_property</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+
+<span class="c1"># Run the test</span>
+<span class="n">test_property</span><span class="p">()</span>
+</code></pre></div>
+<h3 id="with-pytest">With pytest<a class="headerlink" href="#with-pytest" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">python_proptest</span><span class="w"> </span><span class="kn">import</span> <span class="n">for_all</span><span class="p">,</span> <span class="n">Gen</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestMathProperties</span><span class="p">:</span>
+    <span class="nd">@for_all</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">())</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_addition_commutativity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">==</span> <span class="n">y</span> <span class="o">+</span> <span class="n">x</span>
+</code></pre></div>
+<h3 id="with-unittest">With unittest<a class="headerlink" href="#with-unittest" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">unittest</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">python_proptest</span><span class="w"> </span><span class="kn">import</span> <span class="n">for_all</span><span class="p">,</span> <span class="n">Gen</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestMathProperties</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="nd">@for_all</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">())</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_addition_commutativity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="n">x</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>*generators</code>: Variable number of <a href="../generators/">generators</a> for function arguments</li>
+<li><code>num_runs</code>: Number of test runs (default: 100)</li>
+<li><code>seed</code>: Random seed for reproducibility (default: None)</li>
+</ul>
+<p><strong>See Also:</strong> <a href="#run_for_all"><code>@run_for_all</code></a> for dependent generators, <a href="#example"><code>@example</code></a> for specific test cases, <a href="#settings"><code>@settings</code></a> for configuration</p>
+<h2 id="run_for_all">@run_for_all<a class="headerlink" href="#run_for_all" title="Permanent link">&para;</a></h2>
+<p>A versatile decorator that works in three different modes, combining the power of property-based testing with flexible syntax. Unlike <code>@for_all</code>, it doesn't unpack generator values, making it ideal for working with complex generators like <code>chain</code>, <code>aggregate</code>, and <code>accumulate</code>.</p>
+<h3 id="mode-1-function-call-traditional">Mode 1: Function Call (Traditional)<a class="headerlink" href="#mode-1-function-call-traditional" title="Permanent link">&para;</a></h3>
+<p>Use <code>run_for_all</code> as a function to explicitly run property tests:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">python_proptest</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_for_all</span><span class="p">,</span> <span class="n">Gen</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_addition</span><span class="p">():</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">==</span> <span class="n">y</span> <span class="o">+</span> <span class="n">x</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">run_for_all</span><span class="p">(</span><span class="n">check</span><span class="p">,</span> <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span> <span class="n">num_runs</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">True</span>
+</code></pre></div>
+<h3 id="mode-2-test-method-decorator">Mode 2: Test Method Decorator<a class="headerlink" href="#mode-2-test-method-decorator" title="Permanent link">&para;</a></h3>
+<p>Decorate test methods to have property tests executed by the test framework:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">unittest</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">python_proptest</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_for_all</span><span class="p">,</span> <span class="n">Gen</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestProperties</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="nd">@run_for_all</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span> <span class="n">num_runs</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_addition_commutative</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="n">x</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="mode-3-nested-function-decorator-auto-execute">Mode 3: Nested Function Decorator (Auto-Execute)<a class="headerlink" href="#mode-3-nested-function-decorator-auto-execute" title="Permanent link">&para;</a></h3>
+<p>The most powerful mode - decorate nested functions inside test methods and they <strong>execute immediately</strong>:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">unittest</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">python_proptest</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_for_all</span><span class="p">,</span> <span class="n">Gen</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestChain</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_chain_dependency</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">gen</span> <span class="o">=</span> <span class="n">Gen</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">10</span><span class="p">))</span>
+
+        <span class="nd">@run_for_all</span><span class="p">(</span><span class="n">gen</span><span class="p">,</span> <span class="n">num_runs</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">check_dependency</span><span class="p">(</span><span class="n">pair</span><span class="p">):</span>
+            <span class="n">base</span><span class="p">,</span> <span class="n">dependent</span> <span class="o">=</span> <span class="n">pair</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertGreaterEqual</span><span class="p">(</span><span class="n">dependent</span><span class="p">,</span> <span class="n">base</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertLessEqual</span><span class="p">(</span><span class="n">dependent</span><span class="p">,</span> <span class="n">base</span> <span class="o">+</span> <span class="mi">10</span><span class="p">)</span>
+
+        <span class="c1"># No explicit call needed - the property test already ran!</span>
+</code></pre></div>
+<h3 id="working-with-complex-generators">Working with Complex Generators<a class="headerlink" href="#working-with-complex-generators" title="Permanent link">&para;</a></h3>
+<p><code>@run_for_all</code> is perfect for generators that return tuples or complex structures. For detailed documentation on these combinators, see <a href="../combinators/#dependent-generation-combinators">Dependent Generation Combinators</a>.</p>
+<h4 id="with-chain">With chain<a class="headerlink" href="#with-chain" title="Permanent link">&para;</a></h4>
+<p><a href="../combinators/#genchainbase_gen-gen_factory-generatorchaingen_factory"><code>Gen.chain()</code></a> creates dependent tuples where each value depends on the previous:</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">test_dependent_generation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="c1"># chain returns (base_value, dependent_value) tuple</span>
+    <span class="n">gen</span> <span class="o">=</span> <span class="n">Gen</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span>
+        <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span>
+        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">50</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="nd">@run_for_all</span><span class="p">(</span><span class="n">gen</span><span class="p">,</span> <span class="n">num_runs</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_range</span><span class="p">(</span><span class="n">pair</span><span class="p">):</span>
+        <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="n">pair</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertGreaterEqual</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="n">start</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertLessEqual</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="n">start</span> <span class="o">+</span> <span class="mi">50</span><span class="p">)</span>
+</code></pre></div>
+<h4 id="with-aggregate">With aggregate<a class="headerlink" href="#with-aggregate" title="Permanent link">&para;</a></h4>
+<p><a href="../combinators/#genaggregateinitial_gen-gen_factory-min_size-max_size-generatoraggregate"><code>Gen.aggregate()</code></a> generates sequences where each element depends on the previous:</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">test_increasing_sequence</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="c1"># aggregate returns a list of dependent values</span>
+    <span class="n">gen</span> <span class="o">=</span> <span class="n">Gen</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span>
+        <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+        <span class="k">lambda</span> <span class="n">n</span><span class="p">:</span> <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">5</span><span class="p">),</span>
+        <span class="n">min_size</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+        <span class="n">max_size</span><span class="o">=</span><span class="mi">10</span>
+    <span class="p">)</span>
+
+    <span class="nd">@run_for_all</span><span class="p">(</span><span class="n">gen</span><span class="p">,</span> <span class="n">num_runs</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_sequence</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertGreaterEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">),</span> <span class="mi">5</span><span class="p">)</span>
+        <span class="c1"># Check each value &gt;= previous</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertGreaterEqual</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">values</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
+</code></pre></div>
+<h4 id="with-accumulate">With accumulate<a class="headerlink" href="#with-accumulate" title="Permanent link">&para;</a></h4>
+<p><a href="../combinators/#genaccumulateinitial_gen-gen_factory-min_size-max_size-generatoraccumulate"><code>Gen.accumulate()</code></a> generates the final value after N dependent steps:</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">test_final_value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="c1"># accumulate returns only the final value after N steps</span>
+    <span class="n">gen</span> <span class="o">=</span> <span class="n">Gen</span><span class="o">.</span><span class="n">accumulate</span><span class="p">(</span>
+        <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span>
+        <span class="k">lambda</span> <span class="n">n</span><span class="p">:</span> <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">5</span><span class="p">),</span>
+        <span class="n">min_size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">max_size</span><span class="o">=</span><span class="mi">10</span>
+    <span class="p">)</span>
+
+    <span class="nd">@run_for_all</span><span class="p">(</span><span class="n">gen</span><span class="p">,</span> <span class="n">num_runs</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_final</span><span class="p">(</span><span class="n">final_value</span><span class="p">):</span>
+        <span class="c1"># After 10 steps of +1 to +5, should be &gt;= initial + 10</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertGreaterEqual</span><span class="p">(</span><span class="n">final_value</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="comparison-for_all-vs-run_for_all">Comparison: @for_all vs @run_for_all<a class="headerlink" href="#comparison-for_all-vs-run_for_all" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># @for_all unpacks the tuple arguments</span>
+<span class="nd">@for_all</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_with_for_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="c1"># Gets two separate arguments: x and y</span>
+    <span class="k">assert</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">y</span>
+
+<span class="c1"># @run_for_all with chain - receives tuple as-is</span>
+<span class="nd">@run_for_all</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">10</span><span class="p">)))</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_with_run_for_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pair</span><span class="p">):</span>
+    <span class="c1"># Gets tuple: (base, dependent)</span>
+    <span class="n">base</span><span class="p">,</span> <span class="n">dependent</span> <span class="o">=</span> <span class="n">pair</span>
+    <span class="k">assert</span> <span class="n">base</span> <span class="o">&lt;=</span> <span class="n">dependent</span>
+</code></pre></div>
+<h3 id="parameters_1">Parameters<a class="headerlink" href="#parameters_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>*generators</code>: One or more <a href="../generators/">generators</a> (when used as decorator, generators come first)</li>
+<li><code>num_runs</code>: Number of test runs (default: 100)</li>
+<li><code>seed</code>: Random seed for reproducibility (default: None)</li>
+</ul>
+<h3 id="when-to-use-run_for_all">When to Use @run_for_all<a class="headerlink" href="#when-to-use-run_for_all" title="Permanent link">&para;</a></h3>
+<p>Use <code>@run_for_all</code> when:
+- Working with <a href="../combinators/#genchainbase_gen-gen_factory-generatorchaingen_factory"><code>chain</code></a>, <a href="../combinators/#genaggregateinitial_gen-gen_factory-min_size-max_size-generatoraggregate"><code>aggregate</code></a>, or <a href="../combinators/#genaccumulateinitial_gen-gen_factory-min_size-max_size-generatoraccumulate"><code>accumulate</code></a> combinators
+- You want auto-execution in nested function contexts
+- You prefer explicit control over value unpacking
+- Testing properties that operate on tuples or complex structures</p>
+<p>Use <a href="#for_all"><code>@for_all</code></a> when:
+- You want automatic argument unpacking
+- Working with simple, independent generators
+- Following traditional property testing patterns</p>
+<p><strong>See Also:</strong> <a href="#for_all"><code>@for_all</code></a>, <a href="../combinators/#dependent-generation-combinators">Dependent Generation Combinators</a>, <a href="#settings"><code>@settings</code></a></p>
+<h2 id="example">@example<a class="headerlink" href="#example" title="Permanent link">&para;</a></h2>
+<p>Provides specific example values that are tested before random generation. Examples are useful for testing edge cases, known good values, or debugging specific scenarios.</p>
+<h3 id="basic-usage_1">Basic Usage<a class="headerlink" href="#basic-usage_1" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">python_proptest</span><span class="w"> </span><span class="kn">import</span> <span class="n">for_all</span><span class="p">,</span> <span class="n">Gen</span><span class="p">,</span> <span class="n">example</span>
+
+<span class="nd">@for_all</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">str</span><span class="p">())</span>
+<span class="nd">@example</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+<span class="nd">@example</span><span class="p">(</span><span class="mi">42</span><span class="p">,</span> <span class="s2">&quot;hello&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_property</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="multiple-examples">Multiple Examples<a class="headerlink" href="#multiple-examples" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nd">@for_all</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">str</span><span class="p">())</span>
+<span class="nd">@example</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+<span class="nd">@example</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span>
+<span class="nd">@example</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;negative&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_property</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="examples-with-different-types">Examples with Different Types<a class="headerlink" href="#examples-with-different-types" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nd">@for_all</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">()))</span>
+<span class="nd">@example</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">[])</span>
+<span class="nd">@example</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="nd">@example</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_list_property</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">lst</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lst</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="parameters_2">Parameters<a class="headerlink" href="#parameters_2" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>*values</code>: Variable number of values matching the function parameters</li>
+</ul>
+<p><strong>See Also:</strong> <a href="#for_all"><code>@for_all</code></a>, <a href="#matrix"><code>@matrix</code></a>, <a href="#1-use-examples-for-edge-cases">Best Practices</a></p>
+<h2 id="settings">@settings<a class="headerlink" href="#settings" title="Permanent link">&para;</a></h2>
+<p>Configures test parameters like number of runs and random seed. Settings override the defaults provided to <code>@for_all</code>.</p>
+<h3 id="basic-usage_2">Basic Usage<a class="headerlink" href="#basic-usage_2" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">python_proptest</span><span class="w"> </span><span class="kn">import</span> <span class="n">for_all</span><span class="p">,</span> <span class="n">Gen</span><span class="p">,</span> <span class="n">settings</span>
+
+<span class="nd">@for_all</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">str</span><span class="p">())</span>
+<span class="nd">@settings</span><span class="p">(</span><span class="n">num_runs</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_property</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="seed-for-reproducibility">Seed for Reproducibility<a class="headerlink" href="#seed-for-reproducibility" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nd">@for_all</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">str</span><span class="p">())</span>
+<span class="nd">@settings</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="s2">&quot;deterministic&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_property</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="multiple-settings-last-wins">Multiple Settings (Last Wins)<a class="headerlink" href="#multiple-settings-last-wins" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nd">@for_all</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">str</span><span class="p">())</span>
+<span class="nd">@settings</span><span class="p">(</span><span class="n">num_runs</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="nd">@settings</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>  <span class="c1"># This overrides the previous settings</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_property</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="parameters_3">Parameters<a class="headerlink" href="#parameters_3" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>num_runs</code>: Number of test runs (overrides @for_all default)</li>
+<li><code>seed</code>: Random seed for reproducibility (overrides @for_all default)</li>
+</ul>
+<p><strong>See Also:</strong> <a href="#for_all"><code>@for_all</code></a>, <a href="#run_for_all"><code>@run_for_all</code></a>, <a href="#3-use-settings-for-reproducibility">Best Practices</a></p>
+<h2 id="matrix">@matrix<a class="headerlink" href="#matrix" title="Permanent link">&para;</a></h2>
+<p>Provides exhaustive Cartesian product testing of fixed input combinations. Matrix cases are executed once per combination, before examples and random runs, and do not count toward <code>num_runs</code>.</p>
+<h3 id="basic-usage_3">Basic Usage<a class="headerlink" href="#basic-usage_3" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">python_proptest</span><span class="w"> </span><span class="kn">import</span> <span class="n">for_all</span><span class="p">,</span> <span class="n">Gen</span><span class="p">,</span> <span class="n">matrix</span>
+
+<span class="nd">@for_all</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">str</span><span class="p">())</span>
+<span class="nd">@matrix</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">])</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_property</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+</code></pre></div>
+<p>This will test all combinations:
+- <code>(0, "a")</code>
+- <code>(0, "b")</code>
+- <code>(1, "a")</code>
+- <code>(1, "b")</code></p>
+<h3 id="multiple-matrix-decorators">Multiple Matrix Decorators<a class="headerlink" href="#multiple-matrix-decorators" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nd">@for_all</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">str</span><span class="p">())</span>
+<span class="nd">@matrix</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="nd">@matrix</span><span class="p">(</span><span class="n">s</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">])</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_property</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="matrix-with-different-types">Matrix with Different Types<a class="headerlink" href="#matrix-with-different-types" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nd">@for_all</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">()))</span>
+<span class="nd">@matrix</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">lst</span><span class="o">=</span><span class="p">[[],</span> <span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]])</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_property</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">lst</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lst</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="matrix-with-complex-types">Matrix with Complex Types<a class="headerlink" href="#matrix-with-complex-types" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nd">@for_all</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">dict</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">str</span><span class="p">(),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">()))</span>
+<span class="nd">@matrix</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">d</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span> <span class="p">{</span><span class="s2">&quot;b&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}])</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_property</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="parameters_4">Parameters<a class="headerlink" href="#parameters_4" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>**kwargs</code>: Named parameters with lists of values to test</li>
+</ul>
+<p><strong>See Also:</strong> <a href="#for_all"><code>@for_all</code></a>, <a href="#example"><code>@example</code></a>, <a href="#2-use-matrix-for-exhaustive-testing">Best Practices</a>, <a href="#matrix-parameter-coverage">Error Handling</a></p>
+<h2 id="decorator-composition">Decorator Composition<a class="headerlink" href="#decorator-composition" title="Permanent link">&para;</a></h2>
+<p>All decorators can be combined in various ways. The execution order is:</p>
+<ol>
+<li><strong>Matrix cases</strong> (exhaustive combinations)</li>
+<li><strong>Example cases</strong> (specific values)</li>
+<li><strong>Random cases</strong> (property-based generation)</li>
+</ol>
+<h3 id="complete-example">Complete Example<a class="headerlink" href="#complete-example" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">python_proptest</span><span class="w"> </span><span class="kn">import</span> <span class="n">for_all</span><span class="p">,</span> <span class="n">Gen</span><span class="p">,</span> <span class="n">example</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">matrix</span>
+
+<span class="nd">@for_all</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">str</span><span class="p">())</span>
+<span class="nd">@matrix</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">])</span>  <span class="c1"># 4 matrix cases</span>
+<span class="nd">@example</span><span class="p">(</span><span class="mi">42</span><span class="p">,</span> <span class="s2">&quot;special&quot;</span><span class="p">)</span>           <span class="c1"># 1 example case</span>
+<span class="nd">@settings</span><span class="p">(</span><span class="n">num_runs</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>   <span class="c1"># 10 random cases</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_property</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+    <span class="c1"># Total: 4 + 1 + 10 = 15 test cases</span>
+</code></pre></div>
+<h3 id="decorator-order">Decorator Order<a class="headerlink" href="#decorator-order" title="Permanent link">&para;</a></h3>
+<p>The order of decorators matters for merging behavior:</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@for_all</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">str</span><span class="p">())</span>
+<span class="nd">@matrix</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>      <span class="c1"># First matrix decorator</span>
+<span class="nd">@matrix</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>      <span class="c1"># Second matrix decorator (overwrites first)</span>
+<span class="nd">@settings</span><span class="p">(</span><span class="n">num_runs</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span> <span class="c1"># First settings decorator</span>
+<span class="nd">@settings</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>     <span class="c1"># Second settings decorator (overwrites first)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_property</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+    <span class="c1"># Matrix will use x=[3, 4], settings will use seed=42</span>
+</code></pre></div>
+<h2 id="integration-with-testing-frameworks">Integration with Testing Frameworks<a class="headerlink" href="#integration-with-testing-frameworks" title="Permanent link">&para;</a></h2>
+<p>All decorators work seamlessly with both pytest and unittest:</p>
+<h3 id="pytest-integration">Pytest Integration<a class="headerlink" href="#pytest-integration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">python_proptest</span><span class="w"> </span><span class="kn">import</span> <span class="n">for_all</span><span class="p">,</span> <span class="n">Gen</span><span class="p">,</span> <span class="n">example</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">matrix</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestMathProperties</span><span class="p">:</span>
+    <span class="nd">@for_all</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">())</span>
+    <span class="nd">@matrix</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="nd">@example</span><span class="p">(</span><span class="mi">42</span><span class="p">,</span> <span class="mi">24</span><span class="p">)</span>
+    <span class="nd">@settings</span><span class="p">(</span><span class="n">num_runs</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_addition_commutativity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">==</span> <span class="n">y</span> <span class="o">+</span> <span class="n">x</span>
+</code></pre></div>
+<h3 id="unittest-integration">Unittest Integration<a class="headerlink" href="#unittest-integration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">unittest</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">python_proptest</span><span class="w"> </span><span class="kn">import</span> <span class="n">for_all</span><span class="p">,</span> <span class="n">Gen</span><span class="p">,</span> <span class="n">example</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">matrix</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestMathProperties</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="nd">@for_all</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">())</span>
+    <span class="nd">@matrix</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="nd">@example</span><span class="p">(</span><span class="mi">42</span><span class="p">,</span> <span class="mi">24</span><span class="p">)</span>
+    <span class="nd">@settings</span><span class="p">(</span><span class="n">num_runs</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_addition_commutativity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="n">x</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="programmatic-usage">Programmatic Usage<a class="headerlink" href="#programmatic-usage" title="Permanent link">&para;</a></h2>
+<p>For programmatic testing, you can use the <code>run_matrix</code> function:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">python_proptest</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_matrix</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">test_func</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+
+<span class="c1"># Run matrix cases programmatically</span>
+<span class="n">matrix_spec</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">]}</span>
+<span class="n">run_matrix</span><span class="p">(</span><span class="n">test_func</span><span class="p">,</span> <span class="n">matrix_spec</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="parameters_5">Parameters<a class="headerlink" href="#parameters_5" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>test_func</code>: Function to test</li>
+<li><code>matrix_spec</code>: Dictionary mapping parameter names to lists of values</li>
+<li><code>self_obj</code>: Optional self object for class methods</li>
+</ul>
+<h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">&para;</a></h2>
+<h3 id="1-use-examples-for-edge-cases">1. Use Examples for Edge Cases<a class="headerlink" href="#1-use-examples-for-edge-cases" title="Permanent link">&para;</a></h3>
+<p>Combine <a href="#example"><code>@example</code></a> with <a href="#for_all"><code>@for_all</code></a> to test specific edge cases before random generation:</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@for_all</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">())</span>
+<span class="nd">@example</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>      <span class="c1"># Edge case: zero</span>
+<span class="nd">@example</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>      <span class="c1"># Edge case: one</span>
+<span class="nd">@example</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>     <span class="c1"># Edge case: negative</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_property</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="2-use-matrix-for-exhaustive-testing">2. Use Matrix for Exhaustive Testing<a class="headerlink" href="#2-use-matrix-for-exhaustive-testing" title="Permanent link">&para;</a></h3>
+<p>Use <a href="#matrix"><code>@matrix</code></a> to test all combinations of important values:</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@for_all</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">())</span>
+<span class="nd">@matrix</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>  <span class="c1"># Test all combinations of edge cases</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_property</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="3-use-settings-for-reproducibility">3. Use Settings for Reproducibility<a class="headerlink" href="#3-use-settings-for-reproducibility" title="Permanent link">&para;</a></h3>
+<p>Use <a href="#settings"><code>@settings</code></a> to ensure tests are reproducible:</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@for_all</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">str</span><span class="p">())</span>
+<span class="nd">@settings</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>  <span class="c1"># Reproducible tests</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_property</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="4-combine-decorators-strategically">4. Combine Decorators Strategically<a class="headerlink" href="#4-combine-decorators-strategically" title="Permanent link">&para;</a></h3>
+<p>Combine <a href="#for_all"><code>@for_all</code></a>, <a href="#matrix"><code>@matrix</code></a>, <a href="#example"><code>@example</code></a>, and <a href="#settings"><code>@settings</code></a> for comprehensive testing. See also <a href="#decorator-composition">Decorator Composition</a>.</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@for_all</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">str</span><span class="p">())</span>
+<span class="nd">@matrix</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">])</span>  <span class="c1"># Exhaustive edge cases</span>
+<span class="nd">@example</span><span class="p">(</span><span class="mi">42</span><span class="p">,</span> <span class="s2">&quot;special&quot;</span><span class="p">)</span>          <span class="c1"># Known good value</span>
+<span class="nd">@settings</span><span class="p">(</span><span class="n">num_runs</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span> <span class="c1"># Reproducible random testing</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_property</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+</code></pre></div>
+<p><strong>See Also:</strong> <a href="#decorator-composition">Decorator Composition</a>, <a href="#decorator-order">Decorator Order</a></p>
+<h2 id="error-handling">Error Handling<a class="headerlink" href="#error-handling" title="Permanent link">&para;</a></h2>
+<h3 id="matrix-parameter-coverage">Matrix Parameter Coverage<a class="headerlink" href="#matrix-parameter-coverage" title="Permanent link">&para;</a></h3>
+<p>Matrix decorators require all function parameters to be covered:</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@for_all</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">str</span><span class="p">())</span>
+<span class="nd">@matrix</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>  <span class="c1"># Missing &#39;s&#39; parameter - matrix cases will be skipped</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_property</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="example-parameter-count">Example Parameter Count<a class="headerlink" href="#example-parameter-count" title="Permanent link">&para;</a></h3>
+<p>Example decorators must provide the correct number of arguments:</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@for_all</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">str</span><span class="p">())</span>
+<span class="nd">@example</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>  <span class="c1"># Missing second argument - example will be skipped</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_property</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="settings-override">Settings Override<a class="headerlink" href="#settings-override" title="Permanent link">&para;</a></h3>
+<p>Later settings decorators override earlier ones:</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@for_all</span><span class="p">(</span><span class="n">Gen</span><span class="o">.</span><span class="n">int</span><span class="p">(),</span> <span class="n">Gen</span><span class="o">.</span><span class="n">str</span><span class="p">())</span>
+<span class="nd">@settings</span><span class="p">(</span><span class="n">num_runs</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="nd">@settings</span><span class="p">(</span><span class="n">num_runs</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>  <span class="c1"># Only seed=2 will be used</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">test_property</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="related-documentation">Related Documentation<a class="headerlink" href="#related-documentation" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../generators/">Generators</a> - Available generators for creating test data</li>
+<li><a href="../combinators/">Combinators</a> - Combining and transforming generators</li>
+<li><a href="../properties/">Properties</a> - Alternative approaches to property testing</li>
+<li><a href="../pytest-integration/">Pytest Integration</a> - Using decorators with pytest</li>
+<li><a href="../unittest-integration/">Unittest Integration</a> - Using decorators with unittest</li>
+</ul>
+
+
+
+
+
+
+
+  
+    
+  
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="January 5, 2026 13:00:43 UTC">January 5, 2026</span>
+  </span>
+
+    
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tracking", "navigation.tabs.sticky", "navigation.indexes", "navigation.path", "toc.follow", "navigation.top", "search.highlight", "search.suggest", "navigation.expand"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
