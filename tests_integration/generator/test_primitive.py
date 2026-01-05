@@ -289,7 +289,9 @@ class TestPrimitive(unittest.TestCase):
             exhaustive_traversal(shrinkable, 3, assert_list_size_and_unique)
 
         # Ensure we tested at least some unique roots
-        assert unique_roots_tested > 0, "Failed to generate any roots with unique values for testing"
+        assert (
+            unique_roots_tested > 0
+        ), "Failed to generate any roots with unique values for testing"
 
     def test_dict_generator_within_size_range(self):
         """Test dict generator generates dicts within size range."""

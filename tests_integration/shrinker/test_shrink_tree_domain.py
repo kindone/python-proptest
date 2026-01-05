@@ -19,7 +19,9 @@ import unittest
 from python_proptest import Gen
 
 
-def check_shrink_tree_domain(shrinkable, predicate, domain_name="domain", max_depth=100):
+def check_shrink_tree_domain(
+    shrinkable, predicate, domain_name="domain", max_depth=100
+):
     """
     Verify all values in a shrink tree satisfy a predicate.
 
@@ -34,6 +36,7 @@ def check_shrink_tree_domain(shrinkable, predicate, domain_name="domain", max_de
     Raises:
         AssertionError: If any value in the tree violates the predicate
     """
+
     def check_recursive(sh, depth=0):
         if depth > max_depth:
             return []
@@ -101,7 +104,8 @@ class TestFloatShrinkTreeDomain(unittest.TestCase):
             shrinkable = gen.generate(rng)
             # Root can be +inf or finite
             self.assertTrue(
-                math.isinf(shrinkable.value) and shrinkable.value > 0
+                math.isinf(shrinkable.value)
+                and shrinkable.value > 0
                 or math.isfinite(shrinkable.value),
                 f"Root {shrinkable.value} should be +inf or finite",
             )
@@ -121,7 +125,8 @@ class TestFloatShrinkTreeDomain(unittest.TestCase):
             shrinkable = gen.generate(rng)
             # Root can be -inf or finite
             self.assertTrue(
-                math.isinf(shrinkable.value) and shrinkable.value < 0
+                math.isinf(shrinkable.value)
+                and shrinkable.value < 0
                 or math.isfinite(shrinkable.value),
                 f"Root {shrinkable.value} should be -inf or finite",
             )
@@ -172,12 +177,8 @@ class TestIntShrinkTreeDomain(unittest.TestCase):
         for _ in range(10):
             shrinkable = gen.generate(rng)
             # Root must respect constraints
-            self.assertGreaterEqual(
-                shrinkable.value, 5, f"Root {shrinkable.value} < 5"
-            )
-            self.assertLessEqual(
-                shrinkable.value, 15, f"Root {shrinkable.value} > 15"
-            )
+            self.assertGreaterEqual(shrinkable.value, 5, f"Root {shrinkable.value} < 5")
+            self.assertLessEqual(shrinkable.value, 15, f"Root {shrinkable.value} > 15")
             # All shrinks must respect constraints
             check_shrink_tree_domain(
                 shrinkable,
@@ -278,8 +279,8 @@ class TestListShrinkTreeDomain(unittest.TestCase):
         # Create a shrinkable with unique values: [4, 1, 2, 3] with minSize=2
         # This tests whether the shrinking algorithm itself creates duplicates
         # (not due to duplicates already in the root)
-        from python_proptest.core.shrinker.list import shrink_membership_wise
         from python_proptest.core.shrinker import Shrinkable
+        from python_proptest.core.shrinker.list import shrink_membership_wise
 
         # Create base shrinkable with unique values
         base_list = [

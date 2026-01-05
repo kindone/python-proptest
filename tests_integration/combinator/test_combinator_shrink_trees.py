@@ -168,7 +168,11 @@ class TestCombinatorShrinkTrees40213(unittest.TestCase):
                 if filtered_child is not None:
                     filtered_children.append(filtered_child)
             return Shrinkable(sh.value).with_shrinks(
-                lambda: Stream.many(filtered_children) if filtered_children else Stream.empty()
+                lambda: (
+                    Stream.many(filtered_children)
+                    if filtered_children
+                    else Stream.empty()
+                )
             )
 
         filtered_shrinkable = apply_filter(base_shrinkable)
@@ -345,14 +349,10 @@ class TestCombinatorShrinkTreesFlatMap(unittest.TestCase):
         # Verify list constraints
         for lst_tuple in all_lists:
             lst = list(lst_tuple)
-            self.assertGreaterEqual(
-                len(lst), 0, "List should have non-negative length"
-            )
+            self.assertGreaterEqual(len(lst), 0, "List should have non-negative length")
             # All elements should be non-negative
             for elem in lst:
-                self.assertGreaterEqual(
-                    elem, 0, f"Element {elem} should be >= 0"
-                )
+                self.assertGreaterEqual(elem, 0, f"Element {elem} should be >= 0")
 
 
 if __name__ == "__main__":

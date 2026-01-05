@@ -4,12 +4,12 @@ Shrinker for list-like containers (lists, sets, dicts).
 Matches cppproptest's listlike, set, and map shrinker implementations.
 """
 
-from typing import Dict, List, Set, Tuple, TypeVar
+from typing import Dict, List, Optional, Set, Tuple, TypeVar, cast
 
 from python_proptest.core.stream import Stream
 
 from . import Shrinkable
-from .integral import binary_search_shrinkable, shrink_integral
+from .integral import binary_search_shrinkable
 
 T = TypeVar("T")
 U = TypeVar("U")
@@ -98,8 +98,9 @@ def shrink_array_length(
 ) -> Shrinkable[List[T]]:
     """
     Shrinks an array by reducing its length from the rear.
-    It attempts to produce arrays with lengths ranging from the original size down to `minSize`.
-    Uses binary search internally for efficiency, but ensures we eventually reach `minSize`.
+    It attempts to produce arrays with lengths ranging from the original size
+    down to `minSize`. Uses binary search internally for efficiency, but
+    ensures we eventually reach `minSize`.
 
     Args:
         shrinkable_elems: The array of Shrinkable elements
@@ -160,7 +161,8 @@ def _shrink_front_and_then_mid(
     Shrinks an array using the shrinkFrontAndThenMid strategy from cppproptest.
 
     This strategy:
-    1. Shrinks the front size (number of elements to keep from front) using binary search
+    1. Shrinks the front size (number of elements to keep from front) using
+       binary search
     2. Keeps rear_size elements at the end intact
     3. Recursively shrinks by incrementing rear_size
 
@@ -184,22 +186,26 @@ def _shrink_front_and_then_mid(
 
     # Shrink the front size using binary search (shrinkIntegral for size_t)
     # Range is [min_front_size, max_front_size] (inclusive)
-    # We shrink (max_front_size - min_front_size) to get values in [0, max_front_size - min_front_size]
+    # We shrink (max_front_size - min_front_size) to get values in
+    # [0, max_front_size - min_front_size]
     # Then map to [min_front_size, max_front_size]
     range_size = max_front_size - min_front_size
     if range_size < 0:
         return Shrinkable(shrinkable_elems)
 
-    # Use binary_search_shrinkable to shrink the range size, then map to actual front sizes
+    # Use binary_search_shrinkable to shrink the range size, then map to
+    # actual front sizes
     # This matches cppproptest's shrinkIntegral<size_t>(maxFrontSize - minFrontSize)
     # which shrinks from the value down to 0 without min/max constraints
     range_shrinkable = binary_search_shrinkable(range_size)
 
     # Map the shrunk range size back to front size
-    # binary_search_shrinkable produces values in [0, range_size], so after mapping
-    # we get values in [min_front_size, min_front_size + range_size] = [min_front_size, max_front_size]
-    def map_to_front_size(range_val: int) -> int:
-        # binary_search_shrinkable can produce negative values, but we only want [0, range_size]
+    # binary_search_shrinkable produces values in [0, range_size], so after
+    # mapping we get values in [min_front_size, min_front_size + range_size] =
+    # [min_front_size, max_front_size]
+    def map_to_front_size(range_val: int) -> Optional[int]:
+        # binary_search_shrinkable can produce negative values, but we only
+        # want [0, range_size]
         if range_val < 0:
             return None  # Filter out negative values
         front_size = range_val + min_front_size
@@ -211,8 +217,12 @@ def _shrink_front_and_then_mid(
     front_size_shrinkable = range_shrinkable.map(map_to_front_size).filter(
         lambda fs: fs is not None
     )
+    # After filtering, we know all values are int (not None)
+    # Type cast to help mypy understand the filter narrowed the type
+    front_size_shrinkable_int = cast(Shrinkable[int], front_size_shrinkable)
 
-    # For each front size, create a list with front_size elements from front + rear elements
+    # For each front size, create a list with front_size elements from front +
+    # rear elements
     def create_list_with_front_size(front_size: int) -> List[Shrinkable[T]]:
         # Take front_size elements from the front
         front_part = shrinkable_cont[:front_size]
@@ -229,7 +239,7 @@ def _shrink_front_and_then_mid(
         new_list = create_list_with_front_size(front_size)
         return Shrinkable(new_list)
 
-    result_shrinkable = front_size_shrinkable.flat_map(
+    result_shrinkable = front_size_shrinkable_int.flat_map(
         create_shrinkable_with_front_size
     )
 
@@ -247,40 +257,7 @@ def _shrink_front_and_then_mid(
         recursive_result = _shrink_front_and_then_mid(
             parent.value, min_size, rear_size + 1
         )
-        # Structural fix to prevent duplicates:
-        # When rear_size > 0, we're fixing elements to the rear. The recursive
-        # shrinks should have the fixed rear part (last rear_size+1 elements from parent).
-        # If a recursive shrink has the same length and same rear part as what
-        # would be created with rear_size=0, it's a duplicate.
-        parent_value_list = [elem.value for elem in parent.value]
-        recursive_shrinks_list = recursive_result.shrinks().to_list()
-        
-        # The fixed rear part for this recursive level (last rear_size+1 elements)
-        fixed_rear = parent_value_list[-(rear_size + 1):] if len(parent_value_list) >= (rear_size + 1) else []
-        
-        filtered_shrinks = []
-        for shrink in recursive_shrinks_list:
-            shrink_value_list = [elem.value for elem in shrink.value]
-            # Skip if identical to parent
-            if shrink_value_list == parent_value_list:
-                continue
-            
-            # When rear_size > 0, ensure the recursive shrink actually uses the fixed rear
-            # The shrink should end with the fixed rear part (last rear_size+1 elements)
-            if rear_size > 0 and len(shrink_value_list) >= len(fixed_rear):
-                shrink_rear = shrink_value_list[-len(fixed_rear):]
-                if shrink_rear != fixed_rear:
-                    # This shrink doesn't properly use the fixed rear, skip it
-                    continue
-            
-            # Additional check: if this shrink has the same length as what would be
-            # created with rear_size=0, and the rear part matches, it might be a duplicate.
-            # But we can't easily check this without comparing against all previous lists.
-            # Instead, we rely on the fact that if rear_size > 0, the shrink should
-            # have the fixed rear part, which should make it different.
-            filtered_shrinks.append(shrink)
-        
-        return Stream.many(filtered_shrinks)
+        return recursive_result.shrinks()
 
     # Concatenate recursive shrinks to the result
     # This adds recursive shrinks to each shrinkable in the result
@@ -339,7 +316,8 @@ def shrinkable_array(
         )
 
     # Chain element-wise shrinking if enabled
-    # Matches cppproptest: element-wise shrinking applies recursively to membership shrinks
+    # Matches cppproptest: element-wise shrinking applies recursively to
+    # membership shrinks
     if element_wise:
         current_shrinkable = current_shrinkable.and_then(
             lambda parent: shrink_element_wise(parent, 0, 0)
@@ -386,7 +364,8 @@ def shrink_set(
         A Shrinkable containing the set and its shrinks.
         Note: Element-wise shrinking is disabled for sets to avoid duplicates.
     """
-    # Use shrinkable_array with membership_wise only (no element_wise to avoid duplicates)
+    # Use shrinkable_array with membership_wise only (no element_wise to avoid
+    # duplicates)
     array_shrinkable = shrinkable_array(
         shrinkable_elems, min_size, membership_wise=True, element_wise=False
     )
@@ -404,8 +383,10 @@ def shrink_dict(
 
     Matches cppproptest's shrinkMap implementation:
     - Creates pairs from (key, value) shrinkables
-    - Uses shrinkable_array with both membership-wise and element-wise shrinking
-    - Element-wise shrinking uses pair shrinking, allowing both keys and values to shrink
+    - Uses shrinkable_array with both membership-wise and element-wise
+      shrinking
+    - Element-wise shrinking uses pair shrinking, allowing both keys and
+      values to shrink
 
     Args:
         key_shrinkables: List of Shrinkable keys
@@ -414,7 +395,8 @@ def shrink_dict(
 
     Returns:
         A Shrinkable containing the dict and its shrinks.
-        Shrinks both membership-wise (removing pairs) and element-wise (shrinking pairs).
+        Shrinks both membership-wise (removing pairs) and element-wise
+        (shrinking pairs).
     """
     from .pair import shrink_pair
 
