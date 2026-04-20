@@ -55,7 +55,7 @@ class TestChainPublicAPI(unittest.TestCase):
         )
 
         for _ in range(20):
-            (base, (mid, end)) = gen.generate(random.Random()).value
+            base, (mid, end) = gen.generate(random.Random()).value
             self.assertGreaterEqual(mid, base)
             self.assertLessEqual(mid, base + 5)
             self.assertGreaterEqual(end, mid)
