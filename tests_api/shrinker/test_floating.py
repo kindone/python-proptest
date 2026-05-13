@@ -3,6 +3,7 @@
 import unittest
 
 from python_proptest import Gen, PropertyTestError, run_for_all
+from python_proptest.core.shrinker.floating import shrink_float
 
 
 class TestFloatingShrinking(unittest.TestCase):
@@ -27,6 +28,16 @@ class TestFloatingShrinking(unittest.TestCase):
         self.assertIsInstance(minimal_input, float)
         self.assertGreaterEqual(minimal_input, 2.5)
         self.assertLess(minimal_input, 10.0)  # Should be within generator bounds
+
+    def test_negative_infinity_shrinks_through_negative_finite_values(self):
+        """-Infinity should shrink toward negative finite values, not positive ones."""
+
+        shrinkable = shrink_float(float("-inf"))
+        shrinks = shrinkable.shrinks().to_list()
+
+        self.assertGreater(len(shrinks), 0)
+        self.assertEqual(shrinks[0].value, 0.0)
+        self.assertTrue(any(candidate.value < 0.0 for candidate in shrinks))
 
 
 if __name__ == "__main__":

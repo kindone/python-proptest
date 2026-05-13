@@ -61,7 +61,7 @@ def _float_shrinks_impl(value: float) -> Stream[Shrinkable[float]]:
                 max_val = sys.float_info.max
                 fraction, exp = _decompose_float(max_val)
             else:
-                min_val = sys.float_info.min
+                min_val = -sys.float_info.max
                 fraction, exp = _decompose_float(min_val)
         else:
             fraction, exp = _decompose_float(value)

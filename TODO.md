@@ -43,13 +43,6 @@ Tracks open tasks and feature gaps relative to the C++ reference implementation 
 - **Python API (proposed)**: `run_for_all(..., on_reproduction_stats=fn)`
 - **Use case**: Observability into shrink behaviour for flaky tests; logging, debugging, CI dashboards.
 
-### [ ] Floating point generator — nan/inf probability parameters
-- **Status**: Python `Gen.float()` already generates finite-only values by default. ✅
-- **Gap**: No equivalent of `nan_prob`, `posinf_prob`, `neginf_prob` parameters yet.
-- **C++ API**: `Arbi<float>(nanProb=0.0, posInfProb=0.0, negInfProb=0.0)`
-- **Python API (proposed)**: `Gen.float(nan_prob=0.0, posinf_prob=0.0, neginf_prob=0.0)`
-- **Reference**: See `propertybasedtesting/TODO.md` for full spec and validation checklist.
-
 ---
 
 ## Completed
@@ -59,3 +52,5 @@ Tracks open tasks and feature gaps relative to the C++ reference implementation 
 - **[x] Tuple shrinking** — recursive, matches `shrinkTupleUsingVector` in C++
 - **[x] Dict shrinking** — `shrink_dict` via pair shrinking in `shrinker/list.py`
 - **[x] Finite float generation** — rejection loop with bit interpretation, covers full finite float space including denormals
+- **[x] Floating point nan/inf probability config** — `Gen.float(nan_prob, posinf_prob, neginf_prob)`; validated; sum exactly 1.0 supported
+- **[x] Floating point shrinker bug fix** — `-inf` shrinks through negative finite values instead of positive `sys.float_info.min`

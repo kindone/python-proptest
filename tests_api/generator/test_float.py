@@ -1,6 +1,8 @@
 """Tests for ``python_proptest.core.generator.floating``."""
 
 import math
+import random
+import sys
 import unittest
 
 from python_proptest import Gen, for_all
@@ -23,6 +25,21 @@ class TestFloatGenerator(unittest.TestCase):
 
         self.assertIsInstance(value, float)
         self.assertTrue(math.isfinite(value))
+
+    def test_default_range_samples_across_ieee_finite_space(self):
+        """Default generation should cover the finite IEEE-754 double space."""
+
+        gen = Gen.float()
+        rng = random.Random(12345)
+        values = [gen.generate(rng).value for _ in range(50000)]
+
+        self.assertTrue(all(math.isfinite(value) for value in values))
+        self.assertTrue(any(value < 0.0 for value in values))
+        self.assertTrue(any(value > 0.0 for value in values))
+        self.assertTrue(any(abs(value) > sys.float_info.max / 2 for value in values))
+        self.assertTrue(
+            any(0.0 < abs(value) < sys.float_info.min for value in values)
+        )
 
     @for_all(Gen.float(nan_prob=1.0), num_runs=20)
     def test_float_can_generate_nan(self, value: float):
@@ -148,8 +165,6 @@ class TestFloatGenerator(unittest.TestCase):
         # Generate many values - all should be special (no finite)
         special_count = 0
         finite_count = 0
-
-        import random
 
         rng = random.Random(42)
         for _ in range(100):

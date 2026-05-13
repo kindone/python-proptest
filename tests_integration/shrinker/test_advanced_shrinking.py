@@ -408,3 +408,5 @@ class TestShrinkableFloat(unittest.TestCase):
         assert shr.value == float("-inf")
         shrinks_list = shr.shrinks().to_list()
         assert len(shrinks_list) > 0
+        assert shrinks_list[0].value == 0.0
+        assert any(candidate.value < 0.0 for candidate in shrinks_list)

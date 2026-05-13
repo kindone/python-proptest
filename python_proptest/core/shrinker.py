@@ -195,7 +195,7 @@ def shrinkable_float(value: float) -> Shrinkable[float]:
             if val == float("inf"):
                 shrinks.append(Shrinkable(sys.float_info.max))
             elif val == float("-inf"):
-                shrinks.append(Shrinkable(sys.float_info.min))
+                shrinks.append(Shrinkable(-sys.float_info.max))
             else:
                 # For regular floats, add some basic shrinks
                 if abs(val) > 1.0:
