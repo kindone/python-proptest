@@ -28,13 +28,19 @@ jobs:
 
     - name: Run bandit security linter
       run: |
-        bandit -r proptest/ -s B311,B110 -f json -o bandit-report.json || true
-        bandit -r proptest/ -s B311,B110
+        bandit -r python_proptest/ -s B311,B110 -f json -o bandit-report.json || true
+        bandit -r python_proptest/ -s B311,B110
 
-    - name: Run safety check
+    - name: Run safety scan
+      env:
+        SAFETY_API_KEY: ${{ secrets.SAFETY_API_KEY }}
       run: |
-        safety check --json --output safety-report.json || true
-        safety check
+        if [ -z "${SAFETY_API_KEY:-}" ]; then
+          echo "SAFETY_API_KEY is not configured; skipping Safety scan."
+          printf '{"skipped": true, "reason": "SAFETY_API_KEY is not configured"}\n' > safety-report.json
+          exit 0
+        fi
+        safety --key "$SAFETY_API_KEY" --stage cicd scan --save-as json safety-report.json
 
     - name: Upload security reports
       uses: actions/upload-artifact@v4
