@@ -6,43 +6,6 @@ Tracks open tasks and feature gaps relative to the C++ reference implementation 
 
 ## Open
 
-### [ ] onStartup / onCleanup lifecycle hooks
-- **What**: Callbacks invoked before/after each property run (including during shrinking).
-- **C++ API**: `ForAllConfig{ .onStartup = [](){}, .onCleanup = [](){} }`
-- **Python API (proposed)**: `run_for_all(..., on_startup=fn, on_cleanup=fn)`
-- **Use case**: Set up / tear down external state (DB connections, temp files, mock resets) around each trial without leaking state between runs.
-- **Note**: `on_cleanup` should only fire on success (matching C++ semantics).
-
-### [ ] maxDurationMs — time-box the test loop
-- **What**: Stop running new trials after a wall-clock duration, even if `num_runs` hasn't been reached.
-- **C++ API**: `ForAllConfig{ .maxDurationMs = 5000 }`
-- **Python API (proposed)**: `run_for_all(..., max_duration_ms=5000)`
-- **Use case**: CI time budgets; slow generators or properties where you'd rather run fewer trials than time out the build.
-
-### [ ] shrinkMaxRetries — retry-based shrinking for flaky properties
-- **What**: Retry each shrink candidate up to N times before accepting or rejecting it. Improves minimal counterexample quality for non-deterministic (flaky) properties.
-- **C++ API**: `ForAllConfig{ .shrinkMaxRetries = 5 }`
-- **Python API (proposed)**: `run_for_all(..., shrink_max_retries=5)`
-- **Use case**: Properties with timing, concurrency, or probabilistic conditions that don't fail 100% of the time.
-
-### [ ] shrinkTimeoutMs / shrinkRetryTimeoutMs — shrink phase time budgets
-- **What**: Cap total shrink phase time (`shrink_timeout_ms`) and per-candidate retry time (`shrink_retry_timeout_ms`).
-- **C++ API**: `ForAllConfig{ .shrinkTimeoutMs = 2000, .shrinkRetryTimeoutMs = 500 }`
-- **Python API (proposed)**: `run_for_all(..., shrink_timeout_ms=2000, shrink_retry_timeout_ms=500)`
-- **Use case**: Prevents runaway shrinking on slow properties; pairs with `shrink_max_retries`.
-
-### [ ] outputStream / errorStream — redirect log output
-- **What**: Direct informational and failure output to custom streams instead of stdout/stderr.
-- **C++ API**: `ForAllConfig{ .outputStream = &my_stream, .errorStream = &my_err_stream }`
-- **Python API (proposed)**: `run_for_all(..., output_stream=io_obj, error_stream=io_obj)`
-- **Use case**: Capture output in tests; suppress terminal noise; route to loggers.
-
-### [ ] onReproductionStats callback
-- **What**: Callback invoked after each shrink-retry assessment with reproduction rate data (`num_reproduced`, `total_runs`, `elapsed_sec`, `args_as_string`).
-- **C++ API**: `property(...).setOnReproductionStats(fn)`
-- **Python API (proposed)**: `run_for_all(..., on_reproduction_stats=fn)`
-- **Use case**: Observability into shrink behaviour for flaky tests; logging, debugging, CI dashboards.
-
 ---
 
 ## Completed
@@ -54,3 +17,10 @@ Tracks open tasks and feature gaps relative to the C++ reference implementation 
 - **[x] Finite float generation** — rejection loop with bit interpretation, covers full finite float space including denormals
 - **[x] Floating point nan/inf probability config** — `Gen.float(nan_prob, posinf_prob, neginf_prob)`; validated; sum exactly 1.0 supported
 - **[x] Floating point shrinker bug fix** — `-inf` shrinks through negative finite values instead of positive `sys.float_info.min`
+- **[x] Fluent property configuration** — `Property(...).set_num_runs(...).set_seed(...).set_max_duration_ms(...).set_on_startup(...).set_on_cleanup(...)`
+- **[x] onStartup / onCleanup lifecycle hooks** — `run_for_all(..., on_startup=fn, on_cleanup=fn)` and `@settings(...)`; cleanup fires only after successful property evaluations
+- **[x] maxDurationMs time-boxing** — `run_for_all(..., max_duration_ms=5000)` and `@settings(max_duration_ms=...)` stop starting new random trials after the budget expires
+- **[x] shrinkMaxRetries** — `shrink_max_retries` retries shrink candidates for flaky properties
+- **[x] shrinkTimeoutMs / shrinkRetryTimeoutMs** — `shrink_timeout_ms` and `shrink_retry_timeout_ms` cap total shrink time and per-candidate retry time
+- **[x] outputStream / errorStream** — `output_stream` and `error_stream` accept `.write(str)` streams for runner output
+- **[x] onReproductionStats** — `on_reproduction_stats` receives shrink retry stats with reproduction counts and elapsed time

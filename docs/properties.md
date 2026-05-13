@@ -23,6 +23,20 @@ Properties define the expected behavior of your code over a range of inputs. For
 
 *   **`property.set_num_runs(n: int)`**: Configures the number of random test cases to execute when `for_all` is called on a `Property` instance. Returns the `Property` instance for chaining.
 
+*   **`property.set_seed(seed: str | int | None)`**: Sets the random seed and recreates the runner's RNG for reproducible generation. Returns the `Property` instance for chaining.
+
+*   **`property.set_max_duration_ms(ms: int | None)`**: Stops starting new random trials after the wall-clock budget expires. Explicit examples still run before the timed random loop. Returns the `Property` instance for chaining.
+
+*   **`property.set_on_startup(callback)` / `property.set_on_cleanup(callback)`**: Adds lifecycle callbacks around each property evaluation, including shrink candidates. `on_startup` runs before the predicate. `on_cleanup` runs only after successful predicate evaluations. Both setters return the `Property` instance for chaining.
+
+*   **`property.set_shrink_max_retries(n: int)`**: Configures extra retry attempts for each shrink candidate. `0` preserves the default single attempt; `5` means the candidate can be tried up to six times.
+
+*   **`property.set_shrink_timeout_ms(ms: int | None)` / `property.set_shrink_retry_timeout_ms(ms: int | None)`**: Configure total shrink-phase and per-candidate retry time budgets.
+
+*   **`property.set_output_stream(stream)` / `property.set_error_stream(stream)`**: Redirect runner output to objects with a `write(str)` method.
+
+*   **`property.set_on_reproduction_stats(callback)`**: Receives `{"num_reproduced", "total_runs", "elapsed_sec", "args_as_string"}` after each shrink candidate retry assessment.
+
 *   **`property.example(...args: Any)`**: Runs the property's predicate *once* with the explicitly provided `args`. Useful for debugging specific edge cases.
 
     ```python
@@ -184,7 +198,7 @@ def my_property(x: int):
 
 # Using Property class
 prop = Property(my_property)
-prop.set_num_runs(500).for_all(Gen.int())
+prop.set_num_runs(500).set_seed(42).for_all(Gen.int())
 
 # Using run_for_all with num_runs parameter
 run_for_all(my_property, Gen.int(), num_runs=500)
@@ -204,6 +218,39 @@ run_for_all(my_property, Gen.int(), seed=42)
 # Using a string seed
 run_for_all(my_property, Gen.int(), seed="my_test_seed")
 ```
+
+### Time Budget
+
+```python
+from python_proptest import run_for_all, Gen
+
+def my_property(x: int):
+    return x == x
+
+# Stop starting new random trials after five seconds.
+run_for_all(my_property, Gen.int(), num_runs=1_000_000, max_duration_ms=5000)
+```
+
+### Lifecycle Hooks
+
+```python
+from python_proptest import run_for_all, Gen
+
+def reset_state():
+    ...
+
+def cleanup_state():
+    ...
+
+run_for_all(
+    lambda x: x == x,
+    Gen.int(),
+    on_startup=reset_state,
+    on_cleanup=cleanup_state,
+)
+```
+
+`on_startup` runs before each property evaluation, including during shrinking. `on_cleanup` runs only after successful evaluations.
 
 ## Error Handling
 

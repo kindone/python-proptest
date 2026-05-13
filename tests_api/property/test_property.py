@@ -1,8 +1,20 @@
 """Unit tests for ``python_proptest.core.property`` helpers and public API."""
 
 import unittest
+from io import StringIO
 
 from python_proptest import Gen, Property, PropertyTestError, run_for_all
+from python_proptest.core.generator import Generator
+from python_proptest.core.shrinker import Shrinkable
+from python_proptest.core.stream import Stream
+
+
+class FixedShrinkGenerator(Generator[int]):
+    def generate(self, rng):
+        return Shrinkable(
+            10,
+            lambda: Stream.many([Shrinkable(8), Shrinkable(6), Shrinkable(4)]),
+        )
 
 
 class TestPropertyModule(unittest.TestCase):
@@ -225,6 +237,131 @@ class TestPropertyModule(unittest.TestCase):
         prop = Property(property_func, num_runs=10, seed=42)
         result = prop.for_all(Gen.int(min_value=0, max_value=100))
         self.assertTrue(result)
+
+    def test_property_fluent_setters_configure_runner(self):
+        """Property setters return self and update the same runner instance."""
+        calls = []
+
+        def property_func(x):
+            calls.append(x)
+            return True
+
+        startup_calls = []
+        cleanup_calls = []
+        prop = Property(property_func)
+
+        returned = (
+            prop.set_num_runs(3)
+            .set_seed(42)
+            .set_max_duration_ms(None)
+            .set_on_startup(lambda: startup_calls.append("start"))
+            .set_on_cleanup(lambda: cleanup_calls.append("cleanup"))
+        )
+
+        self.assertIs(returned, prop)
+        self.assertTrue(prop.for_all(Gen.int(min_value=0, max_value=100)))
+        self.assertEqual(len(calls), 3)
+        self.assertEqual(len(startup_calls), 3)
+        self.assertEqual(len(cleanup_calls), 3)
+
+    def test_property_max_duration_zero_skips_random_runs(self):
+        """A zero-duration budget prevents starting random trials."""
+        calls = []
+
+        def property_func(x):
+            calls.append(x)
+            return True
+
+        result = (
+            Property(property_func)
+            .set_num_runs(100)
+            .set_max_duration_ms(0)
+            .for_all(Gen.int(min_value=0, max_value=100))
+        )
+
+        self.assertTrue(result)
+        self.assertEqual(calls, [])
+
+    def test_run_for_all_lifecycle_hooks_cleanup_only_on_success(self):
+        """Startup wraps each evaluation; cleanup runs only for passing inputs."""
+        startup_calls = []
+        cleanup_calls = []
+
+        def property_func(x):
+            return x < 0
+
+        with self.assertRaises(PropertyTestError):
+            run_for_all(
+                property_func,
+                Gen.int(min_value=1, max_value=10),
+                num_runs=1,
+                seed=42,
+                on_startup=lambda: startup_calls.append("start"),
+                on_cleanup=lambda: cleanup_calls.append("cleanup"),
+            )
+
+        self.assertGreaterEqual(len(startup_calls), 1)
+        self.assertEqual(cleanup_calls, [])
+
+    def test_run_for_all_max_duration_zero_skips_random_runs(self):
+        """run_for_all exposes the same max_duration_ms option."""
+        calls = []
+
+        def property_func(x):
+            calls.append(x)
+            return True
+
+        result = run_for_all(
+            property_func,
+            Gen.int(min_value=0, max_value=100),
+            num_runs=100,
+            max_duration_ms=0,
+        )
+
+        self.assertTrue(result)
+        self.assertEqual(calls, [])
+
+    def test_shrink_retry_options_collect_reproduction_stats(self):
+        """Shrink retries expose reproduction counts for each assessed candidate."""
+        stats = []
+        output = StringIO()
+
+        def property_func(x):
+            return x < 5
+
+        prop = (
+            Property(property_func)
+            .set_num_runs(1)
+            .set_seed(42)
+            .set_shrink_max_retries(2)
+            .set_shrink_timeout_ms(1000)
+            .set_shrink_retry_timeout_ms(1000)
+            .set_output_stream(output)
+            .set_on_reproduction_stats(stats.append)
+        )
+
+        with self.assertRaises(PropertyTestError):
+            prop.for_all(FixedShrinkGenerator())
+
+        self.assertTrue(stats)
+        self.assertTrue(all(item["total_runs"] == 3 for item in stats))
+        self.assertTrue(any(item["num_reproduced"] > 0 for item in stats))
+        self.assertIn("shrinking found simpler failing arg", output.getvalue())
+
+    def test_shrink_option_validation(self):
+        """Shrink parity options validate their inputs."""
+        prop = Property(lambda x: True)
+
+        with self.assertRaises(ValueError):
+            prop.set_shrink_max_retries(-1)
+        with self.assertRaises(ValueError):
+            prop.set_shrink_timeout_ms(-1)
+        with self.assertRaises(ValueError):
+            prop.set_shrink_retry_timeout_ms(-1)
+        with self.assertRaises(TypeError):
+            prop.set_output_stream(object())
+        with self.assertRaises(TypeError):
+            prop.set_error_stream(object())
 
     def test_property_failure_raises_property_test_error(self):
         """Failing predicate raises PropertyTestError with counterexample."""

@@ -10,11 +10,30 @@ import itertools
 from typing import Any, Callable, Dict, Iterable, List, Optional, Union
 
 from .generator import Generator
-from .property import Property, PropertyTestError
+from .property import (
+    Property,
+    PropertyTestError,
+    ReproductionStats,
+    WriteStream,
+    _config_option_kwargs,
+    _property_option_kwargs,
+    _settings_option_kwargs,
+)
 
 
 def for_all(
-    *generators: Generator[Any], num_runs: int = 100, seed: Union[str, int, None] = None
+    *generators: Generator[Any],
+    num_runs: int = 100,
+    seed: Union[str, int, None] = None,
+    max_duration_ms: Optional[int] = None,
+    on_startup: Optional[Callable[[], None]] = None,
+    on_cleanup: Optional[Callable[[], None]] = None,
+    shrink_max_retries: int = 0,
+    shrink_timeout_ms: Optional[int] = None,
+    shrink_retry_timeout_ms: Optional[int] = None,
+    output_stream: Optional[WriteStream] = None,
+    error_stream: Optional[WriteStream] = None,
+    on_reproduction_stats: Optional[Callable[[ReproductionStats], None]] = None,
 ):
     """
     Decorator for property-based testing with generators.
@@ -49,10 +68,36 @@ def for_all(
         *generators: Variable number of generators for function arguments
         num_runs: Number of test runs (default: 100)
         seed: Random seed for reproducibility (default: None)
+        max_duration_ms: Optional time budget for random runs
+        on_startup: Optional callback before each property evaluation
+        on_cleanup: Optional callback after each successful property evaluation
+        shrink_max_retries: Extra retries for shrink candidates
+        shrink_timeout_ms: Optional total shrink phase budget
+        shrink_retry_timeout_ms: Optional per-candidate retry budget
+        output_stream: Optional stream for informational shrink output
+        error_stream: Optional stream for error output
+        on_reproduction_stats: Optional shrink retry stats callback
+        shrink_max_retries: Extra retries for shrink candidates
+        shrink_timeout_ms: Optional total shrink phase budget
+        shrink_retry_timeout_ms: Optional per-candidate retry budget
+        output_stream: Optional stream for informational shrink output
+        error_stream: Optional stream for error output
+        on_reproduction_stats: Optional shrink retry stats callback
 
     Returns:
         Decorated function that runs property-based tests
     """
+    property_options = _property_option_kwargs(
+        max_duration_ms=max_duration_ms,
+        on_startup=on_startup,
+        on_cleanup=on_cleanup,
+        shrink_max_retries=shrink_max_retries,
+        shrink_timeout_ms=shrink_timeout_ms,
+        shrink_retry_timeout_ms=shrink_retry_timeout_ms,
+        output_stream=output_stream,
+        error_stream=error_stream,
+        on_reproduction_stats=on_reproduction_stats,
+    )
 
     def decorator(func: Callable) -> Callable:
         # Preserve any existing _proptest_examples / _proptest_settings /
@@ -163,6 +208,9 @@ def for_all(
                     # Apply settings overrides if provided
                     override_num_runs = existing_settings.get("num_runs", num_runs)
                     override_seed = existing_settings.get("seed", seed)
+                    settings_options = _settings_option_kwargs(
+                        existing_settings, property_options
+                    )
 
                     # Execute matrix cases first (do not count toward num_runs)
                     # Run each matrix spec independently
@@ -175,6 +223,7 @@ def for_all(
                         config_generators = config["generators"]
                         config_num_runs = config.get("num_runs", override_num_runs)
                         config_seed = config.get("seed", override_seed)
+                        config_options = _config_option_kwargs(config, settings_options)
 
                         property_test = Property(
                             test_property,
@@ -182,6 +231,7 @@ def for_all(
                             seed=config_seed,
                             examples=existing_examples,  # Examples shared across all configs # noqa: E501
                             original_func=func,  # Pass original function for signature
+                            **config_options,
                         )
                         property_test.for_all(*config_generators)
 
@@ -192,6 +242,7 @@ def for_all(
                         seed=override_seed,
                         examples=existing_examples,
                         original_func=func,  # Pass original function for signature
+                        **settings_options,
                     )
                     property_test.for_all(*generators)
                     return None  # Test frameworks expect test functions to return
@@ -237,6 +288,9 @@ def for_all(
                     # Apply settings overrides if provided
                     override_num_runs = existing_settings.get("num_runs", num_runs)
                     override_seed = existing_settings.get("seed", seed)
+                    settings_options = _settings_option_kwargs(
+                        existing_settings, property_options
+                    )
 
                     # Execute matrix cases first (do not count toward num_runs)
                     # Run each matrix spec independently
@@ -249,6 +303,7 @@ def for_all(
                         config_generators = config["generators"]
                         config_num_runs = config.get("num_runs", override_num_runs)
                         config_seed = config.get("seed", override_seed)
+                        config_options = _config_option_kwargs(config, settings_options)
 
                         property_test = Property(
                             assertion_property,
@@ -256,6 +311,7 @@ def for_all(
                             seed=config_seed,
                             examples=existing_examples,  # Examples shared across all configs # noqa: E501
                             original_func=func,  # Pass original function for signature
+                            **config_options,
                         )
                         property_test.for_all(*config_generators)
 
@@ -266,6 +322,7 @@ def for_all(
                         seed=override_seed,
                         examples=existing_examples,
                         original_func=func,  # Pass original function for signature
+                        **settings_options,
                     )
                     property_test.for_all(*generators)
                     return None  # Pytest expects test functions to return None
@@ -292,6 +349,15 @@ def for_all(
         wrapper._proptest_generators = generators  # type: ignore
         wrapper._proptest_num_runs = num_runs  # type: ignore
         wrapper._proptest_seed = seed  # type: ignore
+        wrapper._proptest_max_duration_ms = max_duration_ms  # type: ignore
+        wrapper._proptest_on_startup = on_startup  # type: ignore
+        wrapper._proptest_on_cleanup = on_cleanup  # type: ignore
+        wrapper._proptest_shrink_max_retries = shrink_max_retries  # type: ignore
+        wrapper._proptest_shrink_timeout_ms = shrink_timeout_ms  # type: ignore
+        wrapper._proptest_shrink_retry_timeout_ms = shrink_retry_timeout_ms  # type: ignore
+        wrapper._proptest_output_stream = output_stream  # type: ignore
+        wrapper._proptest_error_stream = error_stream  # type: ignore
+        wrapper._proptest_on_reproduction_stats = on_reproduction_stats  # type: ignore
         wrapper._proptest_is_pytest_method = is_pytest_method  # type: ignore
         wrapper._proptest_is_unittest_method = is_unittest_method  # type: ignore
         wrapper._proptest_is_test_method = is_test_method  # type: ignore
@@ -307,6 +373,7 @@ def for_all(
             "generators": generators,
             "num_runs": num_runs,
             "seed": seed,
+            **property_options,
         }
         wrapper._proptest_for_all_configs = existing_for_all_configs + [new_config]  # type: ignore # noqa: E501
 
@@ -616,13 +683,16 @@ def settings(**kwargs):
 
     Usage:
         @for_all(Gen.int())
-        @settings(num_runs=1000, seed=42)
+        @settings(num_runs=1000, seed=42, max_duration_ms=5000)
         def test_property(x: int):
             assert x * 0 == 0
 
     Args:
         num_runs: Number of test runs (overrides @for_all default)
         seed: Random seed for reproducibility (overrides @for_all default)
+        max_duration_ms: Optional time budget for random runs
+        on_startup: Optional callback before each property evaluation
+        on_cleanup: Optional callback after each successful property evaluation
 
     Raises:
         ValueError: If unsupported parameters are provided
@@ -631,7 +701,19 @@ def settings(**kwargs):
         Decorator function
     """
     # Validate parameters
-    supported_params = {"num_runs", "seed"}
+    supported_params = {
+        "num_runs",
+        "seed",
+        "max_duration_ms",
+        "on_startup",
+        "on_cleanup",
+        "shrink_max_retries",
+        "shrink_timeout_ms",
+        "shrink_retry_timeout_ms",
+        "output_stream",
+        "error_stream",
+        "on_reproduction_stats",
+    }
     unsupported = set(kwargs.keys()) - supported_params
     if unsupported:
         unsupported_str = ", ".join(sorted(unsupported))

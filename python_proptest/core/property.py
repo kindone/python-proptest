@@ -6,7 +6,9 @@ for running property-based tests.
 """
 
 import inspect
+import math
 import random
+import time
 from typing import (
     Any,
     Callable,
@@ -24,6 +26,9 @@ from .generator import Generator, Random
 from .shrinker import Shrinkable
 
 T = TypeVar("T")
+
+ReproductionStats = Dict[str, Union[int, float, str]]
+WriteStream = Any
 
 
 class PropertyTestError(Exception):
@@ -62,11 +67,33 @@ class Property:
             List[Union[Tuple[Any, ...], Tuple[Tuple[Any, ...], Dict[str, Any]]]]
         ] = None,
         original_func: Optional[Callable[..., Any]] = None,
+        max_duration_ms: Optional[int] = None,
+        on_startup: Optional[Callable[[], None]] = None,
+        on_cleanup: Optional[Callable[[], None]] = None,
+        shrink_max_retries: int = 0,
+        shrink_timeout_ms: Optional[int] = None,
+        shrink_retry_timeout_ms: Optional[int] = None,
+        output_stream: Optional[WriteStream] = None,
+        error_stream: Optional[WriteStream] = None,
+        on_reproduction_stats: Optional[Callable[[ReproductionStats], None]] = None,
     ):
         self.property_func = property_func
-        self.num_runs = num_runs
+        self.num_runs = self._validate_num_runs(num_runs)
         self.seed = seed
         self.examples = examples or []
+        self.max_duration_ms = self._validate_max_duration_ms(max_duration_ms)
+        self.on_startup = on_startup
+        self.on_cleanup = on_cleanup
+        self.shrink_max_retries = self._validate_non_negative_int(
+            shrink_max_retries, "shrink_max_retries"
+        )
+        self.shrink_timeout_ms = self._validate_max_duration_ms(shrink_timeout_ms)
+        self.shrink_retry_timeout_ms = self._validate_max_duration_ms(
+            shrink_retry_timeout_ms
+        )
+        self.output_stream = self._validate_stream(output_stream, "output_stream")
+        self.error_stream = self._validate_stream(error_stream, "error_stream")
+        self.on_reproduction_stats = on_reproduction_stats
         self._rng = self._create_rng()
         # Cache function signature for example resolution
         # Use original_func for signature if provided (for wrapped functions)
@@ -78,6 +105,124 @@ class Property:
             if p.kind in (p.POSITIONAL_OR_KEYWORD, p.POSITIONAL_ONLY, p.KEYWORD_ONLY)
             and p.name != "self"  # Exclude 'self' for methods
         ]
+
+    def set_num_runs(self, num_runs: int) -> "Property":
+        """Set the number of random test runs and return self for chaining."""
+        self.num_runs = self._validate_num_runs(num_runs)
+        return self
+
+    def set_seed(self, seed: Optional[Union[str, int]]) -> "Property":
+        """Set the random seed and return self for chaining."""
+        self.seed = seed
+        self._rng = self._create_rng()
+        return self
+
+    def set_max_duration_ms(self, max_duration_ms: Optional[int]) -> "Property":
+        """Set the random test loop time budget and return self for chaining."""
+        self.max_duration_ms = self._validate_max_duration_ms(max_duration_ms)
+        return self
+
+    def set_on_startup(self, callback: Optional[Callable[[], None]]) -> "Property":
+        """Set the callback run before each property evaluation."""
+        self.on_startup = callback
+        return self
+
+    def set_on_cleanup(self, callback: Optional[Callable[[], None]]) -> "Property":
+        """Set the callback run after each successful property evaluation."""
+        self.on_cleanup = callback
+        return self
+
+    def set_shrink_max_retries(self, shrink_max_retries: int) -> "Property":
+        """Set extra retry attempts for each shrink candidate."""
+        self.shrink_max_retries = self._validate_non_negative_int(
+            shrink_max_retries, "shrink_max_retries"
+        )
+        return self
+
+    def set_shrink_timeout_ms(self, shrink_timeout_ms: Optional[int]) -> "Property":
+        """Set the total shrink phase time budget."""
+        self.shrink_timeout_ms = self._validate_max_duration_ms(shrink_timeout_ms)
+        return self
+
+    def set_shrink_retry_timeout_ms(
+        self, shrink_retry_timeout_ms: Optional[int]
+    ) -> "Property":
+        """Set the per-candidate shrink retry time budget."""
+        self.shrink_retry_timeout_ms = self._validate_max_duration_ms(
+            shrink_retry_timeout_ms
+        )
+        return self
+
+    def set_output_stream(self, output_stream: Optional[WriteStream]) -> "Property":
+        """Set the stream used for informational shrink output."""
+        self.output_stream = self._validate_stream(output_stream, "output_stream")
+        return self
+
+    def set_error_stream(self, error_stream: Optional[WriteStream]) -> "Property":
+        """Set the stream used for error output."""
+        self.error_stream = self._validate_stream(error_stream, "error_stream")
+        return self
+
+    def set_on_reproduction_stats(
+        self, callback: Optional[Callable[[ReproductionStats], None]]
+    ) -> "Property":
+        """Set the callback invoked after shrink candidate retry assessment."""
+        self.on_reproduction_stats = callback
+        return self
+
+    @staticmethod
+    def _validate_num_runs(num_runs: int) -> int:
+        return Property._validate_non_negative_int(num_runs, "num_runs")
+
+    @staticmethod
+    def _validate_non_negative_int(value: int, name: str) -> int:
+        if not isinstance(value, int):
+            raise TypeError(f"{name} must be an integer")
+        if value < 0:
+            raise ValueError(f"{name} must be non-negative")
+        return value
+
+    @staticmethod
+    def _validate_max_duration_ms(max_duration_ms: Optional[int]) -> Optional[int]:
+        if max_duration_ms is None:
+            return None
+        if not isinstance(max_duration_ms, (int, float)):
+            raise TypeError("max_duration_ms must be a number or None")
+        if not math.isfinite(max_duration_ms):
+            raise ValueError("max_duration_ms must be finite")
+        if max_duration_ms < 0:
+            raise ValueError("max_duration_ms must be non-negative")
+        return int(max_duration_ms)
+
+    @staticmethod
+    def _validate_stream(
+        stream: Optional[WriteStream], name: str
+    ) -> Optional[WriteStream]:
+        if stream is not None and not callable(getattr(stream, "write", None)):
+            raise TypeError(f"{name} must have a write(str) method")
+        return stream
+
+    @staticmethod
+    def _has_exceeded_timeout(started_at: float, timeout_ms: Optional[int]) -> bool:
+        if timeout_ms is None:
+            return False
+        return (time.monotonic() - started_at) * 1000 >= timeout_ms
+
+    def _write_output(self, message: str) -> None:
+        if self.output_stream is not None:
+            self.output_stream.write(message)
+
+    def _run_property(self, inputs: Iterable[Any]) -> Any:
+        """Run the property with lifecycle hooks around a single evaluation."""
+        if self.on_startup is not None:
+            self.on_startup()
+
+        result = self.property_func(*inputs)
+
+        if result and self.on_cleanup is not None:
+            self.on_cleanup()
+
+        return result
 
     def _resolve_example(
         self,
@@ -189,7 +334,7 @@ class Property:
                 continue  # Skip examples with wrong number of arguments
 
             try:
-                result = self.property_func(*example_inputs)
+                result = self._run_property(example_inputs)
                 if not result:
                     # Example failed, create error
                     raise PropertyTestError(
@@ -207,7 +352,14 @@ class Property:
                 ) from e
 
         # Then run random tests
-        for run in range(self.num_runs):
+        start_time = time.monotonic()
+        run = 0
+        while run < self.num_runs:
+            if self.max_duration_ms is not None:
+                elapsed_ms = (time.monotonic() - start_time) * 1000
+                if elapsed_ms >= self.max_duration_ms:
+                    break
+
             saved_rng_state = self._rng.getstate()  # type: ignore[attr-defined]
             try:
                 # Generate test inputs
@@ -218,7 +370,7 @@ class Property:
                     inputs.append(input_val)
 
                 # Run the property
-                result = self.property_func(*inputs)
+                result = self._run_property(inputs)
 
                 if not result:
                     # Property failed, try to shrink
@@ -243,6 +395,8 @@ class Property:
                     failing_inputs=inputs,
                     minimal_inputs=minimal_inputs,
                 ) from e
+            finally:
+                run += 1
 
         return True
 
@@ -256,12 +410,40 @@ class Property:
         if len(inputs) != len(generators):
             return inputs
 
+        shrink_started_at = time.monotonic()
+
         # Create a predicate that tests if the property passes with given inputs
         def property_predicate(test_inputs: List[Any]) -> bool:
-            try:
-                return self.property_func(*test_inputs)
-            except Exception:
-                return False
+            candidate_started_at = time.monotonic()
+            attempts = 0
+            num_reproduced = 0
+            max_attempts = self.shrink_max_retries + 1
+
+            while attempts < max_attempts:
+                if attempts > 0 and self._has_exceeded_timeout(
+                    candidate_started_at, self.shrink_retry_timeout_ms
+                ):
+                    break
+
+                attempts += 1
+                try:
+                    if not bool(self._run_property(test_inputs)):
+                        num_reproduced += 1
+                except Exception:
+                    num_reproduced += 1
+
+            elapsed_sec = time.monotonic() - candidate_started_at
+            if self.on_reproduction_stats is not None:
+                self.on_reproduction_stats(
+                    {
+                        "num_reproduced": num_reproduced,
+                        "total_runs": attempts,
+                        "elapsed_sec": elapsed_sec,
+                        "args_as_string": repr(test_inputs),
+                    }
+                )
+
+            return num_reproduced == 0
 
         # Regenerate the shrinkables for this run using the saved RNG state
         regenerated_shrinkables: List[Shrinkable[Any]] = []
@@ -301,6 +483,11 @@ class Property:
             improved = True
 
             while improved:
+                if self._has_exceeded_timeout(
+                    shrink_started_at, self.shrink_timeout_ms
+                ):
+                    break
+
                 improved = False
                 # Get shrinks as a stream (lazy evaluation, like cppproptest)
                 shrinks_stream = shrinkable.shrinks()
@@ -321,6 +508,9 @@ class Property:
                         current_val = candidate_val
                         shrinkable = candidate_shrinkable
                         improved = True
+                        self._write_output(
+                            f"  shrinking found simpler failing arg {i}: {test_inputs}\n"
+                        )
                         break
 
                     # Move to next candidate in stream
@@ -334,12 +524,60 @@ class Property:
 # Type overloads for run_for_all
 
 
+def _property_option_kwargs(
+    *,
+    max_duration_ms: Optional[int],
+    on_startup: Optional[Callable[[], None]],
+    on_cleanup: Optional[Callable[[], None]],
+    shrink_max_retries: int,
+    shrink_timeout_ms: Optional[int],
+    shrink_retry_timeout_ms: Optional[int],
+    output_stream: Optional[WriteStream],
+    error_stream: Optional[WriteStream],
+    on_reproduction_stats: Optional[Callable[[ReproductionStats], None]],
+) -> Dict[str, Any]:
+    return {
+        "max_duration_ms": max_duration_ms,
+        "on_startup": on_startup,
+        "on_cleanup": on_cleanup,
+        "shrink_max_retries": shrink_max_retries,
+        "shrink_timeout_ms": shrink_timeout_ms,
+        "shrink_retry_timeout_ms": shrink_retry_timeout_ms,
+        "output_stream": output_stream,
+        "error_stream": error_stream,
+        "on_reproduction_stats": on_reproduction_stats,
+    }
+
+
+def _settings_option_kwargs(
+    settings: Dict[str, Any],
+    defaults: Dict[str, Any],
+) -> Dict[str, Any]:
+    return {key: settings.get(key, value) for key, value in defaults.items()}
+
+
+def _config_option_kwargs(
+    config: Dict[str, Any],
+    defaults: Dict[str, Any],
+) -> Dict[str, Any]:
+    return {key: config.get(key, value) for key, value in defaults.items()}
+
+
 @overload
 def run_for_all(
     property_func_or_generator: Callable[..., bool],
     *generators: Generator[Any],
     num_runs: int = 100,
     seed: Optional[Union[str, int]] = None,
+    max_duration_ms: Optional[int] = None,
+    on_startup: Optional[Callable[[], None]] = None,
+    on_cleanup: Optional[Callable[[], None]] = None,
+    shrink_max_retries: int = 0,
+    shrink_timeout_ms: Optional[int] = None,
+    shrink_retry_timeout_ms: Optional[int] = None,
+    output_stream: Optional[WriteStream] = None,
+    error_stream: Optional[WriteStream] = None,
+    on_reproduction_stats: Optional[Callable[[ReproductionStats], None]] = None,
 ) -> bool: ...
 
 
@@ -349,6 +587,15 @@ def run_for_all(
     *generators: Generator[Any],
     num_runs: int = 100,
     seed: Optional[Union[str, int]] = None,
+    max_duration_ms: Optional[int] = None,
+    on_startup: Optional[Callable[[], None]] = None,
+    on_cleanup: Optional[Callable[[], None]] = None,
+    shrink_max_retries: int = 0,
+    shrink_timeout_ms: Optional[int] = None,
+    shrink_retry_timeout_ms: Optional[int] = None,
+    output_stream: Optional[WriteStream] = None,
+    error_stream: Optional[WriteStream] = None,
+    on_reproduction_stats: Optional[Callable[[ReproductionStats], None]] = None,
 ) -> Callable[..., Any]: ...
 
 
@@ -357,6 +604,15 @@ def run_for_all(
     *generators: Generator[Any],
     num_runs: int = 100,
     seed: Optional[Union[str, int]] = None,
+    max_duration_ms: Optional[int] = None,
+    on_startup: Optional[Callable[[], None]] = None,
+    on_cleanup: Optional[Callable[[], None]] = None,
+    shrink_max_retries: int = 0,
+    shrink_timeout_ms: Optional[int] = None,
+    shrink_retry_timeout_ms: Optional[int] = None,
+    output_stream: Optional[WriteStream] = None,
+    error_stream: Optional[WriteStream] = None,
+    on_reproduction_stats: Optional[Callable[[ReproductionStats], None]] = None,
 ) -> Union[bool, Callable[..., Any]]:
     """
     Run property-based tests with the given function and generators.
@@ -386,6 +642,15 @@ def run_for_all(
         *generators: Variable number of generators for test inputs
         num_runs: Number of test runs to perform
         seed: Optional seed for reproducible tests
+        max_duration_ms: Optional time budget for random runs
+        on_startup: Optional callback before each property evaluation
+        on_cleanup: Optional callback after each successful property evaluation
+        shrink_max_retries: Extra retries for shrink candidates
+        shrink_timeout_ms: Optional total shrink phase budget
+        shrink_retry_timeout_ms: Optional per-candidate retry budget
+        output_stream: Optional stream for informational shrink output
+        error_stream: Optional stream for error output
+        on_reproduction_stats: Optional shrink retry stats callback
 
     Returns:
         True if all tests pass (function mode) or decorated function (decorator mode)
@@ -412,6 +677,18 @@ def run_for_all(
         ...     def test_property(self, x):
         ...         self.assertGreaterEqual(x, 0)
     """
+    property_options = _property_option_kwargs(
+        max_duration_ms=max_duration_ms,
+        on_startup=on_startup,
+        on_cleanup=on_cleanup,
+        shrink_max_retries=shrink_max_retries,
+        shrink_timeout_ms=shrink_timeout_ms,
+        shrink_retry_timeout_ms=shrink_retry_timeout_ms,
+        output_stream=output_stream,
+        error_stream=error_stream,
+        on_reproduction_stats=on_reproduction_stats,
+    )
+
     # Check if being used as decorator: first arg is a Generator
     if isinstance(property_func_or_generator, Generator):
         # Decorator mode: property_func_or_generator is actually the first generator
@@ -487,13 +764,24 @@ def run_for_all(
                             config_generators = config["generators"]
                             config_num_runs = config.get("num_runs", num_runs)
                             config_seed = config.get("seed", seed)
+                            config_options = _config_option_kwargs(
+                                config, property_options
+                            )
                             property_test = Property(
-                                test_property, config_num_runs, config_seed
+                                test_property,
+                                config_num_runs,
+                                config_seed,
+                                **config_options,
                             )
                             property_test.for_all(*config_generators)
 
                         # Run current configuration
-                        property_test = Property(test_property, num_runs, seed)
+                        property_test = Property(
+                            test_property,
+                            num_runs,
+                            seed,
+                            **property_options,
+                        )
                         property_test.for_all(*all_generators)
                         # Return the original function for potential inspection
                         return func
@@ -561,6 +849,7 @@ def run_for_all(
                         "generators": all_generators,
                         "num_runs": num_runs,
                         "seed": seed,
+                        **property_options,
                     }
                 )
             else:
@@ -571,6 +860,7 @@ def run_for_all(
                         "generators": all_generators,
                         "num_runs": num_runs,
                         "seed": seed,
+                        **property_options,
                     }
                 )
 
@@ -596,6 +886,9 @@ def run_for_all(
                         # Apply settings overrides if provided
                         override_num_runs = existing_settings.get("num_runs", num_runs)
                         override_seed = existing_settings.get("seed", seed)
+                        settings_options = _settings_option_kwargs(
+                            existing_settings, property_options
+                        )
 
                         # Execute matrix cases first (do not count toward num_runs)
                         # Run each matrix spec independently
@@ -611,8 +904,14 @@ def run_for_all(
                             config_generators = config["generators"]
                             config_num_runs = config.get("num_runs", override_num_runs)
                             config_seed = config.get("seed", override_seed)
+                            config_options = _config_option_kwargs(
+                                config, settings_options
+                            )
                             property_test = Property(
-                                test_property, config_num_runs, config_seed
+                                test_property,
+                                config_num_runs,
+                                config_seed,
+                                **config_options,
                             )
                             property_test.for_all(*config_generators)
                         return None
@@ -642,6 +941,9 @@ def run_for_all(
                         # Apply settings overrides if provided
                         override_num_runs = existing_settings.get("num_runs", num_runs)
                         override_seed = existing_settings.get("seed", seed)
+                        settings_options = _settings_option_kwargs(
+                            existing_settings, property_options
+                        )
 
                         # Execute matrix cases first (do not count toward num_runs)
                         # Run each matrix spec independently
@@ -657,8 +959,14 @@ def run_for_all(
                             config_generators = config["generators"]
                             config_num_runs = config.get("num_runs", override_num_runs)
                             config_seed = config.get("seed", override_seed)
+                            config_options = _config_option_kwargs(
+                                config, settings_options
+                            )
                             property_test = Property(
-                                test_property, config_num_runs, config_seed
+                                test_property,
+                                config_num_runs,
+                                config_seed,
+                                **config_options,
                             )
                             property_test.for_all(*config_generators)
                         return None
@@ -700,7 +1008,12 @@ def run_for_all(
 
     else:
         # Function mode: property_func_or_generator is the function to test
-        property_test = Property(property_func_or_generator, num_runs, seed)
+        property_test = Property(
+            property_func_or_generator,
+            num_runs,
+            seed,
+            **property_options,
+        )
         return property_test.for_all(*generators)
 
 
@@ -755,6 +1068,15 @@ def property_test(
     *generators: Generator[Any],
     num_runs: int = 100,
     seed: Optional[Union[str, int]] = None,
+    max_duration_ms: Optional[int] = None,
+    on_startup: Optional[Callable[[], None]] = None,
+    on_cleanup: Optional[Callable[[], None]] = None,
+    shrink_max_retries: int = 0,
+    shrink_timeout_ms: Optional[int] = None,
+    shrink_retry_timeout_ms: Optional[int] = None,
+    output_stream: Optional[WriteStream] = None,
+    error_stream: Optional[WriteStream] = None,
+    on_reproduction_stats: Optional[Callable[[ReproductionStats], None]] = None,
 ):
     """
     Decorator for property-based tests that integrates with pytest.
@@ -776,7 +1098,21 @@ def property_test(
 
     def decorator(func: Callable[..., bool]) -> Callable[[], bool]:
         def wrapper() -> bool:
-            return run_for_all(func, *generators, num_runs=num_runs, seed=seed)
+            return run_for_all(
+                func,
+                *generators,
+                num_runs=num_runs,
+                seed=seed,
+                max_duration_ms=max_duration_ms,
+                on_startup=on_startup,
+                on_cleanup=on_cleanup,
+                shrink_max_retries=shrink_max_retries,
+                shrink_timeout_ms=shrink_timeout_ms,
+                shrink_retry_timeout_ms=shrink_retry_timeout_ms,
+                output_stream=output_stream,
+                error_stream=error_stream,
+                on_reproduction_stats=on_reproduction_stats,
+            )
 
         return wrapper
 

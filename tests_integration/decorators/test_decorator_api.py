@@ -137,6 +137,30 @@ class TestDecoratorAPI(unittest.TestCase):
         # Run the test
         test_with_custom_settings()
 
+    def test_settings_with_lifecycle_and_duration_options(self):
+        """@settings can configure parity lifecycle and duration options."""
+        calls = []
+        startup_calls = []
+        cleanup_calls = []
+
+        @for_all(Gen.int())
+        @settings(
+            num_runs=3,
+            seed=42,
+            max_duration_ms=1000,
+            on_startup=lambda: startup_calls.append("start"),
+            on_cleanup=lambda: cleanup_calls.append("cleanup"),
+        )
+        def test_with_lifecycle_settings(x: int):
+            calls.append(x)
+            assert isinstance(x, int)
+
+        test_with_lifecycle_settings()
+
+        self.assertEqual(len(calls), 3)
+        self.assertEqual(len(startup_calls), 3)
+        self.assertEqual(len(cleanup_calls), 3)
+
     def test_settings_with_invalid_parameter(self):
         """Test @settings rejects unsupported parameters."""
 

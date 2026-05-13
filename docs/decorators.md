@@ -62,6 +62,15 @@ class TestMathProperties(unittest.TestCase):
 - `*generators`: Variable number of [generators](generators.md) for function arguments
 - `num_runs`: Number of test runs (default: 100)
 - `seed`: Random seed for reproducibility (default: None)
+- `max_duration_ms`: Optional wall-clock budget for starting random runs
+- `on_startup`: Optional callback before each property evaluation
+- `on_cleanup`: Optional callback after each successful property evaluation
+- `shrink_max_retries`: Extra retry attempts for each shrink candidate
+- `shrink_timeout_ms`: Optional total shrink-phase time budget
+- `shrink_retry_timeout_ms`: Optional per-candidate retry budget
+- `output_stream`: Optional stream with `write(str)` for runner output
+- `error_stream`: Optional stream with `write(str)` for runner error output
+- `on_reproduction_stats`: Optional callback receiving shrink retry stats
 
 **See Also:** [`@run_for_all`](#run_for_all) for dependent generators, [`@example`](#example) for specific test cases, [`@settings`](#settings) for configuration
 
@@ -206,6 +215,15 @@ def test_with_run_for_all(self, pair):
 - `*generators`: One or more [generators](generators.md) (when used as decorator, generators come first)
 - `num_runs`: Number of test runs (default: 100)
 - `seed`: Random seed for reproducibility (default: None)
+- `max_duration_ms`: Optional wall-clock budget for starting random runs
+- `on_startup`: Optional callback before each property evaluation
+- `on_cleanup`: Optional callback after each successful property evaluation
+- `shrink_max_retries`: Extra retry attempts for each shrink candidate
+- `shrink_timeout_ms`: Optional total shrink-phase time budget
+- `shrink_retry_timeout_ms`: Optional per-candidate retry budget
+- `output_stream`: Optional stream with `write(str)` for runner output
+- `error_stream`: Optional stream with `write(str)` for runner error output
+- `on_reproduction_stats`: Optional callback receiving shrink retry stats
 
 ### When to Use @run_for_all
 
@@ -279,7 +297,7 @@ Configures test parameters like number of runs and random seed. Settings overrid
 from python_proptest import for_all, Gen, settings
 
 @for_all(Gen.int(), Gen.str())
-@settings(num_runs=50, seed=42)
+@settings(num_runs=50, seed=42, max_duration_ms=5000)
 def test_property(x: int, s: str):
     assert isinstance(x, int)
     assert isinstance(s, str)
@@ -310,6 +328,17 @@ def test_property(x: int, s: str):
 
 - `num_runs`: Number of test runs (overrides @for_all default)
 - `seed`: Random seed for reproducibility (overrides @for_all default)
+- `max_duration_ms`: Optional wall-clock budget for starting random runs
+- `on_startup`: Optional callback before each property evaluation
+- `on_cleanup`: Optional callback after each successful property evaluation
+- `shrink_max_retries`: Extra retry attempts for each shrink candidate
+- `shrink_timeout_ms`: Optional total shrink-phase time budget
+- `shrink_retry_timeout_ms`: Optional per-candidate retry budget
+- `output_stream`: Optional stream with `write(str)` for runner output
+- `error_stream`: Optional stream with `write(str)` for runner error output
+- `on_reproduction_stats`: Optional callback receiving shrink retry stats
+
+`on_startup` also wraps shrink candidates. `on_cleanup` runs only after successful property evaluations.
 
 **See Also:** [`@for_all`](#for_all), [`@run_for_all`](#run_for_all), [Best Practices](#3-use-settings-for-reproducibility)
 
