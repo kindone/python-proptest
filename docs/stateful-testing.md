@@ -118,6 +118,11 @@ The `StatefulProperty` instance provides several methods for configuration:
 *   `set_on_startup(startup_func)`: Sets a function to run before each test sequence.
 *   `set_on_cleanup(cleanup_func)`: Sets a function to run after each successful test sequence.
 *   `set_post_check(post_check_func)`: Sets a function to run after all actions in a sequence have completed successfully. Useful for final state validation. You can also use `set_post_check_without_model((obj: ObjectType) -> None)`.
+*   `set_shrink_max_retries(retries)`: Retries each shrink candidate to help identify failures in flaky stateful properties.
+*   `set_shrink_timeout_ms(timeout_ms)`: Caps the total time spent shrinking a failing stateful sequence.
+*   `set_shrink_retry_timeout_ms(timeout_ms)`: Caps the retry time budget for each individual shrink candidate.
+*   `set_output_stream(stream)` / `set_error_stream(stream)`: Redirects runner output to objects with a `write(str)` method.
+*   `set_on_reproduction_stats(callback)`: Receives `{"num_reproduced", "total_runs", "elapsed_sec", "args_as_string"}` after each stateful shrink candidate retry assessment.
 
 ```python
 from python_proptest import simple_stateful_property, Gen, SimpleAction
@@ -146,6 +151,8 @@ def test_configured_stateful_property():
     prop.set_min_actions(5)  # At least 5 actions per sequence
     prop.set_max_actions(20)  # At most 20 actions per sequence
     prop.set_verbosity(True)  # Enable verbose output
+    prop.set_shrink_max_retries(2)  # Retry flaky shrink candidates
+    prop.set_shrink_timeout_ms(1000)  # Cap total shrink time
 
     # Add startup and cleanup functions
     prop.set_on_startup(lambda: print("Starting test sequence"))

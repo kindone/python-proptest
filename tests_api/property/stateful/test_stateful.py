@@ -1,6 +1,7 @@
 """Tests for ``python_proptest.core.stateful`` stateful property testing."""
 
 import unittest
+from io import StringIO
 from unittest.mock import Mock
 
 from python_proptest import (
@@ -14,6 +15,16 @@ from python_proptest import (
     simpleStatefulProperty,
     statefulProperty,
 )
+from python_proptest.core.generator import Generator
+from python_proptest.core.shrinker import Shrinkable
+from python_proptest.core.stream import Stream
+
+
+class FixedInitialGenerator(Generator[int]):
+    """Initial-state generator with one deterministic shrink."""
+
+    def generate(self, rng):
+        return Shrinkable(1, lambda: Stream.one(Shrinkable(0)))
 
 
 class TestStatefulProperty(unittest.TestCase):
@@ -369,6 +380,57 @@ class TestStatefulProperty(unittest.TestCase):
         )
 
         prop.go()
+
+    def test_stateful_shrink_retry_options_collect_reproduction_stats(self):
+        """Stateful shrink retries expose reproduction stats and output."""
+        stats = []
+        output = StringIO()
+
+        def fail_for_any_state(state: int) -> None:
+            raise ValueError(f"stateful boom: {state}")
+
+        prop = simpleStatefulProperty(
+            FixedInitialGenerator(),
+            Gen.just(SimpleAction(fail_for_any_state)),
+            max_actions=1,
+            num_runs=1,
+            seed=42,
+            shrink_max_retries=2,
+            shrink_timeout_ms=1000,
+            shrink_retry_timeout_ms=1000,
+            output_stream=output,
+            on_reproduction_stats=stats.append,
+        )
+
+        with self.assertRaises(PropertyTestError) as ctx:
+            prop.go()
+
+        self.assertTrue(stats)
+        self.assertTrue(all(item["total_runs"] == 3 for item in stats))
+        self.assertTrue(any(item["num_reproduced"] > 0 for item in stats))
+        self.assertIn("stateful shrinking found simpler", output.getvalue())
+        self.assertIsNotNone(prop.get_last_reproduction_stats())
+        self.assertIn("Minimal counterexample", str(ctx.exception))
+
+    def test_stateful_shrink_option_validation(self):
+        """Stateful shrink parity options validate their inputs."""
+        prop = simpleStatefulProperty(
+            Gen.just(0),
+            Gen.just(SimpleAction(lambda state: None)),
+            max_actions=1,
+            num_runs=1,
+        )
+
+        with self.assertRaises(ValueError):
+            prop.set_shrink_max_retries(-1)
+        with self.assertRaises(ValueError):
+            prop.set_shrink_timeout_ms(-1)
+        with self.assertRaises(ValueError):
+            prop.set_shrink_retry_timeout_ms(-1)
+        with self.assertRaises(TypeError):
+            prop.set_output_stream(object())
+        with self.assertRaises(TypeError):
+            prop.set_error_stream(object())
 
 
 if __name__ == "__main__":

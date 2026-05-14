@@ -37,9 +37,7 @@ class TestFloatGenerator(unittest.TestCase):
         self.assertTrue(any(value < 0.0 for value in values))
         self.assertTrue(any(value > 0.0 for value in values))
         self.assertTrue(any(abs(value) > sys.float_info.max / 2 for value in values))
-        self.assertTrue(
-            any(0.0 < abs(value) < sys.float_info.min for value in values)
-        )
+        self.assertTrue(any(0.0 < abs(value) < sys.float_info.min for value in values))
 
     @for_all(Gen.float(nan_prob=1.0), num_runs=20)
     def test_float_can_generate_nan(self, value: float):

@@ -6,6 +6,14 @@ Tracks open tasks and feature gaps relative to the C++ reference implementation 
 
 ## Open
 
+### [ ] no_shrink combinator
+- **What**: Public helper for generators whose generated values should not shrink, matching C++ `.noShrink()`.
+- **Candidate API**: `generator.no_shrink()` and/or `Gen.no_shrink(generator)`.
+
+### [ ] Classification/statistics API
+- **What**: Python equivalent for C++ `PROP_TAG`, `PROP_CLASSIFY`, `PROP_STAT`, and stat assertions.
+- **Note**: Needs a Pythonic design; do not copy C++ macros directly.
+
 ---
 
 ## Completed
@@ -24,3 +32,4 @@ Tracks open tasks and feature gaps relative to the C++ reference implementation 
 - **[x] shrinkTimeoutMs / shrinkRetryTimeoutMs** — `shrink_timeout_ms` and `shrink_retry_timeout_ms` cap total shrink time and per-candidate retry time
 - **[x] outputStream / errorStream** — `output_stream` and `error_stream` accept `.write(str)` streams for runner output
 - **[x] onReproductionStats** — `on_reproduction_stats` receives shrink retry stats with reproduction counts and elapsed time
+- **[x] Stateful shrink retry/logging parity** — `StatefulProperty` accepts `shrink_max_retries`, `shrink_timeout_ms`, `shrink_retry_timeout_ms`, `output_stream`, `error_stream`, and `on_reproduction_stats`, plus fluent setters.
