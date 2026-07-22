@@ -4,6 +4,7 @@ python-proptest - Python Property-Based Testing Library
 A clean, Pythonic property-based testing library with seamless pytest integration.
 """
 
+from .core.context import classify, stat, tag
 from .core.decorators import (
     assume,
     example,
@@ -35,6 +36,9 @@ __author__ = "kindone"
 __email__ = "jradoo@gmail.com"
 
 __all__ = [
+    "tag",
+    "classify",
+    "stat",
     "for_all",
     "run_for_all",
     "run_matrix",

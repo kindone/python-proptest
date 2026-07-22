@@ -6,17 +6,12 @@ Tracks open tasks and feature gaps relative to the C++ reference implementation 
 
 ## Open
 
-### [ ] no_shrink combinator
-- **What**: Public helper for generators whose generated values should not shrink, matching C++ `.noShrink()`.
-- **Candidate API**: `generator.no_shrink()` and/or `Gen.no_shrink(generator)`.
-
-### [ ] Classification/statistics API
-- **What**: Python equivalent for C++ `PROP_TAG`, `PROP_CLASSIFY`, `PROP_STAT`, and stat assertions.
-- **Note**: Needs a Pythonic design; do not copy C++ macros directly.
-
 ---
 
 ## Completed
+
+- **[x] Classification/statistics API** — `tag(key, value)`, `classify(condition, key, value)`, `stat(label, value)` in `python_proptest.core.context`; exported from package root; `Property.assert_stat_ge/le/in_range(key, bound)`; summary printed to `output_stream` on success; context isolated per `for_all()` call
+- **[x] no_shrink combinator** — `Gen.no_shrink(gen)` and `gen.no_shrink()`; values retain distribution, shrink stream is empty; tested with int/list/str generators and flat_map U-axis suppression
 
 - **[x] Basic seed + num_runs config** — `run_for_all(..., seed=42, num_runs=100)`
 - **[x] Explicit examples** — `@example(...)` decorator

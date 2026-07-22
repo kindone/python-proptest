@@ -212,3 +212,24 @@ class Generator(ABC, Generic[T]):
         from .aggregate import AccumulateGenerator
 
         return AccumulateGenerator(self, gen_factory, min_size, max_size)
+
+    def no_shrink(self) -> "Generator[T]":
+        """Strip all shrink candidates from this generator.
+
+        Values are generated with the same distribution but carry no shrink tree.
+        Use for seeds, UUIDs, timestamps, or to suppress context shrinking in flat_map.
+
+        Returns:
+            A new Generator producing the same values but with empty shrink streams.
+
+        Examples:
+            # Seed value that should not be shrunk
+            seed_gen = Gen.int(0, 1000).no_shrink()
+
+            # Suppress context (T) shrinking in a flat_map:
+            # Only the inner value (U) will shrink — T is locked to the generated value.
+            gen = Gen.int(2, 10).no_shrink().flat_map(lambda n: Gen.int(0, n))
+        """
+        from ..combinator.no_shrink import NoShrinkGenerator
+
+        return NoShrinkGenerator(self)

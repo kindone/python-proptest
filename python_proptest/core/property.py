@@ -22,6 +22,7 @@ from typing import (
     overload,
 )
 
+from .context import PropertyContext, _set_context
 from .generator import Generator, Random
 from .shrinker import Shrinkable
 
@@ -94,6 +95,7 @@ class Property:
         self.output_stream = self._validate_stream(output_stream, "output_stream")
         self.error_stream = self._validate_stream(error_stream, "error_stream")
         self.on_reproduction_stats = on_reproduction_stats
+        self._stat_assertions: List[dict] = []
         self._rng = self._create_rng()
         # Cache function signature for example resolution
         # Use original_func for signature if provided (for wrapped functions)
@@ -168,6 +170,39 @@ class Property:
     ) -> "Property":
         """Set the callback invoked after shrink candidate retry assessment."""
         self.on_reproduction_stats = callback
+        return self
+
+    def assert_stat_ge(self, key: str, bound: float) -> "Property":
+        """Assert that the ratio of runs where ``stat(key, value)`` produced
+        ``True`` is ≥ *bound*.  Evaluated after ``for_all()`` completes.
+
+        Example::
+
+            from python_proptest.core.context import stat
+
+            Property(lambda n: (stat('pos', n > 0), True)[-1]) \\
+                .assert_stat_ge('pos', 0.4) \\
+                .run(Gen.int(-100, 100))
+        """
+        self._stat_assertions.append({"type": "GE", "key": key, "bound": bound})
+        return self
+
+    def assert_stat_le(self, key: str, bound: float) -> "Property":
+        """Assert that the ratio of runs where ``stat(key, value)`` produced
+        ``True`` is ≤ *bound*.  Evaluated after ``for_all()`` completes.
+        """
+        self._stat_assertions.append({"type": "LE", "key": key, "bound": bound})
+        return self
+
+    def assert_stat_in_range(
+        self, key: str, min_bound: float, max_bound: float
+    ) -> "Property":
+        """Assert that the ratio of runs where ``stat(key, value)`` produced
+        ``True`` is in [*min_bound*, *max_bound*].
+        """
+        self._stat_assertions.append(
+            {"type": "IN_RANGE", "key": key, "min": min_bound, "max": max_bound}
+        )
         return self
 
     @staticmethod
@@ -351,52 +386,80 @@ class Property:
                     minimal_inputs=list(example_inputs),
                 ) from e
 
-        # Then run random tests
-        start_time = time.monotonic()
-        run = 0
-        while run < self.num_runs:
-            if self.max_duration_ms is not None:
-                elapsed_ms = (time.monotonic() - start_time) * 1000
-                if elapsed_ms >= self.max_duration_ms:
-                    break
+        # Set up a fresh per-for_all() context for tag/stat collection
+        ctx = PropertyContext()
+        _set_context(ctx)
+        completed_runs = 0
 
-            saved_rng_state = self._rng.getstate()  # type: ignore[attr-defined]
-            try:
-                # Generate test inputs
-                inputs = []
-                for generator in generators:
-                    shrinkable = generator.generate(self._rng)
-                    input_val = shrinkable.value
-                    inputs.append(input_val)
+        try:
+            # Then run random tests
+            start_time = time.monotonic()
+            run = 0
+            while run < self.num_runs:
+                if self.max_duration_ms is not None:
+                    elapsed_ms = (time.monotonic() - start_time) * 1000
+                    if elapsed_ms >= self.max_duration_ms:
+                        break
 
-                # Run the property
-                result = self._run_property(inputs)
+                saved_rng_state = self._rng.getstate()  # type: ignore[attr-defined]
+                try:
+                    # Generate test inputs
+                    inputs = []
+                    for generator in generators:
+                        shrinkable = generator.generate(self._rng)
+                        input_val = shrinkable.value
+                        inputs.append(input_val)
 
-                if not result:
-                    # Property failed, try to shrink
+                    # Run the property
+                    result = self._run_property(inputs)
+
+                    if not result:
+                        # Suspend context during shrinking so shrink runs don't
+                        # distort tag counts
+                        _set_context(None)
+                        # Property failed, try to shrink
+                        minimal_inputs = self._shrink_failing_inputs(
+                            inputs, list(generators), saved_rng_state
+                        )
+                        raise PropertyTestError(
+                            f"Property failed on run {run + 1}",
+                            failing_inputs=inputs,
+                            minimal_inputs=minimal_inputs,
+                        )
+
+                    completed_runs += 1
+
+                except PropertyTestError:
+                    raise
+                except Exception as e:
+                    # Suspend context during shrinking
+                    _set_context(None)
+                    # Other exceptions are treated as property failures
                     minimal_inputs = self._shrink_failing_inputs(
                         inputs, list(generators), saved_rng_state
                     )
                     raise PropertyTestError(
-                        f"Property failed on run {run + 1}",
+                        f"Property failed with exception on run {run + 1}: {e}",
                         failing_inputs=inputs,
                         minimal_inputs=minimal_inputs,
-                    )
+                    ) from e
+                finally:
+                    run += 1
+        finally:
+            _set_context(None)
 
-            except Exception as e:
-                if isinstance(e, PropertyTestError):
-                    raise
-                # Other exceptions are treated as property failures
-                minimal_inputs = self._shrink_failing_inputs(
-                    inputs, list(generators), saved_rng_state
-                )
+        # Check stat assertions and print summary (only reached on success)
+        if self._stat_assertions:
+            failures = ctx.check_stat_assertions(self._stat_assertions, completed_runs)
+            if ctx.has_tags() and self.output_stream is not None:
+                ctx.print_summary(self.output_stream)
+            if failures:
                 raise PropertyTestError(
-                    f"Property failed with exception on run {run + 1}: {e}",
-                    failing_inputs=inputs,
-                    minimal_inputs=minimal_inputs,
-                ) from e
-            finally:
-                run += 1
+                    "Stat assertion(s) failed:\n"
+                    + "\n".join(f"  {f}" for f in failures)
+                )
+        elif ctx.has_tags() and self.output_stream is not None:
+            ctx.print_summary(self.output_stream)
 
         return True
 

@@ -8,6 +8,7 @@ from .construct import ConstructGenerator
 from .element_of import ElementOfGenerator
 from .just import JustGenerator
 from .lazy import LazyGenerator
+from .no_shrink import NoShrinkGenerator
 from .one_of import OneOfGenerator
 
 __all__ = [
@@ -15,5 +16,6 @@ __all__ = [
     "ElementOfGenerator",
     "JustGenerator",
     "LazyGenerator",
+    "NoShrinkGenerator",
     "ConstructGenerator",
 ]

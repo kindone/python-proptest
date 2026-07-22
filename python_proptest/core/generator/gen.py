@@ -10,6 +10,7 @@ from ..combinator import (
     ElementOfGenerator,
     JustGenerator,
     LazyGenerator,
+    NoShrinkGenerator,
     OneOfGenerator,
 )
 from ..shrinker import Shrinkable
@@ -468,6 +469,31 @@ class Gen:
         from .aggregate import AccumulateGenerator
 
         return AccumulateGenerator(initial_gen, gen_factory, min_size, max_size)
+
+    @staticmethod
+    def no_shrink(gen: "Generator[T]") -> "Generator[T]":
+        """Wrap a generator to produce values with no shrink candidates.
+
+        Generated values have identical distribution to the wrapped generator,
+        but every produced Shrinkable carries an empty shrink stream.
+
+        Use for seeds, UUIDs, timestamps, or to suppress context (T) shrinking
+        in a flat_map chain so that only the inner (U) value shrinks.
+
+        Args:
+            gen: The generator to wrap.
+
+        Returns:
+            A Generator producing the same distribution but no shrink candidates.
+
+        Examples:
+            # Seed value that should not be shrunk
+            seed_gen = Gen.no_shrink(Gen.int(0, 1000))
+
+            # Suppress T-axis shrinking inside flat_map
+            gen = Gen.no_shrink(Gen.int(2, 10)).flat_map(lambda n: Gen.int(0, n))
+        """
+        return NoShrinkGenerator(gen)
 
     @staticmethod
     def tuple(*generators):
