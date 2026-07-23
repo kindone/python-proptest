@@ -24,8 +24,9 @@ class ListGenerator(Generator[List[T]]):
     def generate(self, rng: Random) -> Shrinkable[List[T]]:
         length = rng.randint(self.min_length, self.max_length)
         elements = [self.element_generator.generate(rng) for _ in range(length)]
-        # Use shrink_list which respects min_size constraint
-        return shrink_list(elements, min_size=self.min_length)
+        # Use shrink_list with element_wise=True so individual elements shrink
+        # in addition to membership-wise (length) shrinking.
+        return shrink_list(elements, min_size=self.min_length, element_wise=True)
 
 
 class UniqueListGenerator(Generator[List[T]]):

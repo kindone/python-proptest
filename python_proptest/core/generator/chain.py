@@ -72,81 +72,22 @@ class ChainGenerator(Generator[tuple]):
     def generate(self, rng: Random) -> Shrinkable[tuple]:
         # Generate the base value(s)
         base_shrinkable = self.base_gen.generate(rng)
-        base_value = base_shrinkable.value
 
-        # Normalize to tuple if it's not already
-        if isinstance(base_value, tuple):
-            base_tuple = base_value
-        else:
-            base_tuple = (base_value,)
+        # Save RNG state after base generation for deterministic dependent
+        # regeneration during shrinking.
+        rng_state_after_base = rng.getstate()  # type: ignore[attr-defined]
 
-        # Generate the dependent value
-        dependent_gen = self.gen_factory(base_value)
-        dependent_shrinkable = dependent_gen.generate(rng)
+        def make_combined(base_val: Any) -> Shrinkable[tuple]:
+            """Regenerate the combined tuple from a (possibly shrunk) base value."""
+            bt = base_val if isinstance(base_val, tuple) else (base_val,)
+            rng.setstate(rng_state_after_base)  # type: ignore[attr-defined]
+            dep_gen = self.gen_factory(base_val)
+            dep_shrinkable = dep_gen.generate(rng)
+            # Map the dependent shrinkable into a combined-tuple shrinkable so that
+            # U-axis shrinks (dep value) are preserved in the result.
+            return dep_shrinkable.map(lambda dep_val: bt + (dep_val,))
 
-        # Combine into new tuple
-        combined_value = base_tuple + (dependent_shrinkable.value,)
-
-        def create_shrinks():
-            shrinks = []
-
-            # Shrinks from base generation (keeping dependent value consistent)
-            for shrunk_base in base_shrinkable.shrinks().to_list():
-                shrunk_base_value = shrunk_base.value
-                # Normalize to tuple
-                if isinstance(shrunk_base_value, tuple):
-                    shrunk_base_tuple = shrunk_base_value
-                else:
-                    shrunk_base_tuple = (shrunk_base_value,)
-
-                try:
-                    # Generate new dependent value for the shrunk base
-                    new_dependent_gen = self.gen_factory(shrunk_base_value)
-                    new_dependent_shrinkable = new_dependent_gen.generate(rng)
-                    new_combined = shrunk_base_tuple + (new_dependent_shrinkable.value,)
-
-                    # Recursively create shrinkable with proper shrinks
-                    shrinks.append(
-                        Shrinkable(
-                            new_combined,
-                            lambda: self._create_dependent_shrinks(
-                                shrunk_base, new_dependent_shrinkable, rng
-                            ),
-                        )
-                    )
-                except Exception:
-                    # Skip if dependent generation fails for shrunk value
-                    continue  # nosec B112
-
-            # Shrinks from dependent value generation (keeping base value fixed)
-            for shrunk_dependent in dependent_shrinkable.shrinks().to_list():
-                new_combined = base_tuple + (shrunk_dependent.value,)
-                shrinks.append(
-                    Shrinkable(
-                        new_combined,
-                        lambda: self._create_base_shrinks(
-                            base_shrinkable, shrunk_dependent, rng
-                        ),
-                    )
-                )
-
-            return Stream.many(shrinks)
-
-        return Shrinkable(combined_value, create_shrinks)
-
-    def _create_dependent_shrinks(self, base_shrinkable, dependent_shrinkable, rng):
-        """Create shrinks for when we've shrunk the base and regenerated dependent."""
-        shrinks = []
-
-        base_value = base_shrinkable.value
-        base_tuple = base_value if isinstance(base_value, tuple) else (base_value,)
-
-        # Only shrink the dependent part further
-        for shrunk_dependent in dependent_shrinkable.shrinks().to_list():
-            shrinks.append(Shrinkable(base_tuple + (shrunk_dependent.value,)))
-
-        return Stream.many(shrinks)
-
-    def _create_base_shrinks(self, base_shrinkable, dependent_shrinkable, rng):
-        """Create shrinks for when we've kept base and shrunk dependent."""
-        return Stream.empty()  # No further shrinks needed for this path
+        # Delegate to Shrinkable.flat_map which correctly implements:
+        # - Base (T) axis shrinks first, each carrying recursive flat_map shrinks
+        # - Dependent (U) axis shrinks appended via concat (fires at every node)
+        return base_shrinkable.flat_map(make_combined)

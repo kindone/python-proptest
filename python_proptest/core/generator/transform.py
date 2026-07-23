@@ -5,7 +5,6 @@ Transform generators (map, filter, flat_map).
 from typing import Callable, TypeVar
 
 from ..shrinker import Shrinkable
-from ..stream import Stream
 from .base import Generator, Random
 
 T = TypeVar("T")
@@ -59,38 +58,21 @@ class FlatMappedGenerator(Generator[U]):
         self.func = func
 
     def generate(self, rng: Random) -> Shrinkable[U]:
-        # Generate first value
+        # Generate first value (T-axis)
         first_shrinkable = self.generator.generate(rng)
 
-        # Save RNG state after first generation for deterministic regeneration
+        # Save RNG state after first generation for deterministic U regeneration
+        # during shrinking — each T-shrink candidate regenerates U from this state.
         rng_state_after_first = rng.getstate()  # type: ignore[attr-defined]
 
-        # Generate second value
-        second_generator = self.func(first_shrinkable.value)
-        second_shrinkable = second_generator.generate(rng)
+        def make_second(first_val: T) -> Shrinkable[U]:
+            """Regenerate U from T, restoring RNG to the post-T state."""
+            rng.setstate(rng_state_after_first)  # type: ignore[attr-defined]
+            return self.func(first_val).generate(rng)
 
-        def shrink_func() -> Stream[Shrinkable[U]]:
-            # Shrink the second value first (keeping first fixed)
-            second_shrinks = [
-                Shrinkable(s.value, lambda: s.shrinks())
-                for s in second_shrinkable.shrinks().to_list()
-            ]
-
-            # Then shrink the first value and regenerate the second
-            # IMPORTANT: Restore RNG state to ensure deterministic regeneration
-            original_rng_state = rng.getstate()  # type: ignore[attr-defined]
-            first_shrinks = []
-            try:
-                for first_shrink in first_shrinkable.shrinks().to_list():
-                    # Restore RNG state to what it was after first generation
-                    rng.setstate(rng_state_after_first)  # type: ignore[attr-defined]
-                    new_second_gen = self.func(first_shrink.value)
-                    new_second_shrink = new_second_gen.generate(rng)
-                    first_shrinks.append(new_second_shrink)
-            finally:
-                # Restore original RNG state
-                rng.setstate(original_rng_state)  # type: ignore[attr-defined]
-
-            return Stream.many(second_shrinks + first_shrinks)
-
-        return Shrinkable(second_shrinkable.value, shrink_func)
+        # Delegate to Shrinkable.flat_map which correctly implements:
+        # - T-axis shrinks first (each carrying recursive flat_map shrinks via concat)
+        # - U-axis shrinks appended after (concat, not and_then — fires at every node)
+        # This also avoids the Python late-binding closure bug present in the old
+        # hand-rolled approach.
+        return first_shrinkable.flat_map(make_second)

@@ -87,10 +87,11 @@ def shrink_element_wise(
 
         return results
 
-    new_shrinkable_elems_shr = shrinkable_elems_shr.concat(
-        lambda parent: Stream.many(shrink_bulk(parent, power, offset))
-    )
-    return new_shrinkable_elems_shr.shrinks()
+    # Return only the direct element-wise shrinks (from shrink_bulk), not
+    # membership shrinks.  The outer shrinkable_array drives the tree traversal
+    # via concat, so re-emitting the membership shrinks here would cause them
+    # to appear twice in the shrink tree.
+    return Stream.many(shrink_bulk(shrinkable_elems_shr, power, offset))
 
 
 def shrink_array_length(
@@ -309,17 +310,22 @@ def shrinkable_array(
     # Base Shrinkable containing the initial structure Shrinkable<T>[]
     current_shrinkable = Shrinkable(shrinkable_elems)
 
-    # Chain membership shrinking if enabled
+    # Chain membership shrinking if enabled.
+    # Starting from an empty-shrink Shrinkable, and_then fires immediately
+    # (equivalent to concat_static), replacing with membership shrinks.
     if membership_wise:
         current_shrinkable = current_shrinkable.and_then(
             lambda parent: shrink_membership_wise(parent.value, min_size).shrinks()
         )
 
-    # Chain element-wise shrinking if enabled
-    # Matches cppproptest: element-wise shrinking applies recursively to
-    # membership shrinks
+    # Chain element-wise shrinking if enabled.
+    # Use concat (not and_then) so element-wise shrinks are appended at EVERY
+    # node in the membership shrink tree, not only at leaf nodes.
+    # This matches cppproptest's behaviour: elementWise fires at every membership
+    # shrink step, giving the shrinker the option to try element shrinks at any
+    # point alongside further membership shrinks.
     if element_wise:
-        current_shrinkable = current_shrinkable.and_then(
+        current_shrinkable = current_shrinkable.concat(
             lambda parent: shrink_element_wise(parent, 0, 0)
         )
 
