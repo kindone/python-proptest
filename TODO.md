@@ -11,6 +11,7 @@ Tracks open tasks and feature gaps relative to the C++ reference implementation 
 ## Completed
 
 - **[x] Classification/statistics API** — `tag(key, value)`, `classify(condition, key, value)`, `stat(label, value)` in `python_proptest.core.context`; exported from package root; `Property.assert_stat_ge/le/in_range(key, bound)`; summary printed to `output_stream` on success; context isolated per `for_all()` call
+- **[x] Shrink affordance audit + fixes** — swept all combinators for `andThen`→`concat` gaps and Python closure bugs; fixes: `FlatMappedGenerator` and `ChainGenerator` now delegate to `Shrinkable.flat_map` (correct recursive T-axis shrinking, no late-binding closure bug); `ListGenerator` enables `element_wise=True` (elements now shrink, not just list length); `shrink_element_wise` returns only direct element candidates instead of re-emitting membership shrinks (eliminated duplicate shrink-tree nodes); 5 new affordance tests in `tests_integration/shrinker/test_shrink_affordance.py`
 - **[x] no_shrink combinator** — `Gen.no_shrink(gen)` and `gen.no_shrink()`; values retain distribution, shrink stream is empty; tested with int/list/str generators and flat_map U-axis suppression
 
 - **[x] Basic seed + num_runs config** — `run_for_all(..., seed=42, num_runs=100)`
