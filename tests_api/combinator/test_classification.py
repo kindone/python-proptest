@@ -3,7 +3,7 @@
 import io
 import unittest
 
-from python_proptest import Gen, Property, tag, classify, stat
+from python_proptest import Gen, Property, classify, stat, tag
 from python_proptest.core.property import PropertyTestError
 
 
@@ -17,9 +17,11 @@ class TestTagCollectionBasics(unittest.TestCase):
 
     def test_tag_records_key_value_in_summary(self):
         buf, stream = _stream()
-        Property(lambda n: (tag("bucket", "high" if n > 50 else "low"), True)[-1]).set_num_runs(
-            100
-        ).set_seed("tag-basic").set_output_stream(stream).for_all(Gen.int(0, 100))
+        Property(
+            lambda n: (tag("bucket", "high" if n > 50 else "low"), True)[-1]
+        ).set_num_runs(100).set_seed("tag-basic").set_output_stream(stream).for_all(
+            Gen.int(0, 100)
+        )
 
         summary = buf.getvalue()
         self.assertIn("bucket:", summary)
@@ -58,14 +60,16 @@ class TestTagCollectionBasics(unittest.TestCase):
 
     def test_no_summary_without_output_stream(self):
         # Should not raise even without output_stream
-        Property(lambda n: (tag("x", n), True)[-1]).set_num_runs(20).for_all(Gen.int(0, 10))
+        Property(lambda n: (tag("x", n), True)[-1]).set_num_runs(20).for_all(
+            Gen.int(0, 10)
+        )
 
     def test_summary_not_printed_on_failure(self):
         buf, stream = _stream()
         with self.assertRaises(PropertyTestError):
-            Property(lambda n: (tag("v", n), n < 5)[-1]).set_num_runs(100).set_output_stream(
-                stream
-            ).for_all(Gen.int(0, 10))
+            Property(lambda n: (tag("v", n), n < 5)[-1]).set_num_runs(
+                100
+            ).set_output_stream(stream).for_all(Gen.int(0, 10))
         # No summary should be printed on failure
         self.assertNotIn("v:", buf.getvalue())
 
@@ -90,9 +94,9 @@ class TestStatAssertions(unittest.TestCase):
 
     def test_assert_stat_ge_passes(self):
         # interval(-10, 10) → ~50% positive; bound 0.2 is safe
-        Property(lambda n: (stat("pos", n > 0), True)[-1]).set_num_runs(
-            200
-        ).set_seed("ge-pass").assert_stat_ge("pos", 0.2).for_all(Gen.int(-10, 10))
+        Property(lambda n: (stat("pos", n > 0), True)[-1]).set_num_runs(200).set_seed(
+            "ge-pass"
+        ).assert_stat_ge("pos", 0.2).for_all(Gen.int(-10, 10))
 
     def test_assert_stat_ge_fails(self):
         # All negative → "pos" ratio = 0 < 0.5
@@ -104,9 +108,9 @@ class TestStatAssertions(unittest.TestCase):
 
     def test_assert_stat_le_passes(self):
         # All negative → "pos" ratio = 0 ≤ 0.1
-        Property(lambda n: (stat("pos", n > 0), True)[-1]).set_num_runs(
-            100
-        ).set_seed("le-pass").assert_stat_le("pos", 0.1).for_all(Gen.int(-100, -1))
+        Property(lambda n: (stat("pos", n > 0), True)[-1]).set_num_runs(100).set_seed(
+            "le-pass"
+        ).assert_stat_le("pos", 0.1).for_all(Gen.int(-100, -1))
 
     def test_assert_stat_le_fails(self):
         # All positive → ratio = 1.0 > 0.5
@@ -118,16 +122,18 @@ class TestStatAssertions(unittest.TestCase):
 
     def test_assert_stat_in_range_passes(self):
         # interval(-10, 10) → ~50% positive; [0.2, 0.8] easily contains it
-        Property(lambda n: (stat("pos", n > 0), True)[-1]).set_num_runs(
-            300
-        ).set_seed("range-pass").assert_stat_in_range("pos", 0.2, 0.8).for_all(Gen.int(-10, 10))
+        Property(lambda n: (stat("pos", n > 0), True)[-1]).set_num_runs(300).set_seed(
+            "range-pass"
+        ).assert_stat_in_range("pos", 0.2, 0.8).for_all(Gen.int(-10, 10))
 
     def test_assert_stat_in_range_fails(self):
         # All positive → ratio = 1.0, range [0.1, 0.5] fails
         with self.assertRaises(PropertyTestError) as cm:
             Property(lambda n: (stat("pos", n > 0), True)[-1]).set_num_runs(
                 100
-            ).set_seed("range-fail").assert_stat_in_range("pos", 0.1, 0.5).for_all(Gen.int(1, 100))
+            ).set_seed("range-fail").assert_stat_in_range("pos", 0.1, 0.5).for_all(
+                Gen.int(1, 100)
+            )
         self.assertIn("assert_stat_in_range", str(cm.exception))
 
     def test_failure_message_contains_key_and_bound(self):
@@ -172,9 +178,9 @@ class TestStatAssertions(unittest.TestCase):
         buf1, stream1 = _stream()
         buf2, stream2 = _stream()
 
-        Property(lambda n: (tag("run1", n > 5), True)[-1]).set_num_runs(
-            50
-        ).set_seed("iso1").set_output_stream(stream1).for_all(Gen.int(0, 10))
+        Property(lambda n: (tag("run1", n > 5), True)[-1]).set_num_runs(50).set_seed(
+            "iso1"
+        ).set_output_stream(stream1).for_all(Gen.int(0, 10))
 
         Property(lambda _: True).set_num_runs(50).set_seed("iso2").set_output_stream(
             stream2

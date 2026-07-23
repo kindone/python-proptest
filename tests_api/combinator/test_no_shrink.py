@@ -71,7 +71,9 @@ class TestNoShrink(unittest.TestCase):
             if not shr.shrinks().is_empty():
                 found_shrinks = True
                 break
-        self.assertTrue(found_shrinks, "Expected Gen.int to produce at least some shrink candidates")
+        self.assertTrue(
+            found_shrinks, "Expected Gen.int to produce at least some shrink candidates"
+        )
 
     def test_list_gen_no_shrink(self):
         """no_shrink works on non-integer generators too."""
