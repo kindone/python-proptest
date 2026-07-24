@@ -465,9 +465,13 @@ class StatefulProperty(Generic[S, A]):
             return False
 
         # Initial values
-        current_pairs: List[Tuple[Any, Any]] = [shr.value for shr in bookmarked_action_shrs]
+        current_pairs: List[Tuple[Any, Any]] = [
+            shr.value for shr in bookmarked_action_shrs
+        ]
         current_init_state: Any = initial_state_shrinkable.value
-        current_init_model: Any = model_shrinkable.value if model_shrinkable is not None else None
+        current_init_model: Any = (
+            model_shrinkable.value if model_shrinkable is not None else None
+        )
 
         # ── Phase 1: action-sequence shrinking ────────────────────────────────
         pair_list_shr = shrinkable_array(bookmarked_action_shrs, min_size=0)
@@ -557,7 +561,9 @@ class StatefulProperty(Generic[S, A]):
             # Walk the fresh shrink tree
             shrinks = fresh_shr.shrinks()
             while not shrinks.is_empty():
-                if self._has_exceeded_timeout(shrink_started_at, self.shrink_timeout_ms):
+                if self._has_exceeded_timeout(
+                    shrink_started_at, self.shrink_timeout_ms
+                ):
                     break
                 candidate_action_shr = shrinks.head()
                 if candidate_action_shr is None:
@@ -717,7 +723,11 @@ def statefulProperty(
         error_stream,
         on_reproduction_stats,
         cast(
-            Optional[Callable[[S, Optional[A]], Generator[Union[SimpleAction[S], Action[S, A]]]]],
+            Optional[
+                Callable[
+                    [S, Optional[A]], Generator[Union[SimpleAction[S], Action[S, A]]]
+                ]
+            ],
             action_gen_factory,
         ),
     )
@@ -759,7 +769,11 @@ def simpleStatefulProperty(
         error_stream,
         on_reproduction_stats,
         cast(
-            Optional[Callable[[S, Optional[A]], Generator[Union[SimpleAction[S], Action[S, A]]]]],
+            Optional[
+                Callable[
+                    [S, Optional[A]], Generator[Union[SimpleAction[S], Action[S, A]]]
+                ]
+            ],
             action_gen_factory,
         ),
     )

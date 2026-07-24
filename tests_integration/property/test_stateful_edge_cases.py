@@ -355,14 +355,18 @@ class TestActionGenFactory(unittest.TestCase):
 
     def test_neither_action_gen_nor_factory_raises(self):
         """Supply neither action_gen nor action_gen_factory → ValueError."""
-        with self.assertRaises(ValueError, msg="Supply either action_gen or action_gen_factory"):
+        with self.assertRaises(
+            ValueError, msg="Supply either action_gen or action_gen_factory"
+        ):
             StatefulProperty(Gen.just(0))  # neither supplied
 
     def test_both_action_gen_and_factory_raises(self):
         """Supply both action_gen and action_gen_factory → ValueError."""
         noop_action_gen = Gen.just(Action(lambda s, m: None))
         noop_factory = lambda s, m: Gen.just(Action(lambda s, m: None))
-        with self.assertRaises(ValueError, msg="Supply action_gen OR action_gen_factory, not both"):
+        with self.assertRaises(
+            ValueError, msg="Supply action_gen OR action_gen_factory, not both"
+        ):
             StatefulProperty(
                 Gen.just(0),
                 noop_action_gen,
@@ -577,7 +581,8 @@ class TestActionGenFactory(unittest.TestCase):
         # Phase 2b must have fired at least once
         pfx_msgs = [m for m in capture.msgs if "prefix params" in m]
         self.assertGreater(
-            len(pfx_msgs), 0,
+            len(pfx_msgs),
+            0,
             "Expected at least one 'prefix params' shrink message in output_stream",
         )
 
