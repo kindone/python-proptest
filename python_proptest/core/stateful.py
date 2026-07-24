@@ -283,7 +283,7 @@ class StatefulProperty(Generic[S, A]):
                             # Map: action_value → (bk, action_value)
                             bk_copy = bk  # capture for closure
                             bookmarked_action_shrs.append(
-                                action_shr.map(lambda a, b=bk_copy: (b, a))
+                                action_shr.map(lambda a, b=bk_copy: (b, a))  # type: ignore[misc]
                             )
                             action = action_shr.value
                             if isinstance(action, Action):
@@ -486,8 +486,8 @@ class StatefulProperty(Generic[S, A]):
 
             reproduced = self._test_shrink_candidate_with_retries(
                 f"actions={actions_of(candidate_pairs)!r}",
-                lambda cp=candidate_pairs: candidate_fails_pairs(
-                    current_init_state, current_init_model, cp
+                lambda: candidate_fails_pairs(
+                    current_init_state, current_init_model, candidate_pairs
                 ),
                 shrink_started_at,
             )
@@ -513,8 +513,8 @@ class StatefulProperty(Generic[S, A]):
 
             reproduced = self._test_shrink_candidate_with_retries(
                 f"initial_state={candidate_state!r}",
-                lambda cs=candidate_state: candidate_fails_pairs(
-                    cs, current_init_model, current_pairs
+                lambda: candidate_fails_pairs(
+                    candidate_state, current_init_model, current_pairs
                 ),
                 shrink_started_at,
             )
@@ -573,8 +573,8 @@ class StatefulProperty(Generic[S, A]):
 
                 reproduced = self._test_shrink_candidate_with_retries(
                     f"prefix params slot {i}",
-                    lambda acts=candidate_acts: candidate_fails_actions(
-                        current_init_state, current_init_model, acts
+                    lambda: candidate_fails_actions(
+                        current_init_state, current_init_model, candidate_acts
                     ),
                     shrink_started_at,
                 )
