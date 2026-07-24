@@ -191,12 +191,17 @@ class TestStatefulProperty(unittest.TestCase):
         cleanup_callback.assert_called_once()
 
     def test_action_with_model_updates_model(self):
-        """Actions with model parameter can modify model state."""
+        """Actions with model parameter are invoked during a run.
 
-        model_state = {"count": 0}
+        Each run operates on an isolated deepcopy of the initial model so
+        mutations don't persist to the caller's dict.  The test verifies the
+        action function is actually invoked by using a closure side-effect
+        (appending to an external list) that works regardless of model copying.
+        """
+        calls: list = []
 
-        def action_func(state: int, model: dict):
-            model["count"] += 1
+        def action_func(state: int, model: dict) -> None:
+            calls.append(1)
 
         action = Action(action_func)
         prop = StatefulProperty(
@@ -204,13 +209,13 @@ class TestStatefulProperty(unittest.TestCase):
             Gen.just(action),
             max_actions=5,
             num_runs=1,
-            initial_model_gen=Gen.just(model_state),
+            initial_model_gen=Gen.just({"count": 0}),
         )
         prop.go()
 
-        # Model should have been modified by actions (at least once, up to max_actions)
-        self.assertGreater(model_state["count"], 0)
-        self.assertLessEqual(model_state["count"], 5)
+        # Action should have been called at least once (1..5 actions per run)
+        self.assertGreater(len(calls), 0)
+        self.assertLessEqual(len(calls), 5)
 
     def test_action_without_model_raises_error(self):
         """Action requiring model raises error when model not provided."""

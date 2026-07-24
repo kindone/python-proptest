@@ -22,23 +22,35 @@ A = TypeVar("A")  # Action type
 class SimpleAction(Generic[S]):
     """A simple action that operates on state without a model."""
 
-    def __init__(self, action_func: Callable[[S], None]):
+    def __init__(self, action_func: Callable[[S], None], name: Optional[str] = None):
         self.action_func = action_func
+        self.name = name
 
     def run(self, state: S) -> None:
         """Run the action on the given state."""
         self.action_func(state)
 
+    def __repr__(self) -> str:
+        if self.name is not None:
+            return self.name
+        return f"SimpleAction({self.action_func!r})"
+
 
 class Action(Generic[S, A]):
     """An action that operates on both state and model."""
 
-    def __init__(self, action_func: Callable[[S, A], None]):
+    def __init__(self, action_func: Callable[[S, A], None], name: Optional[str] = None):
         self.action_func = action_func
+        self.name = name
 
     def run(self, state: S, model: A) -> None:
         """Run the action on the given state and model."""
         self.action_func(state, model)
+
+    def __repr__(self) -> str:
+        if self.name is not None:
+            return self.name
+        return f"Action({self.action_func!r})"
 
 
 class StatefulProperty(Generic[S, A]):
@@ -241,14 +253,20 @@ class StatefulProperty(Generic[S, A]):
                 for callback in self._startup_callbacks:
                     callback()
 
-                # Generate initial state
+                # Generate initial state.
+                # IMPORTANT: deepcopy before running actions so that
+                # initial_state_shrinkable.value remains the clean generated
+                # value for use as the shrink-phase starting point.
+                # Without the copy, actions would mutate the shrinkable's
+                # stored value, making every shrink candidate appear to fail
+                # (the "initial" state would already have accumulated mutations).
                 initial_state_shrinkable = self.initial_state_gen.generate(self._rng)
-                state = initial_state_shrinkable.value
+                state = deepcopy(initial_state_shrinkable.value)
 
                 # Generate initial model if needed
                 if self.initial_model_gen is not None:
                     model_shrinkable = self.initial_model_gen.generate(self._rng)
-                    model = model_shrinkable.value
+                    model = deepcopy(model_shrinkable.value)
 
                 # Generate and run actions
                 if self.max_actions > 0:
