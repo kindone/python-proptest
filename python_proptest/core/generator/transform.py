@@ -65,7 +65,7 @@ class FlatMappedGenerator(Generator[U]):
         # during shrinking — each T-shrink candidate regenerates U from this state.
         rng_state_after_first = rng.getstate()  # type: ignore[attr-defined]
 
-        def make_second(first_val: T) -> Shrinkable[U]:
+        def make_second(first_val) -> Shrinkable[U]:  # T inferred from flat_map context
             """Regenerate U from T, restoring RNG to the post-T state."""
             rng.setstate(rng_state_after_first)  # type: ignore[attr-defined]
             return self.func(first_val).generate(rng)
