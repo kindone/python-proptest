@@ -77,7 +77,6 @@ def shrink_element_wise(
         if nothing_to_do:
             return []
 
-        # Generate shrinks by combining element shrinks
         results = []
         for i, elem_stream in enumerate(elem_streams):
             for shrink in elem_stream.to_list():
@@ -87,10 +86,6 @@ def shrink_element_wise(
 
         return results
 
-    # Return only the direct element-wise shrinks (from shrink_bulk), not
-    # membership shrinks.  The outer shrinkable_array drives the tree traversal
-    # via concat, so re-emitting the membership shrinks here would cause them
-    # to appear twice in the shrink tree.
     return Stream.many(shrink_bulk(shrinkable_elems_shr, power, offset))
 
 

@@ -5,6 +5,7 @@ This module provides the main Property class and for_all function
 for running property-based tests.
 """
 
+import hashlib
 import inspect
 import math
 import random
@@ -335,11 +336,16 @@ class Property:
         """Create a random number generator."""
         if self.seed is not None:
             if isinstance(self.seed, str):
-                # Convert string to integer seed
-                seed_int = hash(self.seed) % (2**32)
+                # Use a stable hash (hashlib) — Python's built-in hash() is
+                # randomised per-process (PYTHONHASHSEED) and must not be used
+                # for reproducible seeds.
+                seed_int = int(hashlib.sha256(self.seed.encode()).hexdigest(), 16) % (
+                    2**32
+                )
             elif isinstance(self.seed, (list, dict, tuple)):
-                # Convert complex types to integer seed using hash
-                seed_int = hash(str(self.seed)) % (2**32)
+                seed_int = int(
+                    hashlib.sha256(str(self.seed).encode()).hexdigest(), 16
+                ) % (2**32)
             else:
                 seed_int = self.seed
             return random.Random(seed_int)
